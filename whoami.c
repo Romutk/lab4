@@ -11,5 +11,5 @@ uid_t uid;
 uid = geteuid();
 pw = (getpwuid (uid));
 
-ptintf (pw->pw_name);
+puts (pw->pw_name);
 }
