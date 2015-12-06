@@ -1,0 +1,10 @@
+AC_INIT(superutils, 0.1)
+AC_PROG_CC
+AC_CONFIG_FILES(Makefile)
+AC_CHECK_HEADERS(stdio.h)
+AC_CHECK_HEADERS(sys/types)
+AC_CHECK_HEADERS(getopt.h)
+AC_CHECK_HEADERS(unistd.h)
+AC_CHECK_HEADERS(pwd.h)
+AC_CHECK_LIB(c, printf)
+AC_OUTPUT
