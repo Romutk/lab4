@@ -1,4 +1,4 @@
-AC_INIT(superutils, 0.1)
+AC_INIT(myutils, 0.1)
 AC_PROG_CC
 AC_CONFIG_FILES(Makefile)
 AC_CHECK_HEADERS(stdio.h)
