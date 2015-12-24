@@ -16,10 +16,20 @@
 #include <stddef.h>
 
 #include "mountP.h"
+<<<<<<< HEAD
+=======
+#include "strutils.h"
+>>>>>>> master-vanilla
 
 /**
  * mnt_new_fs:
  *
+<<<<<<< HEAD
+=======
+ * The initial refcount is 1, and needs to be decremented to
+ * release the resources of the filesystem.
+ *
+>>>>>>> master-vanilla
  * Returns: newly allocated struct libmnt_fs.
  */
 struct libmnt_fs *mnt_new_fs(void)
@@ -28,8 +38,14 @@ struct libmnt_fs *mnt_new_fs(void)
 	if (!fs)
 		return NULL;
 
+<<<<<<< HEAD
 	/*DBG(FS, mnt_debug_h(fs, "alloc"));*/
 	INIT_LIST_HEAD(&fs->ents);
+=======
+	fs->refcount = 1;
+	INIT_LIST_HEAD(&fs->ents);
+	/*DBG(FS, ul_debugobj(fs, "alloc"));*/
+>>>>>>> master-vanilla
 	return fs;
 }
 
@@ -37,21 +53,58 @@ struct libmnt_fs *mnt_new_fs(void)
  * mnt_free_fs:
  * @fs: fs pointer
  *
+<<<<<<< HEAD
  * Deallocates the fs.
+=======
+ * Deallocates the fs. This function does not care about reference count. Don't
+ * use this function directly -- it's better to use use mnt_unref_fs().
+ *
+ * The reference counting is supported since util-linux v2.24.
+>>>>>>> master-vanilla
  */
 void mnt_free_fs(struct libmnt_fs *fs)
 {
 	if (!fs)
 		return;
+<<<<<<< HEAD
 	list_del(&fs->ents);
 
 	/*DBG(FS, mnt_debug_h(fs, "free"));*/
 
+=======
+
+	DBG(FS, ul_debugobj(fs, "free [refcount=%d]", fs->refcount));
+
+	mnt_reset_fs(fs);
+	free(fs);
+}
+
+/**
+ * mnt_reset_fs:
+ * @fs: fs pointer
+ *
+ * Resets (zeroize) @fs.
+ */
+void mnt_reset_fs(struct libmnt_fs *fs)
+{
+	int ref;
+
+	if (!fs)
+		return;
+
+	ref = fs->refcount;
+
+	list_del(&fs->ents);
+>>>>>>> master-vanilla
 	free(fs->source);
 	free(fs->bindsrc);
 	free(fs->tagname);
 	free(fs->tagval);
 	free(fs->root);
+<<<<<<< HEAD
+=======
+	free(fs->swaptype);
+>>>>>>> master-vanilla
 	free(fs->target);
 	free(fs->fstype);
 	free(fs->optstr);
@@ -59,6 +112,7 @@ void mnt_free_fs(struct libmnt_fs *fs)
 	free(fs->fs_optstr);
 	free(fs->user_optstr);
 	free(fs->attrs);
+<<<<<<< HEAD
 
 	free(fs);
 }
@@ -73,6 +127,45 @@ void mnt_reset_fs(struct libmnt_fs *fs)
 {
 	if (fs)
 		memset(fs, 0, sizeof(*fs));
+=======
+	free(fs->opt_fields);
+	free(fs->comment);
+
+	memset(fs, 0, sizeof(*fs));
+	INIT_LIST_HEAD(&fs->ents);
+	fs->refcount = ref;
+}
+
+/**
+ * mnt_ref_fs:
+ * @fs: fs pointer
+ *
+ * Increments reference counter.
+ */
+void mnt_ref_fs(struct libmnt_fs *fs)
+{
+	if (fs) {
+		fs->refcount++;
+		/*DBG(FS, ul_debugobj(fs, "ref=%d", fs->refcount));*/
+	}
+}
+
+/**
+ * mnt_unref_fs:
+ * @fs: fs pointer
+ *
+ * De-increments reference counter, on zero the @fs is automatically
+ * deallocated by mnt_free_fs().
+ */
+void mnt_unref_fs(struct libmnt_fs *fs)
+{
+	if (fs) {
+		fs->refcount--;
+		/*DBG(FS, ul_debugobj(fs, "unref=%d", fs->refcount));*/
+		if (fs->refcount <= 0)
+			mnt_free_fs(fs);
+	}
+>>>>>>> master-vanilla
 }
 
 static inline int update_str(char **dest, const char *src)
@@ -103,7 +196,11 @@ static inline int cpy_str_at_offset(void *new, const void *old, size_t offset)
 	char **n = (char **) (new + offset);
 
 	if (*n)
+<<<<<<< HEAD
 		return 0;	/* already set, not overwrite */
+=======
+		return 0;	/* already set, don't overwrite */
+>>>>>>> master-vanilla
 
 	return update_str(n, *o);
 }
@@ -114,7 +211,11 @@ static inline int cpy_str_at_offset(void *new, const void *old, size_t offset)
  * @src: source FS
  *
  * If @dest is NULL, then a new FS is allocated, if any @dest field is already
+<<<<<<< HEAD
  * set then the field is NOT overwrited.
+=======
+ * set, then the field is NOT overwritten.
+>>>>>>> master-vanilla
  *
  * This function does not copy userdata (se mnt_fs_set_userdata()). A new copy is
  * not linked with any existing mnt_tab.
@@ -126,17 +227,30 @@ struct libmnt_fs *mnt_copy_fs(struct libmnt_fs *dest,
 {
 	const struct libmnt_fs *org = dest;
 
+<<<<<<< HEAD
+=======
+	if (!src)
+		return NULL;
+>>>>>>> master-vanilla
 	if (!dest) {
 		dest = mnt_new_fs();
 		if (!dest)
 			return NULL;
 	}
 
+<<<<<<< HEAD
 	/*DBG(FS, mnt_debug_h(dest, "copy from %p", src));*/
+=======
+	/*DBG(FS, ul_debugobj(dest, "copy from %p", src));*/
+>>>>>>> master-vanilla
 
 	dest->id         = src->id;
 	dest->parent     = src->parent;
 	dest->devno      = src->devno;
+<<<<<<< HEAD
+=======
+	dest->tid        = src->tid;
+>>>>>>> master-vanilla
 
 	if (cpy_str_at_offset(dest, src, offsetof(struct libmnt_fs, source)))
 		goto err;
@@ -146,6 +260,11 @@ struct libmnt_fs *mnt_copy_fs(struct libmnt_fs *dest,
 		goto err;
 	if (cpy_str_at_offset(dest, src, offsetof(struct libmnt_fs, root)))
 		goto err;
+<<<<<<< HEAD
+=======
+	if (cpy_str_at_offset(dest, src, offsetof(struct libmnt_fs, swaptype)))
+		goto err;
+>>>>>>> master-vanilla
 	if (cpy_str_at_offset(dest, src, offsetof(struct libmnt_fs, target)))
 		goto err;
 	if (cpy_str_at_offset(dest, src, offsetof(struct libmnt_fs, fstype)))
@@ -166,6 +285,12 @@ struct libmnt_fs *mnt_copy_fs(struct libmnt_fs *dest,
 	dest->freq       = src->freq;
 	dest->passno     = src->passno;
 	dest->flags      = src->flags;
+<<<<<<< HEAD
+=======
+	dest->size	 = src->size;
+	dest->usedsize   = src->usedsize;
+	dest->priority   = src->priority;
+>>>>>>> master-vanilla
 
 	return dest;
 err:
@@ -185,6 +310,10 @@ struct libmnt_fs *mnt_copy_mtab_fs(const struct libmnt_fs *fs)
 {
 	struct libmnt_fs *n = mnt_new_fs();
 
+<<<<<<< HEAD
+=======
+	assert(fs);
+>>>>>>> master-vanilla
 	if (!n)
 		return NULL;
 
@@ -237,7 +366,15 @@ err:
  */
 void *mnt_fs_get_userdata(struct libmnt_fs *fs)
 {
+<<<<<<< HEAD
 	return fs ? fs->userdata : NULL;
+=======
+	if (!fs)
+		return NULL;
+
+	/*DBG(FS, ul_debugobj(fs, "get userdata [%p]", fs->userdata));*/
+	return fs->userdata;
+>>>>>>> master-vanilla
 }
 
 /**
@@ -253,6 +390,11 @@ int mnt_fs_set_userdata(struct libmnt_fs *fs, void *data)
 {
 	if (!fs)
 		return -EINVAL;
+<<<<<<< HEAD
+=======
+
+	/*DBG(FS, ul_debugobj(fs, "set userdata [%p]", fs->userdata));*/
+>>>>>>> master-vanilla
 	fs->userdata = data;
 	return 0;
 }
@@ -272,7 +414,10 @@ int mnt_fs_set_userdata(struct libmnt_fs *fs, void *data)
  */
 const char *mnt_fs_get_srcpath(struct libmnt_fs *fs)
 {
+<<<<<<< HEAD
 	assert(fs);
+=======
+>>>>>>> master-vanilla
 	if (!fs)
 		return NULL;
 
@@ -295,7 +440,11 @@ const char *mnt_fs_get_source(struct libmnt_fs *fs)
 }
 
 /*
+<<<<<<< HEAD
  * Used by parser ONLY (@source has to be allocated on error)
+=======
+ * Used by the parser ONLY (@source has to be freed on error)
+>>>>>>> master-vanilla
  */
 int __mnt_fs_set_source_ptr(struct libmnt_fs *fs, char *source)
 {
@@ -303,6 +452,7 @@ int __mnt_fs_set_source_ptr(struct libmnt_fs *fs, char *source)
 
 	assert(fs);
 
+<<<<<<< HEAD
 	if (source && !strcmp(source, "none")) {
 		free(source);
 		source = NULL;
@@ -310,6 +460,14 @@ int __mnt_fs_set_source_ptr(struct libmnt_fs *fs, char *source)
 	} else if (source && strchr(source, '=')) {
 		if (blkid_parse_tag_string(source, &t, &v) != 0)
 			return -1;
+=======
+	if (source && blkid_parse_tag_string(source, &t, &v) == 0 &&
+	    !mnt_valid_tagname(t)) {
+		/* parsable but unknown tag -- ignore */
+		free(t);
+		free(v);
+		t = v = NULL;
+>>>>>>> master-vanilla
 	}
 
 	if (fs->source != source)
@@ -340,6 +498,10 @@ int mnt_fs_set_source(struct libmnt_fs *fs, const char *source)
 
 	if (!fs)
 		return -EINVAL;
+<<<<<<< HEAD
+=======
+
+>>>>>>> master-vanilla
 	if (source) {
 		p = strdup(source);
 		if (!p)
@@ -353,6 +515,52 @@ int mnt_fs_set_source(struct libmnt_fs *fs, const char *source)
 }
 
 /**
+<<<<<<< HEAD
+=======
+ * mnt_fs_streq_srcpath:
+ * @fs: fs
+ * @path: source path
+ *
+ * Compares @fs source path with @path. The trailing slash is ignored.
+ * See also mnt_fs_match_source().
+ *
+ * Returns: 1 if @fs source path equal to @path, otherwise 0.
+ */
+int mnt_fs_streq_srcpath(struct libmnt_fs *fs, const char *path)
+{
+	const char *p;
+
+	if (!fs)
+		return 0;
+
+	p = mnt_fs_get_srcpath(fs);
+
+	if (!mnt_fs_is_pseudofs(fs))
+		return streq_except_trailing_slash(p, path);
+
+	if (!p && !path)
+		return 1;
+
+	return p && path && strcmp(p, path) == 0;
+}
+
+/**
+ * mnt_fs_streq_target:
+ * @fs: fs
+ * @path: mount point
+ *
+ * Compares @fs target path with @path. The trailing slash is ignored.
+ * See also mnt_fs_match_target().
+ *
+ * Returns: 1 if @fs target path equal to @path, otherwise 0.
+ */
+int mnt_fs_streq_target(struct libmnt_fs *fs, const char *path)
+{
+	return fs && streq_except_trailing_slash(mnt_fs_get_target(fs), path);
+}
+
+/**
+>>>>>>> master-vanilla
  * mnt_fs_get_tag:
  * @fs: fs
  * @name: returns pointer to NAME string
@@ -360,8 +568,13 @@ int mnt_fs_set_source(struct libmnt_fs *fs, const char *source)
  *
  * "TAG" is NAME=VALUE (e.g. LABEL=foo)
  *
+<<<<<<< HEAD
  * The TAG is the first column in the fstab file. The TAG or "srcpath" has to
  * be always set for all entries.
+=======
+ * The TAG is the first column in the fstab file. The TAG or "srcpath" always has
+ * to be set for all entries.
+>>>>>>> master-vanilla
  *
  * See also mnt_fs_get_source().
  *
@@ -383,7 +596,11 @@ int mnt_fs_set_source(struct libmnt_fs *fs, const char *source)
  *   </programlisting>
  * </informalexample>
  *
+<<<<<<< HEAD
  * Returns: 0 on success or negative number in case that a TAG is not defined.
+=======
+ * Returns: 0 on success or negative number in case a TAG is not defined.
+>>>>>>> master-vanilla
  */
 int mnt_fs_get_tag(struct libmnt_fs *fs, const char **name, const char **value)
 {
@@ -404,7 +621,10 @@ int mnt_fs_get_tag(struct libmnt_fs *fs, const char **name, const char **value)
  */
 const char *mnt_fs_get_target(struct libmnt_fs *fs)
 {
+<<<<<<< HEAD
 	assert(fs);
+=======
+>>>>>>> master-vanilla
 	return fs ? fs->target : NULL;
 }
 
@@ -421,8 +641,11 @@ int mnt_fs_set_target(struct libmnt_fs *fs, const char *target)
 {
 	char *p = NULL;
 
+<<<<<<< HEAD
 	assert(fs);
 
+=======
+>>>>>>> master-vanilla
 	if (!fs)
 		return -EINVAL;
 	if (target) {
@@ -436,11 +659,16 @@ int mnt_fs_set_target(struct libmnt_fs *fs, const char *target)
 	return 0;
 }
 
+<<<<<<< HEAD
 int __mnt_fs_get_flags(struct libmnt_fs *fs)
+=======
+static int mnt_fs_get_flags(struct libmnt_fs *fs)
+>>>>>>> master-vanilla
 {
 	return fs ? fs->flags : 0;
 }
 
+<<<<<<< HEAD
 int __mnt_fs_set_flags(struct libmnt_fs *fs, int flags)
 {
 	if (fs) {
@@ -448,6 +676,41 @@ int __mnt_fs_set_flags(struct libmnt_fs *fs, int flags)
 		return 0;
 	}
 	return -EINVAL;
+=======
+/**
+ * mnt_fs_get_propagation:
+ * @fs: mountinfo entry
+ * @flags: returns propagation MS_* flags as present in the mountinfo file
+ *
+ * Note that this function sets @flags to zero if no propagation flags are found
+ * in the mountinfo file. The kernel default is MS_PRIVATE, this flag is not stored
+ * in the mountinfo file.
+ *
+ * Returns: 0 on success or negative number in case of error.
+ */
+int mnt_fs_get_propagation(struct libmnt_fs *fs, unsigned long *flags)
+{
+	if (!fs || !flags)
+		return -EINVAL;
+
+	*flags = 0;
+
+	if (!fs->opt_fields)
+		return 0;
+
+	 /*
+	 * The optional fields format is incompatible with mount options
+	 * ... we have to parse the field here.
+	 */
+	*flags |= strstr(fs->opt_fields, "shared:") ? MS_SHARED : MS_PRIVATE;
+
+	if (strstr(fs->opt_fields, "master:"))
+		*flags |= MS_SLAVE;
+	if (strstr(fs->opt_fields, "unbindable"))
+		*flags |= MS_UNBINDABLE;
+
+	return 0;
+>>>>>>> master-vanilla
 }
 
 /**
@@ -458,7 +721,44 @@ int __mnt_fs_set_flags(struct libmnt_fs *fs, int flags)
  */
 int mnt_fs_is_kernel(struct libmnt_fs *fs)
 {
+<<<<<<< HEAD
 	return __mnt_fs_get_flags(fs) & MNT_FS_KERNEL;
+=======
+	return mnt_fs_get_flags(fs) & MNT_FS_KERNEL;
+}
+
+/**
+ * mnt_fs_is_swaparea:
+ * @fs: filesystem
+ *
+ * Returns: 1 if the filesystem uses "swap" as a type
+ */
+int mnt_fs_is_swaparea(struct libmnt_fs *fs)
+{
+	return mnt_fs_get_flags(fs) & MNT_FS_SWAP;
+}
+
+/**
+ * mnt_fs_is_pseudofs:
+ * @fs: filesystem
+ *
+ * Returns: 1 if the filesystem is a pseudo fs type (proc, cgroups)
+ */
+int mnt_fs_is_pseudofs(struct libmnt_fs *fs)
+{
+	return mnt_fs_get_flags(fs) & MNT_FS_PSEUDO;
+}
+
+/**
+ * mnt_fs_is_netfs:
+ * @fs: filesystem
+ *
+ * Returns: 1 if the filesystem is a network filesystem
+ */
+int mnt_fs_is_netfs(struct libmnt_fs *fs)
+{
+	return mnt_fs_get_flags(fs) & MNT_FS_NET;
+>>>>>>> master-vanilla
 }
 
 /**
@@ -469,11 +769,18 @@ int mnt_fs_is_kernel(struct libmnt_fs *fs)
  */
 const char *mnt_fs_get_fstype(struct libmnt_fs *fs)
 {
+<<<<<<< HEAD
 	assert(fs);
 	return fs ? fs->fstype : NULL;
 }
 
 /* Used by struct libmnt_file parser only */
+=======
+	return fs ? fs->fstype : NULL;
+}
+
+/* Used by the struct libmnt_file parser only */
+>>>>>>> master-vanilla
 int __mnt_fs_set_fstype_ptr(struct libmnt_fs *fs, char *fstype)
 {
 	assert(fs);
@@ -548,7 +855,11 @@ static char *merge_optstr(const char *vfs, const char *fs)
 	if (!strcmp(vfs, fs))
 		return strdup(vfs);		/* e.g. "aaa" and "aaa" */
 
+<<<<<<< HEAD
 	/* leave space for leading "r[ow],", "," and trailing zero */
+=======
+	/* leave space for the leading "r[ow],", "," and the trailing zero */
+>>>>>>> master-vanilla
 	sz = strlen(vfs) + strlen(fs) + 5;
 	res = malloc(sz);
 	if (!res)
@@ -579,7 +890,11 @@ static char *merge_optstr(const char *vfs, const char *fs)
  * mnt_fs_strdup_options:
  * @fs: fstab/mtab/mountinfo entry pointer
  *
+<<<<<<< HEAD
  * Merges all mount options (VFS, FS and userspace) to the one options string
+=======
+ * Merges all mount options (VFS, FS and userspace) to one options string
+>>>>>>> master-vanilla
  * and returns the result. This function does not modigy @fs.
  *
  * Returns: pointer to string (can be freed by free(3)) or NULL in case of error.
@@ -588,10 +903,17 @@ char *mnt_fs_strdup_options(struct libmnt_fs *fs)
 {
 	char *res;
 
+<<<<<<< HEAD
 	assert(fs);
 
 	errno = 0;
 
+=======
+	if (!fs)
+		return NULL;
+
+	errno = 0;
+>>>>>>> master-vanilla
 	if (fs->optstr)
 		return strdup(fs->optstr);
 
@@ -615,27 +937,54 @@ char *mnt_fs_strdup_options(struct libmnt_fs *fs)
  */
 const char *mnt_fs_get_options(struct libmnt_fs *fs)
 {
+<<<<<<< HEAD
 	assert(fs);
 	return fs ? fs->optstr : NULL;
 }
 
+=======
+	return fs ? fs->optstr : NULL;
+}
+
+/**
+ * mnt_fs_get_optional_fields
+ * @fs: mountinfo entry pointer
+ *
+ * Returns: pointer to string with mountinfo optional fields
+ *          or NULL in case of error.
+ */
+const char *mnt_fs_get_optional_fields(struct libmnt_fs *fs)
+{
+	return fs ? fs->opt_fields : NULL;
+}
+>>>>>>> master-vanilla
 
 /**
  * mnt_fs_set_options:
  * @fs: fstab/mtab/mountinfo entry pointer
  * @optstr: options string
  *
+<<<<<<< HEAD
  * Splits @optstr to VFS, FS and userspace mount options and update relevat
  * parts of @fs.
  *
  * Returns: 0 on success, or negative number icase of error.
+=======
+ * Splits @optstr to VFS, FS and userspace mount options and updates relevant
+ * parts of @fs.
+ *
+ * Returns: 0 on success, or negative number in case of error.
+>>>>>>> master-vanilla
  */
 int mnt_fs_set_options(struct libmnt_fs *fs, const char *optstr)
 {
 	char *v = NULL, *f = NULL, *u = NULL, *n = NULL;
 
+<<<<<<< HEAD
 	assert(fs);
 
+=======
+>>>>>>> master-vanilla
 	if (!fs)
 		return -EINVAL;
 	if (optstr) {
@@ -643,8 +992,17 @@ int mnt_fs_set_options(struct libmnt_fs *fs, const char *optstr)
 		if (rc)
 			return rc;
 		n = strdup(optstr);
+<<<<<<< HEAD
 		if (!n)
 			return -ENOMEM;
+=======
+		if (!n) {
+			free(u);
+			free(v);
+			free(f);
+			return -ENOMEM;
+		}
+>>>>>>> master-vanilla
 	}
 
 	free(fs->fs_optstr);
@@ -668,7 +1026,11 @@ int mnt_fs_set_options(struct libmnt_fs *fs, const char *optstr)
  * Parses (splits) @optstr and appends results to VFS, FS and userspace lists
  * of options.
  *
+<<<<<<< HEAD
  * If @optstr is NULL then @fs is not modified and 0 is returned.
+=======
+ * If @optstr is NULL, then @fs is not modified and 0 is returned.
+>>>>>>> master-vanilla
  *
  * Returns: 0 on success or negative number in case of error.
  */
@@ -677,14 +1039,23 @@ int mnt_fs_append_options(struct libmnt_fs *fs, const char *optstr)
 	char *v = NULL, *f = NULL, *u = NULL;
 	int rc;
 
+<<<<<<< HEAD
 	assert(fs);
 
+=======
+>>>>>>> master-vanilla
 	if (!fs)
 		return -EINVAL;
 	if (!optstr)
 		return 0;
 
 	rc = mnt_split_optstr((char *) optstr, &u, &v, &f, 0, 0);
+<<<<<<< HEAD
+=======
+	if (rc)
+		return rc;
+
+>>>>>>> master-vanilla
 	if (!rc && v)
 		rc = mnt_optstr_append_option(&fs->vfs_optstr, v, NULL);
 	if (!rc && f)
@@ -706,10 +1077,17 @@ int mnt_fs_append_options(struct libmnt_fs *fs, const char *optstr)
  * @fs: fstab/mtab/mountinfo entry
  * @optstr: mount options
  *
+<<<<<<< HEAD
  * Parses (splits) @optstr and prepands results to VFS, FS and userspace lists
  * of options.
  *
  * If @optstr is NULL then @fs is not modified and 0 is returned.
+=======
+ * Parses (splits) @optstr and prepends the results to VFS, FS and userspace lists
+ * of options.
+ *
+ * If @optstr is NULL, then @fs is not modified and 0 is returned.
+>>>>>>> master-vanilla
  *
  * Returns: 0 on success or negative number in case of error.
  */
@@ -718,14 +1096,23 @@ int mnt_fs_prepend_options(struct libmnt_fs *fs, const char *optstr)
 	char *v = NULL, *f = NULL, *u = NULL;
 	int rc;
 
+<<<<<<< HEAD
 	assert(fs);
 
+=======
+>>>>>>> master-vanilla
 	if (!fs)
 		return -EINVAL;
 	if (!optstr)
 		return 0;
 
 	rc = mnt_split_optstr((char *) optstr, &u, &v, &f, 0, 0);
+<<<<<<< HEAD
+=======
+	if (rc)
+		return rc;
+
+>>>>>>> master-vanilla
 	if (!rc && v)
 		rc = mnt_optstr_prepend_option(&fs->vfs_optstr, v, NULL);
 	if (!rc && f)
@@ -750,7 +1137,10 @@ int mnt_fs_prepend_options(struct libmnt_fs *fs, const char *optstr)
  */
 const char *mnt_fs_get_fs_options(struct libmnt_fs *fs)
 {
+<<<<<<< HEAD
 	assert(fs);
+=======
+>>>>>>> master-vanilla
 	return fs ? fs->fs_optstr : NULL;
 }
 
@@ -762,7 +1152,10 @@ const char *mnt_fs_get_fs_options(struct libmnt_fs *fs)
  */
 const char *mnt_fs_get_vfs_options(struct libmnt_fs *fs)
 {
+<<<<<<< HEAD
 	assert(fs);
+=======
+>>>>>>> master-vanilla
 	return fs ? fs->vfs_optstr : NULL;
 }
 
@@ -774,7 +1167,10 @@ const char *mnt_fs_get_vfs_options(struct libmnt_fs *fs)
  */
 const char *mnt_fs_get_user_options(struct libmnt_fs *fs)
 {
+<<<<<<< HEAD
 	assert(fs);
+=======
+>>>>>>> master-vanilla
 	return fs ? fs->user_optstr : NULL;
 }
 
@@ -786,7 +1182,10 @@ const char *mnt_fs_get_user_options(struct libmnt_fs *fs)
  */
 const char *mnt_fs_get_attributes(struct libmnt_fs *fs)
 {
+<<<<<<< HEAD
 	assert(fs);
+=======
+>>>>>>> master-vanilla
 	return fs ? fs->attrs : NULL;
 }
 
@@ -796,12 +1195,21 @@ const char *mnt_fs_get_attributes(struct libmnt_fs *fs)
  * @optstr: options string
  *
  * Sets mount attributes. The attributes are mount(2) and mount(8) independent
+<<<<<<< HEAD
  * options, these options are not send to kernel and are not interpreted by
  * libmount. The attributes are stored in /run/mount/utab only.
  *
  * The atrtributes are managed by libmount in userspace only. It's possible
  * that information stored in userspace will not be available for libmount
  * after CLONE_FS unshare. Be carefull, and don't use attributes if possible.
+=======
+ * options, these options are not sent to the kernel and are not interpreted by
+ * libmount. The attributes are stored in /run/mount/utab only.
+ *
+ * The attributes are managed by libmount in userspace only. It's possible
+ * that information stored in userspace will not be available for libmount
+ * after CLONE_FS unshare. Be careful, and don't use attributes if possible.
+>>>>>>> master-vanilla
  *
  * Returns: 0 on success or negative number in case of error.
  */
@@ -867,7 +1275,10 @@ int mnt_fs_prepend_attributes(struct libmnt_fs *fs, const char *optstr)
  */
 int mnt_fs_get_freq(struct libmnt_fs *fs)
 {
+<<<<<<< HEAD
 	assert(fs);
+=======
+>>>>>>> master-vanilla
 	return fs ? fs->freq : 0;
 }
 
@@ -880,7 +1291,10 @@ int mnt_fs_get_freq(struct libmnt_fs *fs)
  */
 int mnt_fs_set_freq(struct libmnt_fs *fs, int freq)
 {
+<<<<<<< HEAD
 	assert(fs);
+=======
+>>>>>>> master-vanilla
 	if (!fs)
 		return -EINVAL;
 	fs->freq = freq;
@@ -895,7 +1309,10 @@ int mnt_fs_set_freq(struct libmnt_fs *fs, int freq)
  */
 int mnt_fs_get_passno(struct libmnt_fs *fs)
 {
+<<<<<<< HEAD
 	assert(fs);
+=======
+>>>>>>> master-vanilla
 	return fs ? fs->passno: 0;
 }
 
@@ -908,7 +1325,10 @@ int mnt_fs_get_passno(struct libmnt_fs *fs)
  */
 int mnt_fs_set_passno(struct libmnt_fs *fs, int passno)
 {
+<<<<<<< HEAD
 	assert(fs);
+=======
+>>>>>>> master-vanilla
 	if (!fs)
 		return -EINVAL;
 	fs->passno = passno;
@@ -923,7 +1343,10 @@ int mnt_fs_set_passno(struct libmnt_fs *fs, int passno)
  */
 const char *mnt_fs_get_root(struct libmnt_fs *fs)
 {
+<<<<<<< HEAD
 	assert(fs);
+=======
+>>>>>>> master-vanilla
 	return fs ? fs->root : NULL;
 }
 
@@ -938,7 +1361,10 @@ int mnt_fs_set_root(struct libmnt_fs *fs, const char *root)
 {
 	char *p = NULL;
 
+<<<<<<< HEAD
 	assert(fs);
+=======
+>>>>>>> master-vanilla
 	if (!fs)
 		return -EINVAL;
 	if (root) {
@@ -952,6 +1378,67 @@ int mnt_fs_set_root(struct libmnt_fs *fs, const char *root)
 }
 
 /**
+<<<<<<< HEAD
+=======
+ * mnt_fs_get_swaptype:
+ * @fs: /proc/swaps entry
+ *
+ * Returns: swap type or NULL
+ */
+const char *mnt_fs_get_swaptype(struct libmnt_fs *fs)
+{
+	return fs ? fs->swaptype : NULL;
+}
+
+/**
+ * mnt_fs_get_size:
+ * @fs: /proc/swaps entry
+ *
+ * Returns: size
+ */
+off_t mnt_fs_get_size(struct libmnt_fs *fs)
+{
+	return fs ? fs->size : 0;
+}
+
+/**
+ * mnt_fs_get_usedsize:
+ * @fs: /proc/swaps entry
+ *
+ * Returns: used size
+ */
+off_t mnt_fs_get_usedsize(struct libmnt_fs *fs)
+{
+	return fs ? fs->usedsize : 0;
+}
+
+/**
+ * mnt_fs_get_priority:
+ * @fs: /proc/swaps entry
+ *
+ * Returns: priority
+ */
+int mnt_fs_get_priority(struct libmnt_fs *fs)
+{
+	return fs ? fs->priority : 0;
+}
+
+/**
+ * mnt_fs_set_priority:
+ * @fs: /proc/swaps entry
+ *
+ * Returns: 0 or -1 in case of error
+ */
+int mnt_fs_set_priority(struct libmnt_fs *fs, int prio)
+{
+	if (!fs)
+		return -EINVAL;
+	fs->priority = prio;
+	return 0;
+}
+
+/**
+>>>>>>> master-vanilla
  * mnt_fs_get_bindsrc:
  * @fs: /run/mount/utab entry
  *
@@ -959,7 +1446,10 @@ int mnt_fs_set_root(struct libmnt_fs *fs, const char *root)
  */
 const char *mnt_fs_get_bindsrc(struct libmnt_fs *fs)
 {
+<<<<<<< HEAD
 	assert(fs);
+=======
+>>>>>>> master-vanilla
 	return fs ? fs->bindsrc : NULL;
 }
 
@@ -974,7 +1464,10 @@ int mnt_fs_set_bindsrc(struct libmnt_fs *fs, const char *src)
 {
 	char *p = NULL;
 
+<<<<<<< HEAD
 	assert(fs);
+=======
+>>>>>>> master-vanilla
 	if (!fs)
 		return -EINVAL;
 	if (src) {
@@ -995,7 +1488,10 @@ int mnt_fs_set_bindsrc(struct libmnt_fs *fs, const char *src)
  */
 int mnt_fs_get_id(struct libmnt_fs *fs)
 {
+<<<<<<< HEAD
 	assert(fs);
+=======
+>>>>>>> master-vanilla
 	return fs ? fs->id : -EINVAL;
 }
 
@@ -1007,7 +1503,10 @@ int mnt_fs_get_id(struct libmnt_fs *fs)
  */
 int mnt_fs_get_parent_id(struct libmnt_fs *fs)
 {
+<<<<<<< HEAD
 	assert(fs);
+=======
+>>>>>>> master-vanilla
 	return fs ? fs->parent : -EINVAL;
 }
 
@@ -1019,11 +1518,15 @@ int mnt_fs_get_parent_id(struct libmnt_fs *fs)
  */
 dev_t mnt_fs_get_devno(struct libmnt_fs *fs)
 {
+<<<<<<< HEAD
 	assert(fs);
+=======
+>>>>>>> master-vanilla
 	return fs ? fs->devno : 0;
 }
 
 /**
+<<<<<<< HEAD
  * mnt_fs_get_option:
  * @fs: fstab/mtab/mountinfo entry pointer
  * @name: option name
@@ -1031,12 +1534,37 @@ dev_t mnt_fs_get_devno(struct libmnt_fs *fs)
  * @valsz: returns size of options value or 0
  *
  * Returns: 0 on success, 1 when not found the @name or negative number in case of error.
+=======
+ * mnt_fs_get_tid:
+ * @fs: /proc/tid/mountinfo entry
+ *
+ * Returns: TID (task ID) for filesystems read from the mountinfo file
+ */
+pid_t mnt_fs_get_tid(struct libmnt_fs *fs)
+{
+	return fs ? fs->tid : 0;
+}
+
+/**
+ * mnt_fs_get_option:
+ * @fs: fstab/mtab/mountinfo entry pointer
+ * @name: option name
+ * @value: returns pointer to the beginning of the value (e.g. name=VALUE) or NULL
+ * @valsz: returns size of options value or 0
+ *
+ * Returns: 0 on success, 1 when @name not found or negative number in case of error.
+>>>>>>> master-vanilla
  */
 int mnt_fs_get_option(struct libmnt_fs *fs, const char *name,
 		char **value, size_t *valsz)
 {
 	char rc = 1;
 
+<<<<<<< HEAD
+=======
+	if (!fs)
+		return -EINVAL;
+>>>>>>> master-vanilla
 	if (fs->fs_optstr)
 		rc = mnt_optstr_get_option(fs->fs_optstr, name, value, valsz);
 	if (rc == 1 && fs->vfs_optstr)
@@ -1050,22 +1578,95 @@ int mnt_fs_get_option(struct libmnt_fs *fs, const char *name,
  * mnt_fs_get_attribute:
  * @fs: fstab/mtab/mountinfo entry pointer
  * @name: option name
+<<<<<<< HEAD
  * @value: returns pointer to the begin of the value (e.g. name=VALUE) or NULL
  * @valsz: returns size of options value or 0
  *
  * Returns: 0 on success, 1 when not found the @name or negative number in case of error.
+=======
+ * @value: returns pointer to the beginning of the value (e.g. name=VALUE) or NULL
+ * @valsz: returns size of options value or 0
+ *
+ * Returns: 0 on success, 1 when @name not found or negative number in case of error.
+>>>>>>> master-vanilla
  */
 int mnt_fs_get_attribute(struct libmnt_fs *fs, const char *name,
 		char **value, size_t *valsz)
 {
 	char rc = 1;
 
+<<<<<<< HEAD
+=======
+	if (!fs)
+		return -EINVAL;
+>>>>>>> master-vanilla
 	if (fs->attrs)
 		rc = mnt_optstr_get_option(fs->attrs, name, value, valsz);
 	return rc;
 }
 
 /**
+<<<<<<< HEAD
+=======
+ * mnt_fs_get_comment:
+ * @fs: fstab/mtab/mountinfo entry pointer
+ *
+ * Returns: 0 on success, 1 when not found the @name or negative number in case of error.
+ */
+const char *mnt_fs_get_comment(struct libmnt_fs *fs)
+{
+	if (!fs)
+		return NULL;
+	return fs->comment;
+}
+
+/**
+ * mnt_fs_set_comment:
+ * @fs: fstab entry pointer
+ * @comm: comment string
+ *
+ * Note that the comment has to be terminated by '\n' (new line), otherwise
+ * the whole filesystem entry will be written as a comment to the tabfile (e.g.
+ * fstab).
+ *
+ * Returns: 0 on success or <0 in case of error.
+ */
+int mnt_fs_set_comment(struct libmnt_fs *fs, const char *comm)
+{
+	char *p = NULL;
+
+	if (!fs)
+		return -EINVAL;
+	if (comm) {
+		p = strdup(comm);
+		if (!p)
+			return -ENOMEM;
+	}
+
+	free(fs->comment);
+	fs->comment = p;
+	return 0;
+}
+
+/**
+ * mnt_fs_append_comment:
+ * @fs: fstab entry pointer
+ * @comm: comment string
+ *
+ * See also mnt_fs_set_comment().
+ *
+ * Returns: 0 on success or <0 in case of error.
+ */
+int mnt_fs_append_comment(struct libmnt_fs *fs, const char *comm)
+{
+	if (!fs)
+		return -EINVAL;
+
+	return append_string(&fs->comment, comm);
+}
+
+/**
+>>>>>>> master-vanilla
  * mnt_fs_match_target:
  * @fs: filesystem
  * @target: mountpoint path
@@ -1073,6 +1674,7 @@ int mnt_fs_get_attribute(struct libmnt_fs *fs, const char *name,
  *
  * Possible are three attempts:
  *	1) compare @target with @fs->target
+<<<<<<< HEAD
  *	2) realpath(@target) with @fs->target
  *	3) realpath(@target) with realpath(@fs->target).
  *
@@ -1081,6 +1683,24 @@ int mnt_fs_get_attribute(struct libmnt_fs *fs, const char *name,
  * Returns: 1 if @fs target is equal to @target else 0.
  */
 int mnt_fs_match_target(struct libmnt_fs *fs, const char *target, struct libmnt_cache *cache)
+=======
+ *
+ *	2) realpath(@target) with @fs->target
+ *
+ *	3) realpath(@target) with realpath(@fs->target) if @fs is not from
+ *	   /proc/self/mountinfo.
+ *
+ *	   However, if mnt_cache_set_targets(cache, mtab) was called, and the
+ *	   path @target or @fs->target is found in the @mtab, the canonicalization is
+ *	   is not performed (see mnt_resolve_target()).
+ *
+ * The 2nd and 3rd attempts are not performed when @cache is NULL.
+ *
+ * Returns: 1 if @fs target is equal to @target, else 0.
+ */
+int mnt_fs_match_target(struct libmnt_fs *fs, const char *target,
+			struct libmnt_cache *cache)
+>>>>>>> master-vanilla
 {
 	int rc = 0;
 
@@ -1088,6 +1708,7 @@ int mnt_fs_match_target(struct libmnt_fs *fs, const char *target, struct libmnt_
 		return 0;
 
 	/* 1) native paths */
+<<<<<<< HEAD
 	rc = !strcmp(target, fs->target);
 
 	if (!rc && cache) {
@@ -1098,6 +1719,18 @@ int mnt_fs_match_target(struct libmnt_fs *fs, const char *target, struct libmnt_
 		/* 3) - canonicalized and canonicalized */
 		if (!rc && cn) {
 			char *tcn = mnt_resolve_path(fs->target, cache);
+=======
+	rc = mnt_fs_streq_target(fs, target);
+
+	if (!rc && cache) {
+		/* 2) - canonicalized and non-canonicalized */
+		char *cn = mnt_resolve_target(target, cache);
+		rc = (cn && mnt_fs_streq_target(fs, cn));
+
+		/* 3) - canonicalized and canonicalized */
+		if (!rc && cn && !mnt_fs_is_kernel(fs) && !mnt_fs_is_swaparea(fs)) {
+			char *tcn = mnt_resolve_target(fs->target, cache);
+>>>>>>> master-vanilla
 			rc = (tcn && strcmp(cn, tcn) == 0);
 		}
 	}
@@ -1111,7 +1744,11 @@ int mnt_fs_match_target(struct libmnt_fs *fs, const char *target, struct libmnt_
  * @source: tag or path (device or so) or NULL
  * @cache: tags/paths cache or NULL
  *
+<<<<<<< HEAD
  * Possible are four attempts:
+=======
+ * Four attempts are possible:
+>>>>>>> master-vanilla
  *	1) compare @source with @fs->source
  *	2) compare realpath(@source) with @fs->source
  *	3) compare realpath(@source) with realpath(@fs->source)
@@ -1120,6 +1757,7 @@ int mnt_fs_match_target(struct libmnt_fs *fs, const char *target, struct libmnt_
  * The 2nd, 3rd and 4th attempts are not performed when @cache is NULL. The
  * 2nd and 3rd attempts are not performed if @fs->source is tag.
  *
+<<<<<<< HEAD
  * Note that valid source path is NULL; the libmount uses NULL instead of
  * "none".  The "none" is used in /proc/{mounts,self/mountninfo} for pseudo
  * filesystems.
@@ -1127,6 +1765,12 @@ int mnt_fs_match_target(struct libmnt_fs *fs, const char *target, struct libmnt_
  * Returns: 1 if @fs source is equal to @source else 0.
  */
 int mnt_fs_match_source(struct libmnt_fs *fs, const char *source, struct libmnt_cache *cache)
+=======
+ * Returns: 1 if @fs source is equal to @source, else 0.
+ */
+int mnt_fs_match_source(struct libmnt_fs *fs, const char *source,
+			struct libmnt_cache *cache)
+>>>>>>> master-vanilla
 {
 	char *cn;
 	const char *src, *t, *v;
@@ -1134,6 +1778,7 @@ int mnt_fs_match_source(struct libmnt_fs *fs, const char *source, struct libmnt_
 	if (!fs)
 		return 0;
 
+<<<<<<< HEAD
 	/* undefined source -- "none" in /proc */
 	if (source == NULL && fs->source == NULL)
 		return 1;
@@ -1143,6 +1788,17 @@ int mnt_fs_match_source(struct libmnt_fs *fs, const char *source, struct libmnt_
 
 	/* 1) native paths/tags */
 	if (!strcmp(source, fs->source))
+=======
+	/* 1) native paths... */
+	if (mnt_fs_streq_srcpath(fs, source) == 1)
+		return 1;
+
+	if (!source || !fs->source)
+		return 0;
+
+	/* ... and tags */
+	if (fs->tagname && strcmp(source, fs->source) == 0)
+>>>>>>> master-vanilla
 		return 1;
 
 	if (!cache)
@@ -1156,7 +1812,11 @@ int mnt_fs_match_source(struct libmnt_fs *fs, const char *source, struct libmnt_
 
 	/* 2) canonicalized and native */
 	src = mnt_fs_get_srcpath(fs);
+<<<<<<< HEAD
 	if (src && !strcmp(cn, src))
+=======
+	if (src && mnt_fs_streq_srcpath(fs, cn))
+>>>>>>> master-vanilla
 		return 1;
 
 	/* 3) canonicalized and canonicalized */
@@ -1166,14 +1826,22 @@ int mnt_fs_match_source(struct libmnt_fs *fs, const char *source, struct libmnt_
 			return 1;
 	}
 	if (src || mnt_fs_get_tag(fs, &t, &v))
+<<<<<<< HEAD
 		/* src path does not match and tag is not defined */
+=======
+		/* src path does not match and the tag is not defined */
+>>>>>>> master-vanilla
 		return 0;
 
 	/* read @source's tags to the cache */
 	if (mnt_cache_read_tags(cache, cn) < 0) {
 		if (errno == EACCES) {
 			/* we don't have permissions to read TAGs from
+<<<<<<< HEAD
 			 * @source, but can translate @fs tag to devname.
+=======
+			 * @source, but can translate the @fs tag to devname.
+>>>>>>> master-vanilla
 			 *
 			 * (because libblkid uses udev symlinks and this is
 			 * accessible for non-root uses)
@@ -1185,7 +1853,11 @@ int mnt_fs_match_source(struct libmnt_fs *fs, const char *source, struct libmnt_
 		return 0;
 	}
 
+<<<<<<< HEAD
 	/* 4) has the @source a tag that matches with tag from @fs ? */
+=======
+	/* 4) has the @source a tag that matches with the tag from @fs ? */
+>>>>>>> master-vanilla
 	if (mnt_cache_device_has_tag(cache, cn, t, v))
 		return 1;
 
@@ -1199,7 +1871,11 @@ int mnt_fs_match_source(struct libmnt_fs *fs, const char *source, struct libmnt_
  *
  * For more details see mnt_match_fstype().
  *
+<<<<<<< HEAD
  * Returns: 1 if @fs type is matching to @types else 0. The function returns
+=======
+ * Returns: 1 if @fs type is matching to @types, else 0. The function returns
+>>>>>>> master-vanilla
  * 0 when types is NULL.
  */
 int mnt_fs_match_fstype(struct libmnt_fs *fs, const char *types)
@@ -1214,7 +1890,11 @@ int mnt_fs_match_fstype(struct libmnt_fs *fs, const char *types)
  *
  * For more details see mnt_match_options().
  *
+<<<<<<< HEAD
  * Returns: 1 if @fs type is matching to @options else 0. The function returns
+=======
+ * Returns: 1 if @fs type is matching to @options, else 0. The function returns
+>>>>>>> master-vanilla
  * 0 when types is NULL.
  */
 int mnt_fs_match_options(struct libmnt_fs *fs, const char *options)
@@ -1231,7 +1911,11 @@ int mnt_fs_match_options(struct libmnt_fs *fs, const char *options)
  */
 int mnt_fs_print_debug(struct libmnt_fs *fs, FILE *file)
 {
+<<<<<<< HEAD
 	if (!fs)
+=======
+	if (!fs || !file)
+>>>>>>> master-vanilla
 		return -EINVAL;
 	fprintf(file, "------ fs: %p\n", fs);
 	fprintf(file, "source: %s\n", mnt_fs_get_source(fs));
@@ -1246,11 +1930,29 @@ int mnt_fs_print_debug(struct libmnt_fs *fs, FILE *file)
 		fprintf(file, "FS-opstr: %s\n", mnt_fs_get_fs_options(fs));
 	if (mnt_fs_get_user_options(fs))
 		fprintf(file, "user-optstr: %s\n", mnt_fs_get_user_options(fs));
+<<<<<<< HEAD
+=======
+	if (mnt_fs_get_optional_fields(fs))
+		fprintf(file, "optional-fields: '%s'\n", mnt_fs_get_optional_fields(fs));
+>>>>>>> master-vanilla
 	if (mnt_fs_get_attributes(fs))
 		fprintf(file, "attributes: %s\n", mnt_fs_get_attributes(fs));
 
 	if (mnt_fs_get_root(fs))
 		fprintf(file, "root:   %s\n", mnt_fs_get_root(fs));
+<<<<<<< HEAD
+=======
+
+	if (mnt_fs_get_swaptype(fs))
+		fprintf(file, "swaptype: %s\n", mnt_fs_get_swaptype(fs));
+	if (mnt_fs_get_size(fs))
+		fprintf(file, "size: %jd\n", mnt_fs_get_size(fs));
+	if (mnt_fs_get_usedsize(fs))
+		fprintf(file, "usedsize: %jd\n", mnt_fs_get_usedsize(fs));
+	if (mnt_fs_get_priority(fs))
+		fprintf(file, "priority: %d\n", mnt_fs_get_priority(fs));
+
+>>>>>>> master-vanilla
 	if (mnt_fs_get_bindsrc(fs))
 		fprintf(file, "bindsrc: %s\n", mnt_fs_get_bindsrc(fs));
 	if (mnt_fs_get_freq(fs))
@@ -1263,7 +1965,16 @@ int mnt_fs_print_debug(struct libmnt_fs *fs, FILE *file)
 		fprintf(file, "parent: %d\n", mnt_fs_get_parent_id(fs));
 	if (mnt_fs_get_devno(fs))
 		fprintf(file, "devno:  %d:%d\n", major(mnt_fs_get_devno(fs)),
+<<<<<<< HEAD
 						 minor(mnt_fs_get_devno(fs)));
+=======
+						minor(mnt_fs_get_devno(fs)));
+	if (mnt_fs_get_tid(fs))
+		fprintf(file, "tid:    %d\n", mnt_fs_get_tid(fs));
+	if (mnt_fs_get_comment(fs))
+		fprintf(file, "comment: '%s'\n", mnt_fs_get_comment(fs));
+
+>>>>>>> master-vanilla
 	return 0;
 }
 
@@ -1271,7 +1982,11 @@ int mnt_fs_print_debug(struct libmnt_fs *fs, FILE *file)
  * mnt_free_mntent:
  * @mnt: mount entry
  *
+<<<<<<< HEAD
  * Deallocates "mntent.h" mount entry.
+=======
+ * Deallocates the "mntent.h" mount entry.
+>>>>>>> master-vanilla
  */
 void mnt_free_mntent(struct mntent *mnt)
 {
@@ -1289,11 +2004,19 @@ void mnt_free_mntent(struct mntent *mnt)
  * @fs: filesystem
  * @mnt: mount description (as described in mntent.h)
  *
+<<<<<<< HEAD
  * Copies information from @fs to struct mntent @mnt. If @mnt is already set
  * then the struct mntent items are reallocated and updated. See also
  * mnt_free_mntent().
  *
  * Returns: 0 on success and negative number in case of error.
+=======
+ * Copies the information from @fs to struct mntent @mnt. If @mnt is already set,
+ * then the struct mntent items are reallocated and updated. See also
+ * mnt_free_mntent().
+ *
+ * Returns: 0 on success and a negative number in case of error.
+>>>>>>> master-vanilla
  */
 int mnt_fs_to_mntent(struct libmnt_fs *fs, struct mntent **mnt)
 {

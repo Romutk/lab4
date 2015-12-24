@@ -21,8 +21,31 @@
 #ifdef HAVE_ERRNO_H
 #include <errno.h>
 #endif
+<<<<<<< HEAD
 #include "blkidP.h"
 
+=======
+
+#include "closestream.h"
+
+#include "blkidP.h"
+
+
+static void save_quoted(const char *data, FILE *file)
+{
+	const char *p;
+
+	fputc('"', file);
+	for (p = data; p && *p; p++) {
+		if ((unsigned char) *p == 0x22 ||		/* " */
+		    (unsigned char) *p == 0x5c)			/* \ */
+			fputc('\\', file);
+
+		fputc(*p, file);
+	}
+	fputc('"', file);
+}
+>>>>>>> master-vanilla
 static int save_dev(blkid_dev dev, FILE *file)
 {
 	struct list_head *p;
@@ -30,8 +53,12 @@ static int save_dev(blkid_dev dev, FILE *file)
 	if (!dev || dev->bid_name[0] != '/')
 		return 0;
 
+<<<<<<< HEAD
 	DBG(DEBUG_SAVE,
 	    printf("device %s, type %s\n", dev->bid_name, dev->bid_type ?
+=======
+	DBG(SAVE, ul_debug("device %s, type %s", dev->bid_name, dev->bid_type ?
+>>>>>>> master-vanilla
 		   dev->bid_type : "(null)"));
 
 	fprintf(file, "<device DEVNO=\"0x%04lx\" TIME=\"%ld.%ld\"",
@@ -41,9 +68,20 @@ static int save_dev(blkid_dev dev, FILE *file)
 
 	if (dev->bid_pri)
 		fprintf(file, " PRI=\"%d\"", dev->bid_pri);
+<<<<<<< HEAD
 	list_for_each(p, &dev->bid_tags) {
 		blkid_tag tag = list_entry(p, struct blkid_struct_tag, bit_tags);
 		fprintf(file, " %s=\"%s\"", tag->bit_name,tag->bit_val);
+=======
+
+	list_for_each(p, &dev->bid_tags) {
+		blkid_tag tag = list_entry(p, struct blkid_struct_tag, bit_tags);
+
+		fputc(' ', file);			/* space between tags */
+		fputs(tag->bit_name, file);		/* tag NAME */
+		fputc('=', file);			/* separator between NAME and VALUE */
+		save_quoted(tag->bit_val, file);	/* tag "VALUE" */
+>>>>>>> master-vanilla
 	}
 	fprintf(file, ">%s</device>\n", dev->bid_name);
 
@@ -57,8 +95,13 @@ int blkid_flush_cache(blkid_cache cache)
 {
 	struct list_head *p;
 	char *tmp = NULL;
+<<<<<<< HEAD
 	const char *opened = NULL;
 	const char *filename;
+=======
+	char *opened = NULL;
+	char *filename;
+>>>>>>> master-vanilla
 	FILE *file = NULL;
 	int fd, ret = 0;
 	struct stat st;
@@ -68,17 +111,48 @@ int blkid_flush_cache(blkid_cache cache)
 
 	if (list_empty(&cache->bic_devs) ||
 	    !(cache->bic_flags & BLKID_BIC_FL_CHANGED)) {
+<<<<<<< HEAD
 		DBG(DEBUG_SAVE, printf("skipping cache file write\n"));
 		return 0;
 	}
 
 	filename = cache->bic_filename ? cache->bic_filename: BLKID_CACHE_FILE;
+=======
+		DBG(SAVE, ul_debug("skipping cache file write"));
+		return 0;
+	}
+
+	filename = cache->bic_filename ? cache->bic_filename :
+					 blkid_get_cache_filename(NULL);
+	if (!filename)
+		return -BLKID_ERR_PARAM;
+
+	if (strncmp(filename,
+	    BLKID_RUNTIME_DIR "/", sizeof(BLKID_RUNTIME_DIR)) == 0) {
+
+		/* default destination, create the directory if necessary */
+		if (stat(BLKID_RUNTIME_DIR, &st)
+		    && errno == ENOENT
+		    && mkdir(BLKID_RUNTIME_DIR, S_IWUSR|
+						S_IRUSR|S_IRGRP|S_IROTH|
+						S_IXUSR|S_IXGRP|S_IXOTH) != 0
+		    && errno != EEXIST) {
+			DBG(SAVE, ul_debug("can't create %s directory for cache file",
+					BLKID_RUNTIME_DIR));
+			return 0;
+		}
+	}
+>>>>>>> master-vanilla
 
 	/* If we can't write to the cache file, then don't even try */
 	if (((ret = stat(filename, &st)) < 0 && errno != ENOENT) ||
 	    (ret == 0 && access(filename, W_OK) < 0)) {
+<<<<<<< HEAD
 		DBG(DEBUG_SAVE,
 		    printf("can't write to cache file %s\n", filename));
+=======
+		DBG(SAVE, ul_debug("can't write to cache file %s", filename));
+>>>>>>> master-vanilla
 		return 0;
 	}
 
@@ -93,22 +167,42 @@ int blkid_flush_cache(blkid_cache cache)
 		tmp = malloc(strlen(filename) + 8);
 		if (tmp) {
 			sprintf(tmp, "%s-XXXXXX", filename);
+<<<<<<< HEAD
 			fd = mkstemp(tmp);
 			if (fd >= 0) {
 				file = fdopen(fd, "w");
 				opened = tmp;
 			}
 			fchmod(fd, 0644);
+=======
+			fd = mkostemp(tmp, O_RDWR|O_CREAT|O_EXCL|O_CLOEXEC);
+			if (fd >= 0) {
+				if (fchmod(fd, 0644) != 0)
+					DBG(SAVE, ul_debug("%s: fchmod failed", filename));
+				else if ((file = fdopen(fd, "w" UL_CLOEXECSTR)))
+					opened = tmp;
+				if (!file)
+					close(fd);
+			}
+>>>>>>> master-vanilla
 		}
 	}
 
 	if (!file) {
+<<<<<<< HEAD
 		file = fopen(filename, "w");
 		opened = filename;
 	}
 
 	DBG(DEBUG_SAVE,
 	    printf("writing cache file %s (really %s)\n",
+=======
+		file = fopen(filename, "w" UL_CLOEXECSTR);
+		opened = filename;
+	}
+
+	DBG(SAVE, ul_debug("writing cache file %s (really %s)",
+>>>>>>> master-vanilla
 		   filename, opened));
 
 	if (!file) {
@@ -129,12 +223,22 @@ int blkid_flush_cache(blkid_cache cache)
 		ret = 1;
 	}
 
+<<<<<<< HEAD
 	fclose(file);
 	if (opened != filename) {
 		if (ret < 0) {
 			unlink(opened);
 			DBG(DEBUG_SAVE,
 			    printf("unlinked temp cache %s\n", opened));
+=======
+	if (close_stream(file) != 0)
+		DBG(SAVE, ul_debug("write failed: %s", filename));
+
+	if (opened != filename) {
+		if (ret < 0) {
+			unlink(opened);
+			DBG(SAVE, ul_debug("unlinked temp cache %s", opened));
+>>>>>>> master-vanilla
 		} else {
 			char *backup;
 
@@ -143,20 +247,39 @@ int blkid_flush_cache(blkid_cache cache)
 				sprintf(backup, "%s.old", filename);
 				unlink(backup);
 				if (link(filename, backup)) {
+<<<<<<< HEAD
 					DBG(DEBUG_SAVE,
 						printf("can't link %s to %s\n",
+=======
+					DBG(SAVE, ul_debug("can't link %s to %s",
+>>>>>>> master-vanilla
 							filename, backup));
 				}
 				free(backup);
 			}
+<<<<<<< HEAD
 			rename(opened, filename);
 			DBG(DEBUG_SAVE,
 			    printf("moved temp cache %s\n", opened));
+=======
+			if (rename(opened, filename)) {
+				ret = errno;
+				DBG(SAVE, ul_debug("can't rename %s to %s",
+						opened, filename));
+			} else {
+				DBG(SAVE, ul_debug("moved temp cache %s", opened));
+			}
+>>>>>>> master-vanilla
 		}
 	}
 
 errout:
 	free(tmp);
+<<<<<<< HEAD
+=======
+	if (filename != cache->bic_filename)
+		free(filename);
+>>>>>>> master-vanilla
 	return ret;
 }
 
@@ -166,7 +289,11 @@ int main(int argc, char **argv)
 	blkid_cache cache = NULL;
 	int ret;
 
+<<<<<<< HEAD
 	blkid_init_debug(DEBUG_ALL);
+=======
+	blkid_init_debug(BLKID_DEBUG_ALL);
+>>>>>>> master-vanilla
 	if (argc > 2) {
 		fprintf(stderr, "Usage: %s [filename]\n"
 			"Test loading/saving a cache (filename)\n", argv[0]);
@@ -182,7 +309,11 @@ int main(int argc, char **argv)
 		fprintf(stderr, "error (%d) probing devices\n", ret);
 		exit(1);
 	}
+<<<<<<< HEAD
 	cache->bic_filename = blkid_strdup(argv[1]);
+=======
+	cache->bic_filename = strdup(argv[1]);
+>>>>>>> master-vanilla
 
 	if ((ret = blkid_flush_cache(cache)) < 0) {
 		fprintf(stderr, "error (%d) saving cache\n", ret);

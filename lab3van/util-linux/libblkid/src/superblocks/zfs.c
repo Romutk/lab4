@@ -12,12 +12,21 @@
 #include <errno.h>
 #include <ctype.h>
 #include <inttypes.h>
+<<<<<<< HEAD
+=======
+#include <limits.h>
+>>>>>>> master-vanilla
 
 #include "superblocks.h"
 
 #define VDEV_LABEL_UBERBLOCK	(128 * 1024ULL)
 #define VDEV_LABEL_NVPAIR	( 16 * 1024ULL)
 #define VDEV_LABEL_SIZE		(256 * 1024ULL)
+<<<<<<< HEAD
+=======
+#define UBERBLOCK_SIZE		1024ULL
+#define UBERBLOCKS_COUNT   128
+>>>>>>> master-vanilla
 
 /* #include <sys/uberblock_impl.h> */
 #define UBERBLOCK_MAGIC         0x00bab10c              /* oo-ba-bloc!  */
@@ -30,7 +39,10 @@ struct zfs_uberblock {
 	char		ub_rootbp;	/* MOS objset_phys_t		*/
 } __attribute__((packed));
 
+<<<<<<< HEAD
 #define ZFS_TRIES	64
+=======
+>>>>>>> master-vanilla
 #define ZFS_WANT	 4
 
 #define DATA_TYPE_UINT64 8
@@ -64,6 +76,7 @@ struct nvlist {
 };
 
 #define nvdebug(fmt, ...)	do { } while(0)
+<<<<<<< HEAD
 /*#define nvdebug(fmt, a...)	printf(fmt, ##a)*/
 
 static void zfs_extract_guid_name(blkid_probe pr, loff_t offset)
@@ -71,6 +84,16 @@ static void zfs_extract_guid_name(blkid_probe pr, loff_t offset)
 	struct nvlist *nvl;
 	struct nvpair *nvp;
 	size_t left = 4096;
+=======
+/*#define nvdebug(fmt, a...)	fprintf(stderr, fmt, ##a)*/
+
+static void zfs_extract_guid_name(blkid_probe pr, loff_t offset)
+{
+	unsigned char *p, buff[4096];
+	struct nvlist *nvl;
+	struct nvpair *nvp;
+	size_t left = sizeof(buff);
+>>>>>>> master-vanilla
 	int found = 0;
 
 	offset = (offset & ~(VDEV_LABEL_SIZE - 1)) + VDEV_LABEL_NVPAIR;
@@ -79,10 +102,21 @@ static void zfs_extract_guid_name(blkid_probe pr, loff_t offset)
 	 * the first 4k (left) of the nvlist.  This is true for all pools
 	 * I've seen, and simplifies this code somewhat, because we don't
 	 * have to handle an nvpair crossing a buffer boundary. */
+<<<<<<< HEAD
 	nvl = (struct nvlist *)blkid_probe_get_buffer(pr, offset, left);
 	if (nvl == NULL)
 		return;
 
+=======
+	p = blkid_probe_get_buffer(pr, offset, left);
+	if (!p)
+		return;
+
+	/* libblkid buffers are strictly readonly, but the code below modifies nvpair etc. */
+	memcpy(buff, p, sizeof(buff));
+	nvl = (struct nvlist *) buff;
+
+>>>>>>> master-vanilla
 	nvdebug("zfs_extract: nvlist offset %llu\n", offset);
 
 	nvp = &nvl->nvl_nvpair;
@@ -108,6 +142,11 @@ static void zfs_extract_guid_name(blkid_probe pr, loff_t offset)
 
 			nvs->nvs_type = be32_to_cpu(nvs->nvs_type);
 			nvs->nvs_strlen = be32_to_cpu(nvs->nvs_strlen);
+<<<<<<< HEAD
+=======
+			if (nvs->nvs_strlen > UINT_MAX - sizeof(*nvs))
+				break;
+>>>>>>> master-vanilla
 			avail -= nvs->nvs_strlen + sizeof(*nvs);
 			nvdebug("nvstring: type %u string %*s\n", nvs->nvs_type,
 				nvs->nvs_strlen, nvs->nvs_string);
@@ -157,11 +196,44 @@ static void zfs_extract_guid_name(blkid_probe pr, loff_t offset)
 }
 
 #define zdebug(fmt, ...)	do {} while(0)
+<<<<<<< HEAD
 /*#define zdebug(fmt, a...)	printf(fmt, ##a)*/
+=======
+/*#define zdebug(fmt, a...)	fprintf(stderr, fmt, ##a)*/
+
+static int find_uberblocks(const void *label, loff_t *ub_offset, int *swap_endian)
+{
+	uint64_t swab_magic = swab64(UBERBLOCK_MAGIC);
+	struct zfs_uberblock *ub;
+	int i, found = 0;
+	loff_t offset = VDEV_LABEL_UBERBLOCK;
+
+	for (i = 0; i < UBERBLOCKS_COUNT; i++, offset += UBERBLOCK_SIZE) {
+		ub = (struct zfs_uberblock *)(label + offset);
+
+		if (ub->ub_magic == UBERBLOCK_MAGIC) {
+			*ub_offset = offset;
+			*swap_endian = 0;
+			found++;
+			zdebug("probe_zfs: found little-endian uberblock at %llu\n", offset >> 10);
+		}
+
+		if (ub->ub_magic == swab_magic) {
+			*ub_offset = offset;
+			*swap_endian = 1;
+			found++;
+			zdebug("probe_zfs: found big-endian uberblock at %llu\n", offset >> 10);
+		}
+	}
+
+	return found;
+}
+>>>>>>> master-vanilla
 
 /* ZFS has 128x1kB host-endian root blocks, stored in 2 areas at the start
  * of the disk, and 2 areas at the end of the disk.  Check only some of them...
  * #4 (@ 132kB) is the first one written on a new filesystem. */
+<<<<<<< HEAD
 static int probe_zfs(blkid_probe pr,
 		const struct blkid_idmag *mag __attribute__((__unused__)))
 {
@@ -199,6 +271,53 @@ static int probe_zfs(blkid_probe pr,
 
 	if (found < 4)
 		return -1;
+=======
+static int probe_zfs(blkid_probe pr, const struct blkid_idmag *mag)
+{
+	int swab_endian = 0;
+	struct zfs_uberblock *ub;
+	loff_t offset, ub_offset = 0;
+	int label_no, found = 0, found_in_label;
+	void *label;
+	loff_t blk_align = (pr->size % (256 * 1024ULL));
+
+	zdebug("probe_zfs\n");
+	/* Look for at least 4 uberblocks to ensure a positive match */
+	for (label_no = 0; label_no < 4; label_no++) {
+		switch(label_no) {
+		case 0: // jump to L0
+			offset = 0;
+			break;
+		case 1: // jump to L1
+			offset = VDEV_LABEL_SIZE;
+			break;
+		case 2: // jump to L2
+			offset = pr->size - 2 * VDEV_LABEL_SIZE - blk_align;
+			break;
+		case 3: // jump to L3
+			offset = pr->size - VDEV_LABEL_SIZE - blk_align;
+			break;
+		}
+
+		label = blkid_probe_get_buffer(pr, offset, VDEV_LABEL_SIZE);
+		if (label == NULL)
+			return errno ? -errno : 1;
+
+		found_in_label = find_uberblocks(label, &ub_offset, &swab_endian);
+
+		if (found_in_label > 0) {
+			found+= found_in_label;
+			ub = (struct zfs_uberblock *)(label + ub_offset);
+			ub_offset += offset;
+
+			if (found >= ZFS_WANT)
+				break;
+		}
+	}
+
+	if (found < ZFS_WANT)
+		return 1;
+>>>>>>> master-vanilla
 
 	/* If we found the 4th uberblock, then we will have exited from the
 	 * scanning loop immediately, and ub will be a valid uberblock. */
@@ -207,10 +326,17 @@ static int probe_zfs(blkid_probe pr,
 
 	zfs_extract_guid_name(pr, offset);
 
+<<<<<<< HEAD
 	if (blkid_probe_set_magic(pr, offset,
 				sizeof(ub->ub_magic),
 				(unsigned char *) &ub->ub_magic))
 		return -1;
+=======
+	if (blkid_probe_set_magic(pr, ub_offset,
+				sizeof(ub->ub_magic),
+				(unsigned char *) &ub->ub_magic))
+		return 1;
+>>>>>>> master-vanilla
 
 	return 0;
 }
@@ -218,9 +344,16 @@ static int probe_zfs(blkid_probe pr,
 const struct blkid_idinfo zfs_idinfo =
 {
 	.name		= "zfs_member",
+<<<<<<< HEAD
 	.usage		= BLKID_USAGE_RAID,
+=======
+	.usage		= BLKID_USAGE_FILESYSTEM,
+>>>>>>> master-vanilla
 	.probefunc	= probe_zfs,
 	.minsz		= 64 * 1024 * 1024,
 	.magics		= BLKID_NONE_MAGIC
 };
+<<<<<<< HEAD
 
+=======
+>>>>>>> master-vanilla

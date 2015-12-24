@@ -99,11 +99,20 @@ static int probe_ubifs(blkid_probe pr, const struct blkid_idmag *mag)
 
 	sb = blkid_probe_get_sb(pr, mag, struct ubifs_sb_node);
 	if (!sb)
+<<<<<<< HEAD
 		return -1;
 
 	blkid_probe_set_uuid(pr, sb->uuid);
 	blkid_probe_sprintf_version(pr, "w%dr%d",
 				    sb->fmt_version, sb->ro_compat_version);
+=======
+		return errno ? -errno : 1;
+
+	blkid_probe_set_uuid(pr, sb->uuid);
+	blkid_probe_sprintf_version(pr, "w%dr%d",
+			le32_to_cpu(sb->fmt_version),
+			le32_to_cpu(sb->ro_compat_version));
+>>>>>>> master-vanilla
 	return 0;
 }
 

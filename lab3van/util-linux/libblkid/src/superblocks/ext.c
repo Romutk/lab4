@@ -18,7 +18,10 @@
 #endif
 #include <time.h>
 
+<<<<<<< HEAD
 #include "linux_version.h"
+=======
+>>>>>>> master-vanilla
 #include "superblocks.h"
 
 struct ext2_super_block {
@@ -132,6 +135,7 @@ struct ext2_super_block {
 #define EXT3_FEATURE_RO_COMPAT_UNSUPPORTED	~EXT3_FEATURE_RO_COMPAT_SUPP
 
 /*
+<<<<<<< HEAD
  * Check to see if a filesystem is in /proc/filesystems.
  * Returns 1 if found, 0 if not
  */
@@ -214,11 +218,14 @@ static int check_for_modules(const char *fs_name)
 }
 
 /*
+=======
+>>>>>>> master-vanilla
  * Starting in 2.6.29, ext4 can be used to support filesystems
  * without a journal.
  */
 #define EXT4_SUPPORTS_EXT2 KERNEL_VERSION(2, 6, 29)
 
+<<<<<<< HEAD
 static int system_supports_ext2(void)
 {
 	static time_t	last_check = 0;
@@ -257,6 +264,8 @@ static int system_supports_ext4dev(void)
 	ret = (fs_proc_check("ext4dev") || check_for_modules("ext4dev"));
 	return ret;
 }
+=======
+>>>>>>> master-vanilla
 /*
  * reads superblock and returns:
  *	fc = feature_compat
@@ -286,7 +295,11 @@ static void ext_get_info(blkid_probe pr, int ver, struct ext2_super_block *es)
 {
 	struct blkid_chain *chn = blkid_probe_get_chain(pr);
 
+<<<<<<< HEAD
 	DBG(DEBUG_PROBE, printf("ext2_sb.compat = %08X:%08X:%08X\n",
+=======
+	DBG(PROBE, ul_debug("ext2_sb.compat = %08X:%08X:%08X",
+>>>>>>> master-vanilla
 		   le32_to_cpu(es->s_feature_compat),
 		   le32_to_cpu(es->s_feature_incompat),
 		   le32_to_cpu(es->s_feature_ro_compat)));
@@ -319,11 +332,21 @@ static int probe_jbd(blkid_probe pr,
 
 	es = ext_get_super(pr, NULL, &fi, NULL);
 	if (!es)
+<<<<<<< HEAD
 		return -BLKID_ERR_PARAM;
 	if (!(fi & EXT3_FEATURE_INCOMPAT_JOURNAL_DEV))
 		return -BLKID_ERR_PARAM;
 
 	ext_get_info(pr, 2, es);
+=======
+		return errno ? -errno : 1;
+	if (!(fi & EXT3_FEATURE_INCOMPAT_JOURNAL_DEV))
+		return 1;
+
+	ext_get_info(pr, 2, es);
+	blkid_probe_set_uuid_as(pr, es->s_uuid, "LOGUUID");
+
+>>>>>>> master-vanilla
 	return 0;
 }
 
@@ -335,15 +358,24 @@ static int probe_ext2(blkid_probe pr,
 
 	es = ext_get_super(pr, &fc, &fi, &frc);
 	if (!es)
+<<<<<<< HEAD
 		return -BLKID_ERR_PARAM;
 
 	/* Distinguish between ext3 and ext2 */
 	if (fc & EXT3_FEATURE_COMPAT_HAS_JOURNAL)
 		return -BLKID_ERR_PARAM;
+=======
+		return errno ? -errno : 1;
+
+	/* Distinguish between ext3 and ext2 */
+	if (fc & EXT3_FEATURE_COMPAT_HAS_JOURNAL)
+		return 1;
+>>>>>>> master-vanilla
 
 	/* Any features which ext2 doesn't understand */
 	if ((frc & EXT2_FEATURE_RO_COMPAT_UNSUPPORTED) ||
 	    (fi  & EXT2_FEATURE_INCOMPAT_UNSUPPORTED))
+<<<<<<< HEAD
 		return -BLKID_ERR_PARAM;
 
 	/*
@@ -354,6 +386,9 @@ static int probe_ext2(blkid_probe pr,
 	    (system_supports_ext4() || system_supports_ext4dev()) &&
 	    get_linux_version() >= EXT4_SUPPORTS_EXT2)
 		return -BLKID_ERR_PARAM;
+=======
+		return 1;
+>>>>>>> master-vanilla
 
 	ext_get_info(pr, 2, es);
 	return 0;
@@ -367,16 +402,28 @@ static int probe_ext3(blkid_probe pr,
 
 	es = ext_get_super(pr, &fc, &fi, &frc);
 	if (!es)
+<<<<<<< HEAD
 		return -BLKID_ERR_PARAM;
 
 	/* ext3 requires journal */
 	if (!(fc & EXT3_FEATURE_COMPAT_HAS_JOURNAL))
 		return -BLKID_ERR_PARAM;
+=======
+		return errno ? -errno : 1;
+
+	/* ext3 requires journal */
+	if (!(fc & EXT3_FEATURE_COMPAT_HAS_JOURNAL))
+		return 1;
+>>>>>>> master-vanilla
 
 	/* Any features which ext3 doesn't understand */
 	if ((frc & EXT3_FEATURE_RO_COMPAT_UNSUPPORTED) ||
 	    (fi  & EXT3_FEATURE_INCOMPAT_UNSUPPORTED))
+<<<<<<< HEAD
 		return -BLKID_ERR_PARAM;
+=======
+		return 1;
+>>>>>>> master-vanilla
 
 	ext_get_info(pr, 3, es);
 	return 0;
@@ -391,6 +438,7 @@ static int probe_ext4dev(blkid_probe pr,
 
 	es = ext_get_super(pr, &fc, &fi, &frc);
 	if (!es)
+<<<<<<< HEAD
 		return -BLKID_ERR_PARAM;
 
 	/* Distinguish from jbd */
@@ -425,6 +473,17 @@ static int probe_ext4dev(blkid_probe pr,
 		return -BLKID_ERR_PARAM;
 
 force_ext4dev:
+=======
+		return errno ? -errno : 1;
+
+	/* Distinguish from jbd */
+	if (fi & EXT3_FEATURE_INCOMPAT_JOURNAL_DEV)
+		return 1;
+
+	if (!(le32_to_cpu(es->s_flags) & EXT2_FLAGS_TEST_FILESYS))
+		return 1;
+
+>>>>>>> master-vanilla
 	ext_get_info(pr, 4, es);
 	return 0;
 }
@@ -437,6 +496,7 @@ static int probe_ext4(blkid_probe pr,
 
 	es = ext_get_super(pr, &fc, &fi, &frc);
 	if (!es)
+<<<<<<< HEAD
 		return -1;
 
 	/* Distinguish from jbd */
@@ -452,13 +512,25 @@ static int probe_ext4(blkid_probe pr,
 	    !system_supports_ext2() && system_supports_ext4() &&
 	    get_linux_version() >= EXT4_SUPPORTS_EXT2)
 		goto force_ext4;
+=======
+		return errno ? -errno : 1;
+
+	/* Distinguish from jbd */
+	if (fi & EXT3_FEATURE_INCOMPAT_JOURNAL_DEV)
+		return 1;
+>>>>>>> master-vanilla
 
 	/* Ext4 has at least one feature which ext3 doesn't understand */
 	if (!(frc & EXT3_FEATURE_RO_COMPAT_UNSUPPORTED) &&
 	    !(fi  & EXT3_FEATURE_INCOMPAT_UNSUPPORTED))
+<<<<<<< HEAD
 		return -BLKID_ERR_PARAM;
 
 force_ext4:
+=======
+		return 1;
+
+>>>>>>> master-vanilla
 	/*
 	 * If the filesystem is a OK for use by in-development
 	 * filesystem code, and ext4dev is supported or ext4 is not
@@ -469,10 +541,15 @@ force_ext4:
 	 * filesystem, then it can only be used by ext4 and NOT by
 	 * ext4dev.
 	 */
+<<<<<<< HEAD
 	if (le32_to_cpu(es->s_flags) & EXT2_FLAGS_TEST_FILESYS) {
 		if (system_supports_ext4dev() || !system_supports_ext4())
 			return -BLKID_ERR_PARAM;
 	}
+=======
+	if (le32_to_cpu(es->s_flags) & EXT2_FLAGS_TEST_FILESYS)
+		return 1;
+>>>>>>> master-vanilla
 
 	ext_get_info(pr, 4, es);
 	return 0;

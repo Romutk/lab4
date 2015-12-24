@@ -106,19 +106,35 @@ static int probe_unixware_pt(blkid_probe pr,
 
 	l = (struct unixware_disklabel *)
 			blkid_probe_get_sector(pr, UNIXWARE_SECTOR);
+<<<<<<< HEAD
 	if (!l)
 		goto nothing;
+=======
+	if (!l) {
+		if (errno)
+			return -errno;
+		goto nothing;
+	}
+>>>>>>> master-vanilla
 
 	if (le32_to_cpu(l->vtoc.v_magic) != UNIXWARE_VTOCMAGIC)
 		goto nothing;
 
 	if (blkid_partitions_need_typeonly(pr))
 		/* caller does not ask for details about partitions */
+<<<<<<< HEAD
 		return 0;
 
 	ls = blkid_probe_get_partlist(pr);
 	if (!ls)
 		goto err;
+=======
+		return BLKID_PROBE_OK;
+
+	ls = blkid_probe_get_partlist(pr);
+	if (!ls)
+		goto nothing;
+>>>>>>> master-vanilla
 
 	parent = blkid_partlist_get_parent(ls);
 
@@ -147,9 +163,15 @@ static int probe_unixware_pt(blkid_probe pr,
 		size = le32_to_cpu(p->nr_sects);
 
 		if (parent && !blkid_is_nested_dimension(parent, start, size)) {
+<<<<<<< HEAD
 			DBG(DEBUG_LOWPROBE, printf(
 				"WARNING: unixware partition (%d) overflow "
 				"detected, ignore\n", i));
+=======
+			DBG(LOWPROBE, ul_debug(
+				"WARNING: unixware partition (%d) overflow "
+				"detected, ignore", i));
+>>>>>>> master-vanilla
 			continue;
 		}
 
@@ -161,12 +183,21 @@ static int probe_unixware_pt(blkid_probe pr,
 		blkid_partition_set_flags(par, flg);
 	}
 
+<<<<<<< HEAD
 	return 0;
 
 nothing:
 	return 1;
 err:
 	return -1;
+=======
+	return BLKID_PROBE_OK;
+
+nothing:
+	return BLKID_PROBE_NONE;
+err:
+	return -ENOMEM;
+>>>>>>> master-vanilla
 }
 
 

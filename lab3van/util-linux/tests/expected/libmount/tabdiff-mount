@@ -1,1 +1,5 @@
 /dev/mapper/kzak-home on /home/kzak: MOUNTED
+<<<<<<< HEAD
+=======
+/fooooo on /mnt/foo: MOUNTED
+>>>>>>> master-vanilla

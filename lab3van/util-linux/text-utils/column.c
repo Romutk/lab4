@@ -32,7 +32,11 @@
  */
  
 /*
+<<<<<<< HEAD
  * 1999-02-22 Arkadiusz Mi∂kiewicz <misiek@pld.ORG.PL>
+=======
+ * 1999-02-22 Arkadiusz Mi≈õkiewicz <misiek@pld.ORG.PL>
+>>>>>>> master-vanilla
  * 	added Native Language Support
  * 1999-09-19 Bruno Haible <haible@clisp.cons.org>
  * 	modified to work correctly in multi-byte locales
@@ -42,19 +46,32 @@
 #include <sys/ioctl.h>
 
 #include <ctype.h>
+<<<<<<< HEAD
 #include <limits.h>
+=======
+>>>>>>> master-vanilla
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 #include <getopt.h>
+<<<<<<< HEAD
 #include "nls.h"
 
+=======
+
+#include "nls.h"
+>>>>>>> master-vanilla
 #include "widechar.h"
 #include "c.h"
 #include "xalloc.h"
 #include "strutils.h"
+<<<<<<< HEAD
+=======
+#include "closestream.h"
+#include "ttyutils.h"
+>>>>>>> master-vanilla
 
 #ifdef HAVE_WIDECHAR
 #define wcs_width(s) wcswidth(s,wcslen(s))
@@ -74,7 +91,12 @@ static char *mtsafe_strtok(char *, const char *, char **);
 static int input(FILE *fp, int *maxlength, wchar_t ***list, int *entries);
 static void c_columnate(int maxlength, long termwidth, wchar_t **list, int entries);
 static void r_columnate(int maxlength, long termwidth, wchar_t **list, int entries);
+<<<<<<< HEAD
 static void maketbl(wchar_t **list, int entries, wchar_t *separator);
+=======
+static wchar_t *local_wcstok(wchar_t *p, const wchar_t *separator, int greedy, wchar_t **wcstok_state);
+static void maketbl(wchar_t **list, int entries, wchar_t *separator, int greedy, wchar_t *colsep);
+>>>>>>> master-vanilla
 static void print(wchar_t **list, int entries);
 
 typedef struct _tbl {
@@ -86,6 +108,7 @@ static void __attribute__((__noreturn__)) usage(int rc)
 {
 	FILE *out = rc == EXIT_FAILURE ? stderr : stdout;
 
+<<<<<<< HEAD
 	fprintf(out, _("\nUsage: %s [options] [file ...]\n"),
 				program_invocation_short_name);
 	fprintf(out, _("\nOptions:\n"));
@@ -99,18 +122,49 @@ static void __attribute__((__noreturn__)) usage(int rc)
 	" -x, --fillrows           fill rows before columns\n"));
 
 	fprintf(out, _("\nFor more information see column(1).\n"));
+=======
+	fputs(USAGE_HEADER, out);
+	fprintf(out, _(" %s [options] [<file>...]\n"), program_invocation_short_name);
+
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Columnate lists.\n"), out);
+
+	fputs(USAGE_OPTIONS, out);
+	fputs(_(" -c, --columns <width>    width of output in number of characters\n"), out);
+	fputs(_(" -t, --table              create a table\n"), out);
+	fputs(_(" -s, --separator <string> possible table delimiters\n"), out);
+	fputs(_(" -o, --output-separator <string>\n"
+	        "                          columns separator for table output; default is two spaces\n"), out);
+	fputs(_(" -x, --fillrows           fill rows before columns\n"), out);
+	fputs(USAGE_SEPARATOR, out);
+	fputs(USAGE_HELP, out);
+	fputs(USAGE_VERSION, out);
+	fprintf(out, USAGE_MAN_TAIL("column(1)"));
+
+>>>>>>> master-vanilla
 	exit(rc);
 }
 
 int main(int argc, char **argv)
 {
+<<<<<<< HEAD
 	struct winsize win;
 	int ch, tflag = 0, xflag = 0;
 	long termwidth = 80;
+=======
+	int ch, tflag = 0, xflag = 0;
+	int i;
+	int termwidth = 80;
+>>>>>>> master-vanilla
 	int entries = 0;		/* number of records */
 	unsigned int eval = 0;		/* exit value */
 	int maxlength = 0;		/* longest record */
 	wchar_t **list = NULL;		/* array of pointers to records */
+<<<<<<< HEAD
+=======
+	int greedy = 1;
+	wchar_t *colsep;		/* table column output separator */
+>>>>>>> master-vanilla
 
 	/* field separator for table option */
 	wchar_t default_separator[] = { '\t', ' ', 0 };
@@ -120,9 +174,16 @@ int main(int argc, char **argv)
 	{
 		{ "help",	0, 0, 'h' },
 		{ "version",    0, 0, 'V' },
+<<<<<<< HEAD
 		{ "columns",	0, 0, 'c' },
 		{ "table",	0, 0, 't' },
 		{ "separator",	0, 0, 's' },
+=======
+		{ "columns",	1, 0, 'c' },
+		{ "table",	0, 0, 't' },
+		{ "separator",	1, 0, 's' },
+		{ "output-separator", 1, 0, 'o' },
+>>>>>>> master-vanilla
 		{ "fillrows",	0, 0, 'x' },
 		{ NULL,		0, 0, 0 },
 	};
@@ -130,6 +191,7 @@ int main(int argc, char **argv)
 	setlocale(LC_ALL, "");
 	bindtextdomain(PACKAGE, LOCALEDIR);
 	textdomain(PACKAGE);
+<<<<<<< HEAD
 
 	if (ioctl(STDIN_FILENO, TIOCGWINSZ, &win) == -1 || !win.ws_col) {
 		char *p;
@@ -141,11 +203,22 @@ int main(int argc, char **argv)
 		termwidth = win.ws_col;
 
 	while ((ch = getopt_long(argc, argv, "hVc:s:tx", longopts, NULL)) != -1)
+=======
+	atexit(close_stdout);
+
+	termwidth = get_terminal_width();
+	if (termwidth <= 0)
+		termwidth = 80;
+	colsep = mbs_to_wcs("  ");
+
+	while ((ch = getopt_long(argc, argv, "hVc:s:txo:", longopts, NULL)) != -1)
+>>>>>>> master-vanilla
 		switch(ch) {
 		case 'h':
 			usage(EXIT_SUCCESS);
 			break;
 		case 'V':
+<<<<<<< HEAD
 			printf(_("%s from %s\n"), program_invocation_short_name,
 				 PACKAGE_STRING);
 				 return EXIT_SUCCESS;
@@ -158,6 +231,20 @@ int main(int argc, char **argv)
 			break;
 		case 's':
 			separator = mbs_to_wcs(optarg);
+=======
+			printf(UTIL_LINUX_VERSION);
+			return EXIT_SUCCESS;
+		case 'c':
+			termwidth = strtou32_or_err(optarg, _("invalid columns argument"));
+			break;
+		case 's':
+			separator = mbs_to_wcs(optarg);
+			greedy = 0;
+			break;
+		case 'o':
+			free(colsep);
+			colsep = mbs_to_wcs(optarg);
+>>>>>>> master-vanilla
 			break;
 		case 't':
 			tflag = 1;
@@ -190,7 +277,11 @@ int main(int argc, char **argv)
 		exit(eval);
 
 	if (tflag)
+<<<<<<< HEAD
 		maketbl(list, entries, separator);
+=======
+		maketbl(list, entries, separator, greedy, colsep);
+>>>>>>> master-vanilla
 	else if (maxlength >= termwidth)
 		print(list, entries);
 	else if (xflag)
@@ -198,6 +289,7 @@ int main(int argc, char **argv)
 	else
 		r_columnate(maxlength, termwidth, list, entries);
 
+<<<<<<< HEAD
 	for (int i = 0; i < entries; i++)
 		free(list[i]);
 	free(list);
@@ -205,6 +297,12 @@ int main(int argc, char **argv)
 	if (ferror(stdout) || fclose(stdout))
 		eval += EXIT_FAILURE;
 
+=======
+	for (i = 0; i < entries; i++)
+		free(list[i]);
+	free(list);
+
+>>>>>>> master-vanilla
 	if (eval == 0)
 		return EXIT_SUCCESS;
 	else
@@ -280,16 +378,51 @@ static void print(wchar_t **list, int entries)
 	}
 }
 
+<<<<<<< HEAD
 static void maketbl(wchar_t **list, int entries, wchar_t *separator)
 {
 	TBL *t;
 	int cnt, i;
+=======
+wchar_t *local_wcstok(wchar_t * p, const wchar_t * separator, int greedy,
+		      wchar_t ** wcstok_state)
+{
+	wchar_t *result;
+	if (greedy)
+		return wcstok(p, separator, wcstok_state);
+
+	if (p == NULL) {
+		if (*wcstok_state == NULL)
+			return NULL;
+		else
+			p = *wcstok_state;
+	}
+	result = p;
+	p = wcspbrk(result, separator);
+	if (p == NULL)
+		*wcstok_state = NULL;
+	else {
+		*p = '\0';
+		*wcstok_state = p + 1;
+	}
+	return result;
+}
+
+static void maketbl(wchar_t **list, int entries, wchar_t *separator, int greedy, wchar_t *colsep)
+{
+	TBL *t;
+	int cnt;
+>>>>>>> master-vanilla
 	wchar_t *p, **lp;
 	ssize_t *lens;
 	ssize_t maxcols = DEFCOLS, coloff;
 	TBL *tbl;
 	wchar_t **cols;
+<<<<<<< HEAD
 	wchar_t *wcstok_state;
+=======
+	wchar_t *wcstok_state = NULL;
+>>>>>>> master-vanilla
 
 	t = tbl = xcalloc(entries, sizeof(TBL));
 	cols = xcalloc(maxcols, sizeof(wchar_t *));
@@ -298,14 +431,23 @@ static void maketbl(wchar_t **list, int entries, wchar_t *separator)
 	for (lp = list, cnt = 0; cnt < entries; ++cnt, ++lp, ++t) {
 		coloff = 0;
 		p = *lp;
+<<<<<<< HEAD
 		while ((cols[coloff] = wcstok(p, separator, &wcstok_state)) != NULL) {
+=======
+		while ((cols[coloff] = local_wcstok(p, separator, greedy, &wcstok_state)) != NULL) {
+>>>>>>> master-vanilla
 			if (++coloff == maxcols) {
 				maxcols += DEFCOLS;
 				cols = xrealloc(cols, maxcols * sizeof(wchar_t *));
 				lens = xrealloc(lens, maxcols * sizeof(ssize_t));
 				/* zero fill only new memory */
+<<<<<<< HEAD
 				memset(lens + ((maxcols - DEFCOLS) * sizeof(ssize_t)), 0,
 				       DEFCOLS * sizeof(int));
+=======
+				memset(lens + (maxcols - DEFCOLS), 0,
+				       DEFCOLS * sizeof(*lens));
+>>>>>>> master-vanilla
 			}
 			p = NULL;
 		}
@@ -322,8 +464,13 @@ static void maketbl(wchar_t **list, int entries, wchar_t *separator)
 	for (t = tbl, cnt = 0; cnt < entries; ++cnt, ++t) {
 		for (coloff = 0; coloff < t->cols - 1; ++coloff) {
 			fputws(t->list[coloff], stdout);
+<<<<<<< HEAD
 			for (i = lens[coloff] - t->len[coloff] + 2; i > 0; i--)
 				putwchar(' ');
+=======
+			wprintf(L"%*s", lens[coloff] - t->len[coloff], "");
+			fputws(colsep, stdout);
+>>>>>>> master-vanilla
 		}
 		if (coloff < t->cols) {
 			fputws(t->list[coloff], stdout);
@@ -351,7 +498,17 @@ static int input(FILE *fp, int *maxlength, wchar_t ***list, int *entries)
 	if (!local_list)
 		local_list = xcalloc(maxentry, sizeof(wchar_t *));
 
+<<<<<<< HEAD
 	while (fgetws(buf, MAXLINELEN, fp)) {
+=======
+	while (1) {
+		if (fgetws(buf, MAXLINELEN, fp) == NULL) {
+			if (feof(fp))
+				break;
+			else
+				err(EXIT_FAILURE, _("read failed"));
+		}
+>>>>>>> master-vanilla
 		for (p = buf; *p && iswspace(*p); ++p)
 			;
 		if (!*p)
@@ -366,7 +523,11 @@ static int input(FILE *fp, int *maxlength, wchar_t ***list, int *entries)
 			continue;
 		}
 		lineno++;
+<<<<<<< HEAD
 		if (!feof(fp))
+=======
+		if (!feof(fp) && p)
+>>>>>>> master-vanilla
 			*p = '\0';
 		len = wcs_width(buf);	/* len = p - buf; */
 		if (*maxlength < len)
@@ -394,12 +555,21 @@ static wchar_t *mbs_to_wcs(const char *s)
 	n = mbstowcs((wchar_t *)0, s, 0);
 	if (n < 0)
 		return NULL;
+<<<<<<< HEAD
 	wcs = malloc((n + 1) * sizeof(wchar_t));
 	if (!wcs)
 		return NULL;
 	n = mbstowcs(wcs, s, n + 1);
 	if (n < 0)
 		return NULL;
+=======
+	wcs = xmalloc((n + 1) * sizeof(wchar_t));
+	n = mbstowcs(wcs, s, n + 1);
+	if (n < 0) {
+		free(wcs);
+		return NULL;
+	}
+>>>>>>> master-vanilla
 	return wcs;
 }
 #endif

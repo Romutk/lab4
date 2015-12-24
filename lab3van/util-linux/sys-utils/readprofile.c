@@ -13,6 +13,7 @@
  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *   GNU General Public License for more details.
  *
+<<<<<<< HEAD
  *   You should have received a copy of the GNU General Public License
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -20,6 +21,15 @@
 
 /*
  * 1999-02-22 Arkadiusz Mi∂kiewicz <misiek@pld.ORG.PL>
+=======
+ *   You should have received a copy of the GNU General Public License along
+ *   with this program; if not, write to the Free Software Foundation, Inc.,
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+/*
+ * 1999-02-22 Arkadiusz Mi≈õkiewicz <misiek@pld.ORG.PL>
+>>>>>>> master-vanilla
  * - added Native Language Support
  * 1999-09-01 Stephane Eranian <eranian@cello.hpl.hp.com>
  * - 64bit clean patch
@@ -41,6 +51,7 @@
  */
 
 #include <errno.h>
+<<<<<<< HEAD
 #include <stdio.h>
 #include <fcntl.h>
 #include <stdlib.h>
@@ -71,20 +82,60 @@ myopen(char *name, char *mode, int *flag) {
 		char *cmdline = xmalloc(len+6);
 		sprintf(cmdline, "zcat %s", name);
 		res = popen(cmdline,mode);
+=======
+#include <fcntl.h>
+#include <getopt.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/utsname.h>
+#include <unistd.h>
+
+#include "nls.h"
+#include "xalloc.h"
+#include "closestream.h"
+
+#define S_LEN 128
+
+/* These are the defaults */
+static char defaultmap[]="/boot/System.map";
+static char defaultpro[]="/proc/profile";
+
+static FILE *myopen(char *name, char *mode, int *flag)
+{
+	int len = strlen(name);
+
+	if (!strcmp(name + len - 3, ".gz")) {
+		FILE *res;
+		char *cmdline = xmalloc(len + 6);
+		sprintf(cmdline, "zcat %s", name);
+		res = popen(cmdline, mode);
+>>>>>>> master-vanilla
 		free(cmdline);
 		*flag = 1;
 		return res;
 	}
 	*flag = 0;
+<<<<<<< HEAD
 	return fopen(name,mode);
+=======
+	return fopen(name, mode);
+>>>>>>> master-vanilla
 }
 
 #ifndef BOOT_SYSTEM_MAP
 #define BOOT_SYSTEM_MAP "/boot/System.map-"
 #endif
 
+<<<<<<< HEAD
 static char *
 boot_uname_r_str(void) {
+=======
+static char *boot_uname_r_str(void)
+{
+>>>>>>> master-vanilla
 	struct utsname uname_info;
 	char *s;
 	size_t len;
@@ -98,6 +149,7 @@ boot_uname_r_str(void) {
 	return s;
 }
 
+<<<<<<< HEAD
 static void
 usage(void) {
 	fprintf(stderr, _(
@@ -138,11 +190,82 @@ main(int argc, char **argv) {
 	int popenMap;   /* flag to tell if popen() has been used */
 	int header_printed;
 
+=======
+static void __attribute__ ((__noreturn__))
+    usage(FILE * out)
+{
+	fputs(USAGE_HEADER, out);
+	fprintf(out, _(" %s [options]\n"), program_invocation_short_name);
+
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Display kernel profiling information.\n"), out);
+
+	fputs(USAGE_OPTIONS, out);
+	fprintf(out,
+	      _(" -m, --mapfile <mapfile>   (defaults: \"%s\" and\n"), defaultmap);
+	fprintf(out,
+	      _("                                      \"%s\")\n"), boot_uname_r_str());
+	fprintf(out,
+	      _(" -p, --profile <pro-file>  (default:  \"%s\")\n"), defaultpro);
+	fputs(_(" -M, --multiplier <mult>   set the profiling multiplier to <mult>\n"), out);
+	fputs(_(" -i, --info                print only info about the sampling step\n"), out);
+	fputs(_(" -v, --verbose             print verbose data\n"), out);
+	fputs(_(" -a, --all                 print all symbols, even if count is 0\n"), out);
+	fputs(_(" -b, --histbin             print individual histogram-bin counts\n"), out);
+	fputs(_(" -s, --counters            print individual counters within functions\n"), out);
+	fputs(_(" -r, --reset               reset all the counters (root only)\n"), out);
+	fputs(_(" -n, --no-auto             disable byte order auto-detection\n"), out);
+	fputs(USAGE_SEPARATOR, out);
+	fputs(USAGE_HELP, out);
+	fputs(USAGE_VERSION, out);
+	fprintf(out, USAGE_MAN_TAIL("readprofile(8)"));
+	exit(out == stderr ? EXIT_FAILURE : EXIT_SUCCESS);
+}
+
+int main(int argc, char **argv)
+{
+	FILE *map;
+	int proFd;
+	char *mapFile, *proFile, *mult = 0;
+	size_t len = 0, indx = 1;
+	unsigned long long add0 = 0;
+	unsigned int step;
+	unsigned int *buf, total, fn_len;
+	unsigned long long fn_add, next_add;	/* current and next address */
+	char fn_name[S_LEN], next_name[S_LEN];	/* current and next name */
+	char mode[8];
+	int c;
+	ssize_t rc;
+	int optAll = 0, optInfo = 0, optReset = 0, optVerbose = 0, optNative = 0;
+	int optBins = 0, optSub = 0;
+	char mapline[S_LEN];
+	int maplineno = 1;
+	int popenMap;		/* flag to tell if popen() has been used */
+	int header_printed;
+
+	static const struct option longopts[] = {
+		{"mapfile", required_argument, NULL, 'm'},
+		{"profile", required_argument, NULL, 'p'},
+		{"multiplier", required_argument, NULL, 'M'},
+		{"info", no_argument, NULL, 'i'},
+		{"verbose", no_argument, NULL, 'v'},
+		{"all", no_argument, NULL, 'a'},
+		{"histbin", no_argument, NULL, 'b'},
+		{"counters", no_argument, NULL, 's'},
+		{"reset", no_argument, NULL, 'r'},
+		{"no-auto", no_argument, NULL, 'n'},
+		{"version", no_argument, NULL, 'V'},
+		{"help", no_argument, NULL, 'h'},
+		{NULL, 0, 0, 0}
+	};
+
+>>>>>>> master-vanilla
 #define next (current^1)
 
 	setlocale(LC_ALL, "");
 	bindtextdomain(PACKAGE, LOCALEDIR);
 	textdomain(PACKAGE);
+<<<<<<< HEAD
 
 	prgname = argv[0];
 	proFile = defaultpro;
@@ -150,6 +273,15 @@ main(int argc, char **argv) {
 
 	while ((c = getopt(argc, argv, optstring)) != -1) {
 		switch(c) {
+=======
+	atexit(close_stdout);
+
+	proFile = defaultpro;
+	mapFile = defaultmap;
+
+	while ((c = getopt_long(argc, argv, "m:p:M:ivabsrnVh", longopts, NULL)) != -1) {
+		switch (c) {
+>>>>>>> master-vanilla
 		case 'm':
 			mapFile = optarg;
 			break;
@@ -181,26 +313,42 @@ main(int argc, char **argv) {
 			optVerbose++;
 			break;
 		case 'V':
+<<<<<<< HEAD
 			printf(_("%s (%s)\n"), prgname,
 			       PACKAGE_STRING);
 			exit(0);
 		default:
 			usage();
+=======
+			printf(UTIL_LINUX_VERSION);
+			return EXIT_SUCCESS;
+		case 'h':
+			usage(stdout);
+		default:
+			usage(stderr);
+>>>>>>> master-vanilla
 		}
 	}
 
 	if (optReset || mult) {
 		int multiplier, fd, to_write;
 
+<<<<<<< HEAD
 		/*
 		 * When writing the multiplier, if the length of the write is
 		 * not sizeof(int), the multiplier is not changed
 		 */
+=======
+		/* When writing the multiplier, if the length of the
+		 * write is not sizeof(int), the multiplier is not
+		 * changed. */
+>>>>>>> master-vanilla
 		if (mult) {
 			multiplier = strtoul(mult, 0, 10);
 			to_write = sizeof(int);
 		} else {
 			multiplier = 0;
+<<<<<<< HEAD
 			to_write = 1;	/* sth different from sizeof(int) */
 		}
 		/* try to become root, just in case */
@@ -261,15 +409,72 @@ main(int argc, char **argv) {
 					tmp = b[i];
 					b[i] = b[sizeof(*buf)-i-1];
 					b[sizeof(*buf)-i-1] = tmp;
+=======
+			/* sth different from sizeof(int) */
+			to_write = 1;
+		}
+		/* try to become root, just in case */
+		ignore_result( setuid(0) );
+		fd = open(defaultpro, O_WRONLY);
+		if (fd < 0)
+			err(EXIT_FAILURE, "%s", defaultpro);
+		if (write(fd, &multiplier, to_write) != to_write)
+			err(EXIT_FAILURE, _("error writing %s"), defaultpro);
+		close(fd);
+		exit(EXIT_SUCCESS);
+	}
+
+	/* Use an fd for the profiling buffer, to skip stdio overhead */
+	if (((proFd = open(proFile, O_RDONLY)) < 0)
+	    || ((int)(len = lseek(proFd, 0, SEEK_END)) < 0)
+	    || (lseek(proFd, 0, SEEK_SET) < 0))
+		err(EXIT_FAILURE, "%s", proFile);
+
+	buf = xmalloc(len);
+
+	rc = read(proFd, buf, len);
+	if (rc < 0 || (size_t) rc != len)
+		err(EXIT_FAILURE, "%s", proFile);
+	close(proFd);
+
+	if (!optNative) {
+		int entries = len / sizeof(*buf);
+		int big = 0, small = 0;
+		unsigned *p;
+		size_t i;
+
+		for (p = buf + 1; p < buf + entries; p++) {
+			if (*p & ~0U << (sizeof(*buf) * 4))
+				big++;
+			if (*p & ((1 << (sizeof(*buf) * 4)) - 1))
+				small++;
+		}
+		if (big > small) {
+			warnx(_("Assuming reversed byte order. "
+				"Use -n to force native byte order."));
+			for (p = buf; p < buf + entries; p++)
+				for (i = 0; i < sizeof(*buf) / 2; i++) {
+					unsigned char *b = (unsigned char *)p;
+					unsigned char tmp;
+					tmp = b[i];
+					b[i] = b[sizeof(*buf) - i - 1];
+					b[sizeof(*buf) - i - 1] = tmp;
+>>>>>>> master-vanilla
 				}
 		}
 	}
 
 	step = buf[0];
 	if (optInfo) {
+<<<<<<< HEAD
 		printf(_("Sampling_step: %i\n"), step);
 		exit(0);
 	} 
+=======
+		printf(_("Sampling_step: %u\n"), step);
+		exit(EXIT_SUCCESS);
+	}
+>>>>>>> master-vanilla
 
 	total = 0;
 
@@ -278,6 +483,7 @@ main(int argc, char **argv) {
 		mapFile = boot_uname_r_str();
 		map = myopen(mapFile, "r", &popenMap);
 	}
+<<<<<<< HEAD
 	if (map == NULL) {
 		int errsv = errno;
 		fprintf(stderr, "%s: ", prgname);
@@ -294,21 +500,38 @@ main(int argc, char **argv) {
 		}
 		/* only elf works like this */
 		if (!strcmp(fn_name,"_stext") || !strcmp(fn_name,"__stext")) {
+=======
+	if (map == NULL)
+		err(EXIT_FAILURE, "%s", mapFile);
+
+	while (fgets(mapline, S_LEN, map)) {
+		if (sscanf(mapline, "%llx %s %s", &fn_add, mode, fn_name) != 3)
+			errx(EXIT_FAILURE, _("%s(%i): wrong map line"), mapFile,
+			     maplineno);
+		/* only elf works like this */
+		if (!strcmp(fn_name, "_stext") || !strcmp(fn_name, "__stext")) {
+>>>>>>> master-vanilla
 			add0 = fn_add;
 			break;
 		}
 		maplineno++;
 	}
 
+<<<<<<< HEAD
 	if (!add0) {
 		fprintf(stderr,_("%s: can't find \"_stext\" in %s\n"),
 			prgname, mapFile);
 		exit(1);
 	}
+=======
+	if (!add0)
+		errx(EXIT_FAILURE, _("can't find \"_stext\" in %s"), mapFile);
+>>>>>>> master-vanilla
 
 	/*
 	 * Main loop.
 	 */
+<<<<<<< HEAD
 	while (fgets(mapline,S_LEN,map)) {
 		unsigned int this=0;
 		int done = 0;
@@ -318,6 +541,15 @@ main(int argc, char **argv) {
 				prgname,mapFile, maplineno);
 			exit(1);
 		}
+=======
+	while (fgets(mapline, S_LEN, map)) {
+		unsigned int this = 0;
+		int done = 0;
+
+		if (sscanf(mapline, "%llx %s %s", &next_add, mode, next_name) != 3)
+			errx(EXIT_FAILURE, _("%s(%i): wrong map line"), mapFile,
+			     maplineno);
+>>>>>>> master-vanilla
 		header_printed = 0;
 
 		/* the kernel only profiles up to _etext */
@@ -325,9 +557,16 @@ main(int argc, char **argv) {
 		    !strcmp(next_name, "__etext"))
 			done = 1;
 		else {
+<<<<<<< HEAD
 			/* ignore any LEADING (before a '[tT]' symbol is found)
 			   Absolute symbols and __init_end because some
 			   architectures place it before .text section */
+=======
+			/* ignore any LEADING (before a '[tT]' symbol
+			 * is found) Absolute symbols and __init_end
+			 * because some architectures place it before
+			 * .text section */
+>>>>>>> master-vanilla
 			if ((*mode == 'A' || *mode == '?')
 			    && (total == 0 || !strcmp(next_name, "__init_end")))
 				continue;
@@ -336,6 +575,7 @@ main(int argc, char **argv) {
 				break;	/* only text is profiled */
 		}
 
+<<<<<<< HEAD
 		if (indx >= len / sizeof(*buf)) {
 			fprintf(stderr, _("%s: profile address out of range. "
 					  "Wrong map file?\n"), prgname);
@@ -349,6 +589,20 @@ main(int argc, char **argv) {
 					header_printed = 1;
 				}
 				printf ("\t%llx\t%u\n", (indx - 1)*step + add0, buf[indx]);
+=======
+		if (indx >= len / sizeof(*buf))
+			errx(EXIT_FAILURE,
+			     _("profile address out of range. Wrong map file?"));
+
+		while (indx < (next_add - add0) / step) {
+			if (optBins && (buf[indx] || optAll)) {
+				if (!header_printed) {
+					printf("%s:\n", fn_name);
+					header_printed = 1;
+				}
+				printf("\t%llx\t%u\n", (indx - 1) * step + add0,
+				       buf[indx]);
+>>>>>>> master-vanilla
 			}
 			this += buf[indx++];
 		}
@@ -356,6 +610,7 @@ main(int argc, char **argv) {
 
 		if (optBins) {
 			if (optVerbose || this > 0)
+<<<<<<< HEAD
 				printf ("  total\t\t\t\t%u\n", this);
 		} else if ((this || optAll) &&
 			   (fn_len = next_add-fn_add) != 0) {
@@ -373,6 +628,25 @@ main(int argc, char **argv) {
 					unsigned long long addr;
 
 					addr = (scan - 1)*step + add0;
+=======
+				printf("  total\t\t\t\t%u\n", this);
+		} else if ((this || optAll) &&
+			   (fn_len = next_add - fn_add) != 0) {
+			if (optVerbose)
+				printf("%016llx %-40s %6u %8.4f\n", fn_add,
+				       fn_name, this, this / (double)fn_len);
+			else
+				printf("%6u %-40s %8.4f\n",
+				       this, fn_name, this / (double)fn_len);
+			if (optSub) {
+				unsigned long long scan;
+
+				for (scan = (fn_add - add0) / step + 1;
+				     scan < (next_add - add0) / step;
+				     scan++) {
+					unsigned long long addr;
+					addr = (scan - 1) * step + add0;
+>>>>>>> master-vanilla
 					printf("\t%#llx\t%s+%#llx\t%u\n",
 					       addr, fn_name, addr - fn_add,
 					       buf[scan]);
@@ -381,7 +655,11 @@ main(int argc, char **argv) {
 		}
 
 		fn_add = next_add;
+<<<<<<< HEAD
 		strcpy(fn_name,next_name);
+=======
+		strcpy(fn_name, next_name);
+>>>>>>> master-vanilla
 
 		maplineno++;
 		if (done)
@@ -389,6 +667,7 @@ main(int argc, char **argv) {
 	}
 
 	/* clock ticks, out of kernel text - probably modules */
+<<<<<<< HEAD
 	printf("%6i %s\n", buf[len/sizeof(*buf)-1], "*unknown*");
 
 	/* trailer */
@@ -401,4 +680,18 @@ main(int argc, char **argv) {
 	
 	popenMap ? pclose(map) : fclose(map);
 	exit(0);
+=======
+	printf("%6u %s\n", buf[len / sizeof(*buf) - 1], "*unknown*");
+
+	/* trailer */
+	if (optVerbose)
+		printf("%016x %-40s %6u %8.4f\n",
+		       0, "total", total, total / (double)(fn_add - add0));
+	else
+		printf("%6u %-40s %8.4f\n",
+		       total, _("total"), total / (double)(fn_add - add0));
+
+	popenMap ? pclose(map) : fclose(map);
+	exit(EXIT_SUCCESS);
+>>>>>>> master-vanilla
 }

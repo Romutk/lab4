@@ -9,7 +9,11 @@
     <title>libblkid Reference Manual</title>
     <releaseinfo>for libblkid version &version;</releaseinfo>
     <copyright>
+<<<<<<< HEAD
       <year>2009-2011</year>
+=======
+      <year>2009-2013</year>
+>>>>>>> master-vanilla
       <holder>Karel Zak &lt;kzak@redhat.com&gt;</holder>
     </copyright>
   </bookinfo>
@@ -50,6 +54,10 @@ available from ftp://ftp.kernel.org/pub/linux/utils/util-linux/.
   </part>
   <part>
     <title>Low-level</title>
+<<<<<<< HEAD
+=======
+    <xi:include href="xml/init.xml"/>
+>>>>>>> master-vanilla
     <xi:include href="xml/lowprobe.xml"/>
     <xi:include href="xml/lowprobe-tags.xml"/>
     <xi:include href="xml/superblocks.xml"/>
@@ -62,7 +70,11 @@ available from ftp://ftp.kernel.org/pub/linux/utils/util-linux/.
     <xi:include href="xml/misc.xml"/>
   </part>
 
+<<<<<<< HEAD
   <index id="api-index-full">
+=======
+  <index id="api-index">
+>>>>>>> master-vanilla
     <title>API Index</title>
     <xi:include href="xml/api-index-full.xml"><xi:fallback /></xi:include>
   </index>

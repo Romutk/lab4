@@ -1,11 +1,19 @@
 .\" Copyright 1992, 1993 Rickard E. Faith (faith@cs.unc.edu)
 .\" May be distributed under the GNU General Public License
+<<<<<<< HEAD
 .TH FDFORMAT 8 "July 2011" "util-linux" "System Administration"
+=======
+.TH FDFORMAT 8 "July 2014" "util-linux" "System Administration"
+>>>>>>> master-vanilla
 .SH NAME
 fdformat \- low-level format a floppy disk
 .SH SYNOPSIS
 .B fdformat
+<<<<<<< HEAD
 .RI [ options ] " device"
+=======
+.RI [options] " device"
+>>>>>>> master-vanilla
 .SH DESCRIPTION
 .B fdformat
 does a low-level format on a floppy disk.
@@ -45,14 +53,33 @@ autodetected earlier.  In this case, use
 to load the disk parameters.
 .SH OPTIONS
 .TP
+<<<<<<< HEAD
+=======
+\fB\-f\fR, \fB\-\-from\fR \fIN\fR
+Start at the track \fIN\fR (default is 0).
+.TP
+\fB\-t\fR, \fB\-\-to\fR \fIN\fR
+Stop at the track \fIN\fR.
+.TP
+\fB\-r\fR, \fB\-\-repair\fR \fIN\fR
+Try to repair tracks failed during the verification (max \fIN\fR retries).
+.TP
+>>>>>>> master-vanilla
 \fB\-n\fR, \fB\-\-no\-verify\fR
 Skip the verification that is normally performed after the formatting.
 .TP
 \fB\-V\fR, \fB\-\-version\fR
+<<<<<<< HEAD
 Output version information and exit.
 .TP
 \fB\-h\fR, \fB\-\-help\fR
 Display help and exit.
+=======
+Display version information and exit.
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Display help text and exit.
+>>>>>>> master-vanilla
 .SH "SEE ALSO"
 .BR fd (4),
 .BR setfdprm (8),

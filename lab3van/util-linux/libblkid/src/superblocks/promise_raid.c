@@ -27,6 +27,7 @@ struct promise_metadata {
 static int probe_pdcraid(blkid_probe pr,
 		const struct blkid_idmag *mag __attribute__((__unused__)))
 {
+<<<<<<< HEAD
 	unsigned int i;
 	static unsigned int sectors[] = {
 		63, 255, 256, 16, 399, 0
@@ -42,23 +43,58 @@ static int probe_pdcraid(blkid_probe pr,
 		struct promise_metadata *pdc;
 
 		off = ((pr->size / 0x200) - sectors[i]) * 0x200;
+=======
+	size_t i;
+	static unsigned int sectors[] = {
+	  63, 255, 256, 16, 399, 591, 675, 735, 911, 974, 991, 951, 3087
+	};
+	uint64_t nsectors;
+
+	if (pr->size < 0x40000)
+		return 1;
+	if (!S_ISREG(pr->mode) && !blkid_probe_is_wholedisk(pr))
+		return 1;
+
+	nsectors = pr->size >> 9;
+
+	for (i = 0; i < ARRAY_SIZE(sectors); i++) {
+		uint64_t off;
+		struct promise_metadata *pdc;
+
+		if (nsectors < sectors[i])
+			return 1;
+
+		off = (nsectors - sectors[i]) << 9;
+>>>>>>> master-vanilla
 		pdc = (struct promise_metadata *)
 				blkid_probe_get_buffer(pr,
 					off,
 					sizeof(struct promise_metadata));
 		if (!pdc)
+<<<<<<< HEAD
 			return -1;
+=======
+			return errno ? -errno : 1;
+>>>>>>> master-vanilla
 
 		if (memcmp(pdc->sig, PDC_SIGNATURE,
 				sizeof(PDC_SIGNATURE) - 1) == 0) {
 
 			if (blkid_probe_set_magic(pr, off, sizeof(pdc->sig),
 						(unsigned char *) pdc->sig))
+<<<<<<< HEAD
 				return -1;
 			return 0;
 		}
 	}
 	return -1;
+=======
+				return 1;
+			return 0;
+		}
+	}
+	return 1;
+>>>>>>> master-vanilla
 }
 
 const struct blkid_idinfo pdcraid_idinfo = {

@@ -36,9 +36,16 @@
 look \- display lines beginning with a given string
 .SH SYNOPSIS
 .B look
+<<<<<<< HEAD
 .RI [ options ] " string " [ file ]
 .SH DESCRIPTION
 The 
+=======
+[options]
+.IR "string " [ file ]
+.SH DESCRIPTION
+The
+>>>>>>> master-vanilla
 .B look
 utility displays any lines in
 .I file
@@ -48,7 +55,13 @@ As
 .B look
 performs a binary search, the lines in
 .I file
+<<<<<<< HEAD
 must be sorted (where sort(1) got the same options
+=======
+must be sorted (where
+.BR sort (1)
+was given the same options
+>>>>>>> master-vanilla
 .BR "\-d " and/or " \-f " that
 .B look
 is invoked with).
@@ -77,11 +90,19 @@ Specify a string termination character, i.e. only the characters
 in \fIstring\fR up to and including the first occurrence of \fIcharacter\fR
 are compared.
 .TP
+<<<<<<< HEAD
 .BR \-h , " \-\-help"
 Display help text and exit.
 .TP
 .BR \-V , " \-\-version"
 Output version information and exit.
+=======
+.BR \-V , " \-\-version"
+Display version information and exit.
+.TP
+.BR \-h , " \-\-help"
+Display help text and exit.
+>>>>>>> master-vanilla
 .PP
 The
 .B look
@@ -95,7 +116,10 @@ look -t: root:foobar /tmp/look.dict
 .nf
 .RE
 .SH FILES
+<<<<<<< HEAD
 .IX Header "FILES"
+=======
+>>>>>>> master-vanilla
 .IP "\fB/usr/share/dict/words\fR" 4
 the dictionary
 .IP "\fB/usr/share/dict/web2\fR" 4
@@ -105,8 +129,13 @@ the alternative dictionary
 .BR sort (1)
 .SH COMPATIBILITY
 The original manual page stated that tabs and blank characters participated
+<<<<<<< HEAD
 in comparisons when the alphanum option was specified.  This was incorrect,
 and the current man page matches the historic implementation.
+=======
+in comparisons when the \fB\-\-alphanum\fR option was specified.  This was
+incorrect, and the current man page matches the historic implementation.
+>>>>>>> master-vanilla
 .SH HISTORY
 The
 .B look

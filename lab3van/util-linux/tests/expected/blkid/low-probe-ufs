@@ -1,3 +1,8 @@
 ID_FS_TYPE=ufs
 ID_FS_USAGE=filesystem
+<<<<<<< HEAD
+=======
+ID_FS_UUID=4b0e640aec56ac70
+ID_FS_UUID_ENC=4b0e640aec56ac70
+>>>>>>> master-vanilla
 ID_FS_VERSION=2

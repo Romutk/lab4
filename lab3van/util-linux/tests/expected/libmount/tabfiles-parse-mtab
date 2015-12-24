@@ -42,7 +42,11 @@ fstype: ext4
 optstr: rw,noatime
 VFS-optstr: rw,noatime
 ------ fs:
+<<<<<<< HEAD
 source: (null)
+=======
+source: none
+>>>>>>> master-vanilla
 target: /proc/sys/fs/binfmt_misc
 fstype: binfmt_misc
 optstr: rw
@@ -66,3 +70,13 @@ target: /var/lib/nfs/rpc_pipefs
 fstype: rpc_pipefs
 optstr: rw
 VFS-optstr: rw
+<<<<<<< HEAD
+=======
+------ fs:
+source: none
+target: /var/tmp/																																																																																																																																																																																																																																																															/																																																																																																																																																																																																																																																															/																																																																																																																																																																																																																																																															/																																																																																																																																																																																																																																																															/																																																																																																																																																																																																																																																															/																																																																																																																																																																																																																																																															/																																																																																																																																																																																																																																																															/																																																																																																																																																																																																																																																															/																																																																																																																																																																																																																																																															/																																																																																																																																																																																																																																																															/																																																																																																																																																																																																																																																															/																																																																																																																																																																																																																																																															/																																																																																																																																																																																																																																																															/																																																																																																																																																																																																																																																															/																																																																																																																																																																																																																																																															
+fstype: overlay
+optstr: rw,relatime,lowerdir=lower,upperdir=upper,workdir=work
+VFS-optstr: rw,relatime
+FS-opstr: lowerdir=lower,upperdir=upper,workdir=work
+>>>>>>> master-vanilla

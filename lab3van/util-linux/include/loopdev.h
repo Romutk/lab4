@@ -23,6 +23,17 @@
 #define LOOP_GET_STATUS64	0x4C05
 /* #define LOOP_CHANGE_FD	0x4C06 */
 #define LOOP_SET_CAPACITY	0x4C07
+<<<<<<< HEAD
+=======
+#define LOOP_SET_DIRECT_IO	0x4C08
+
+/* /dev/loop-control interface */
+#ifndef LOOP_CTL_ADD
+# define LOOP_CTL_ADD		0x4C80
+# define LOOP_CTL_REMOVE	0x4C81
+# define LOOP_CTL_GET_FREE	0x4C82
+#endif
+>>>>>>> master-vanilla
 
 /*
  * loop_info.lo_flags
@@ -30,14 +41,24 @@
 enum {
 	LO_FLAGS_READ_ONLY  = 1,
 	LO_FLAGS_USE_AOPS   = 2,
+<<<<<<< HEAD
 	LO_FLAGS_AUTOCLEAR  = 4, /* New in 2.6.25 */
+=======
+	LO_FLAGS_AUTOCLEAR  = 4,	/* kernel >= 2.6.25 */
+	LO_FLAGS_PARTSCAN   = 8,	/* kernel >= 3.2 */
+	LO_FLAGS_DIRECT_IO  = 16,	/* kernel >= 4.2 */
+>>>>>>> master-vanilla
 };
 
 #define LO_NAME_SIZE	64
 #define LO_KEY_SIZE	32
 
 /*
+<<<<<<< HEAD
  * Linux LOOP_{SET,GET}_STATUS64 ioclt struct
+=======
+ * Linux LOOP_{SET,GET}_STATUS64 ioctl struct
+>>>>>>> master-vanilla
  */
 struct loop_info64 {
 	uint64_t	lo_device;
@@ -60,6 +81,10 @@ struct loop_info64 {
 
 struct loopdev_iter {
 	FILE		*proc;		/* /proc/partitions */
+<<<<<<< HEAD
+=======
+	DIR		*sysblock;	/* /sys/block */
+>>>>>>> master-vanilla
 	int		ncur;		/* current position */
 	int		*minors;	/* ary of minor numbers (when scan whole /dev) */
 	int		nminors;	/* number of items in *minors */
@@ -88,12 +113,22 @@ struct loopdev_cxt {
 	int		flags;		/* LOOPDEV_FL_* flags */
 	unsigned int	has_info:1;	/* .info contains data */
 	unsigned int	extra_check:1;	/* unusual stuff for iterator */
+<<<<<<< HEAD
+=======
+	unsigned int	info_failed:1;	/* LOOP_GET_STATUS ioctl failed */
+	unsigned int    control_ok:1;	/* /dev/loop-control success */
+>>>>>>> master-vanilla
 
 	struct sysfs_cxt	sysfs;	/* pointer to /sys/dev/block/<maj:min>/ */
 	struct loop_info64	info;	/* for GET/SET ioctl */
 	struct loopdev_iter	iter;	/* scans /sys or /dev for used/free devices */
 };
 
+<<<<<<< HEAD
+=======
+#define UL_LOOPDEVCXT_EMPTY { .fd = -1, .sysfs = UL_SYSFSCXT_EMPTY }
+
+>>>>>>> master-vanilla
 /*
  * loopdev_cxt.flags
  */
@@ -103,14 +138,28 @@ enum {
 	LOOPDEV_FL_OFFSET	= (1 << 4),
 	LOOPDEV_FL_NOSYSFS	= (1 << 5),
 	LOOPDEV_FL_NOIOCTL	= (1 << 6),
+<<<<<<< HEAD
 	LOOPDEV_FL_DEVSUBDIR	= (1 << 7)
+=======
+	LOOPDEV_FL_DEVSUBDIR	= (1 << 7),
+	LOOPDEV_FL_CONTROL	= (1 << 8),	/* system with /dev/loop-control */
+	LOOPDEV_FL_SIZELIMIT	= (1 << 9)
+>>>>>>> master-vanilla
 };
 
 /*
  * High-level
  */
+<<<<<<< HEAD
 extern int is_loopdev(const char *device);
 extern int loopdev_is_autoclear(const char *device);
+=======
+extern int loopmod_supports_partscan(void);
+
+extern int is_loopdev(const char *device);
+extern int loopdev_is_autoclear(const char *device);
+
+>>>>>>> master-vanilla
 extern char *loopdev_get_backing_file(const char *device);
 extern int loopdev_is_used(const char *device, const char *filename,
 			   uint64_t offset, int flags);
@@ -118,10 +167,15 @@ extern char *loopdev_find_by_backing_file(const char *filename,
 					  uint64_t offset, int flags);
 extern int loopcxt_find_unused(struct loopdev_cxt *lc);
 extern int loopdev_delete(const char *device);
+<<<<<<< HEAD
+=======
+extern int loopdev_count_by_backing_file(const char *filename, char **loopdev);
+>>>>>>> master-vanilla
 
 /*
  * Low-level
  */
+<<<<<<< HEAD
 extern int loopcxt_init(struct loopdev_cxt *lc, int flags);
 extern void loopcxt_deinit(struct loopdev_cxt *lc);
 
@@ -129,6 +183,20 @@ extern int loopcxt_set_device(struct loopdev_cxt *lc, const char *device);
 extern char *loopcxt_strdup_device(struct loopdev_cxt *lc);
 extern const char *loopcxt_get_device(struct loopdev_cxt *lc);
 extern struct sysfs_cxt *loopcxt_get_sysfs(struct loopdev_cxt *lc);
+=======
+extern int loopcxt_init(struct loopdev_cxt *lc, int flags)
+				__attribute__ ((warn_unused_result));
+extern void loopcxt_deinit(struct loopdev_cxt *lc);
+
+extern int loopcxt_set_device(struct loopdev_cxt *lc, const char *device)
+				__attribute__ ((warn_unused_result));
+extern int loopcxt_has_device(struct loopdev_cxt *lc);
+extern int loopcxt_add_device(struct loopdev_cxt *lc);
+extern char *loopcxt_strdup_device(struct loopdev_cxt *lc);
+extern const char *loopcxt_get_device(struct loopdev_cxt *lc);
+extern struct sysfs_cxt *loopcxt_get_sysfs(struct loopdev_cxt *lc);
+extern struct loop_info64 *loopcxt_get_info(struct loopdev_cxt *lc);
+>>>>>>> master-vanilla
 
 extern int loopcxt_get_fd(struct loopdev_cxt *lc);
 extern int loopcxt_set_fd(struct loopdev_cxt *lc, int fd, int mode);
@@ -139,11 +207,17 @@ extern int loopcxt_next(struct loopdev_cxt *lc);
 
 extern int loopcxt_setup_device(struct loopdev_cxt *lc);
 extern int loopcxt_delete_device(struct loopdev_cxt *lc);
+<<<<<<< HEAD
+=======
+extern int loopcxt_set_capacity(struct loopdev_cxt *lc);
+extern int loopcxt_set_dio(struct loopdev_cxt *lc, unsigned long use_dio);
+>>>>>>> master-vanilla
 
 int loopcxt_set_offset(struct loopdev_cxt *lc, uint64_t offset);
 int loopcxt_set_sizelimit(struct loopdev_cxt *lc, uint64_t sizelimit);
 int loopcxt_set_flags(struct loopdev_cxt *lc, uint32_t flags);
 int loopcxt_set_backing_file(struct loopdev_cxt *lc, const char *filename);
+<<<<<<< HEAD
 int loopcxt_set_encryption(struct loopdev_cxt *lc,
                            const char *encryption,
                            const char *password);
@@ -153,8 +227,31 @@ extern int loopcxt_get_offset(struct loopdev_cxt *lc, uint64_t *offset);
 extern int loopcxt_get_sizelimit(struct loopdev_cxt *lc, uint64_t *size);
 extern int loopcxt_is_autoclear(struct loopdev_cxt *lc);
 extern int loopcxt_is_readonly(struct loopdev_cxt *lc);
+=======
+
+extern char *loopcxt_get_backing_file(struct loopdev_cxt *lc);
+extern int loopcxt_get_backing_devno(struct loopdev_cxt *lc, dev_t *devno);
+extern int loopcxt_get_backing_inode(struct loopdev_cxt *lc, ino_t *ino);
+extern int loopcxt_get_offset(struct loopdev_cxt *lc, uint64_t *offset);
+extern int loopcxt_get_sizelimit(struct loopdev_cxt *lc, uint64_t *size);
+extern int loopcxt_get_encrypt_type(struct loopdev_cxt *lc, uint32_t *type);
+extern const char *loopcxt_get_crypt_name(struct loopdev_cxt *lc);
+extern int loopcxt_is_autoclear(struct loopdev_cxt *lc);
+extern int loopcxt_is_readonly(struct loopdev_cxt *lc);
+extern int loopcxt_is_dio(struct loopdev_cxt *lc);
+extern int loopcxt_is_partscan(struct loopdev_cxt *lc);
+>>>>>>> master-vanilla
 extern int loopcxt_find_by_backing_file(struct loopdev_cxt *lc,
 				const char *filename,
                                 uint64_t offset, int flags);
 
+<<<<<<< HEAD
+=======
+extern int loopcxt_is_used(struct loopdev_cxt *lc,
+                    struct stat *st,
+                    const char *backing_file,
+                    uint64_t offset,
+                    int flags);
+
+>>>>>>> master-vanilla
 #endif /* UTIL_LINUX_LOOPDEV_H */

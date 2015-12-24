@@ -15,16 +15,31 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
+<<<<<<< HEAD
 TS_TOPDIR="$(dirname $0)/../.."
+=======
+TS_TOPDIR="${0%/*}/../.."
+>>>>>>> master-vanilla
 TS_DESC="remount"
 
 . $TS_TOPDIR/functions.sh
 ts_init "$*"
+<<<<<<< HEAD
 ts_skip_nonroot
+=======
+
+ts_check_test_command "$TS_CMD_MOUNT"
+ts_check_test_command "$TS_CMD_FINDMNT"
+
+ts_skip_nonroot
+ts_check_losetup
+ts_check_prog "mkfs.ext2"
+>>>>>>> master-vanilla
 
 # mountpoint
 [ -d $TS_MOUNTPOINT ] || mkdir -p $TS_MOUNTPOINT
 
+<<<<<<< HEAD
 DEVICE=$(ts_device_init)
 [ "$?" == 0 ] || ts_die "Cannot init device"
 
@@ -47,6 +62,28 @@ $TS_CMD_FINDMNT --kernel --target "$TS_MOUNTPOINT" --options "ro" &> /dev/null
 
 ts_device_deinit $DEVICE
 
+=======
+ts_device_init
+DEVICE=$TS_LODEV
+
+mkfs.ext2 $DEVICE &> /dev/null || ts_die "Cannot make ext2 on $DEVICE"
+
+# mount read-write
+$TS_CMD_MOUNT $DEVICE $TS_MOUNTPOINT || ts_die "Cannot mount $TS_MOUNTPOINT"
+
+# check the mount
+egrep -q "^$DEVICE $TS_MOUNTPOINT" /etc/mtab \
+ || ts_die "Cannot find $TS_MOUNTPOINT in /etc/mtab"
+
+# remount
+$TS_CMD_MOUNT -o remount,ro $TS_MOUNTPOINT \
+ || ts_die "Cannot remount $TS_MOUNTPOINT"
+
+# check the remount
+$TS_CMD_FINDMNT --kernel --mountpoint "$TS_MOUNTPOINT" --options "ro" &> /dev/null
+[ "$?" == "0" ] || ts_die "Cannot find read-only in $TS_MOUNTPOINT in /proc/self/mountinfo"
+
+>>>>>>> master-vanilla
 ts_log "Success"
 ts_finalize
 

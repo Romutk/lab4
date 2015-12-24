@@ -14,17 +14,33 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
+<<<<<<< HEAD
 TS_TOPDIR="$(dirname $0)/../.."
+=======
+TS_TOPDIR="${0%/*}/../.."
+>>>>>>> master-vanilla
 TS_DESC="mkfs checksums"
 
 . $TS_TOPDIR/functions.sh
 ts_init "$*"
+<<<<<<< HEAD
 ts_skip_nonroot
 
 set -o pipefail
 
 IMAGE="$TS_OUTDIR/${TS_TESTNAME}-loop.img"
 DEVICE=$(ts_device_init)
+=======
+
+ts_check_test_command "$TS_CMD_MKMINIX"
+
+ts_skip_nonroot
+ts_check_losetup
+
+IMAGE="$TS_OUTDIR/${TS_TESTNAME}-loop.img"
+ts_device_init
+DEVICE=$TS_LODEV
+>>>>>>> master-vanilla
 
 ts_log "create minix fs"
 $TS_CMD_MKMINIX $DEVICE 2>&1 >> $TS_OUTPUT
@@ -32,6 +48,9 @@ $TS_CMD_MKMINIX $DEVICE 2>&1 >> $TS_OUTPUT
 ts_log "fsck minix fs"
 $TS_CMD_FSCKMINIX $DEVICE 2>&1 >> $TS_OUTPUT
 
+<<<<<<< HEAD
 ts_device_deinit $DEVICE
+=======
+>>>>>>> master-vanilla
 ts_finalize
 

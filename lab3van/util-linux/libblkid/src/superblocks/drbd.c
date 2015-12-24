@@ -27,7 +27,12 @@
  * user/drbdmeta.c
  * We only support v08 for now
  */
+<<<<<<< HEAD
 #define DRBD_MD_MAGIC_08 (DRBD_MAGIC+4)
+=======
+#define DRBD_MD_MAGIC_08         (DRBD_MAGIC+4)
+#define DRBD_MD_MAGIC_84_UNCLEAN (DRBD_MAGIC+5)
+>>>>>>> master-vanilla
 
 /*
  * drbd/linux/drbd.h
@@ -74,17 +79,29 @@ static int probe_drbd(blkid_probe pr,
 
 	/* Small devices cannot be drbd (?) */
 	if (pr->size < 0x10000)
+<<<<<<< HEAD
 		return -1;
+=======
+		return 1;
+>>>>>>> master-vanilla
 
 	md = (struct md_on_disk_08 *)
 			blkid_probe_get_buffer(pr,
 					off,
 					sizeof(struct md_on_disk_08));
 	if (!md)
+<<<<<<< HEAD
 		return -1;
 
 	if (be32_to_cpu(md->magic) != DRBD_MD_MAGIC_08)
 		return -1;
+=======
+		return errno ? -errno : 1;
+
+	if (be32_to_cpu(md->magic) != DRBD_MD_MAGIC_08 &&
+			be32_to_cpu(md->magic) != DRBD_MD_MAGIC_84_UNCLEAN)
+		return 1;
+>>>>>>> master-vanilla
 
 	/*
 	 * DRBD does not have "real" uuids; the following resembles DRBD's
@@ -100,7 +117,11 @@ static int probe_drbd(blkid_probe pr,
 				off + offsetof(struct md_on_disk_08, magic),
 				sizeof(md->magic),
 				(unsigned char *) &md->magic))
+<<<<<<< HEAD
 		return -1;
+=======
+		return 1;
+>>>>>>> master-vanilla
 
 	return 0;
 }

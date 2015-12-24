@@ -18,7 +18,10 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <stdlib.h>
+<<<<<<< HEAD
 #include <blkid.h>
+=======
+>>>>>>> master-vanilla
 #include <getopt.h>
 
 #ifdef HAVE_LIBUUID
@@ -26,14 +29,25 @@
 #endif
 
 #include "c.h"
+<<<<<<< HEAD
 #include "writeall.h"
 #include "swapheader.h"
 #include "strutils.h"
 #include "nls.h"
+=======
+#include "nls.h"
+#include "all-io.h"
+#include "strutils.h"
+#include "closestream.h"
+
+#include "swapheader.h"
+#include "swapprober.h"
+>>>>>>> master-vanilla
 
 #define SWAP_UUID_OFFSET	(offsetof(struct swap_header_v1_2, uuid))
 #define SWAP_LABEL_OFFSET	(offsetof(struct swap_header_v1_2, volume_name))
 
+<<<<<<< HEAD
 /*
  * Returns new libblkid prober. This function call exit() on error.
  */
@@ -79,6 +93,8 @@ static blkid_probe get_swap_prober(const char *devname)
 	return NULL;
 }
 
+=======
+>>>>>>> master-vanilla
 /* Print the swap partition information */
 static int print_info(blkid_probe pr)
 {
@@ -100,7 +116,11 @@ static int change_info(const char *devname, const char *label, const char *uuid)
 
 	fd = open(devname, O_RDWR);
 	if (fd < 0) {
+<<<<<<< HEAD
 		warn(_("%s: failed to open"), devname);
+=======
+		warn(_("cannot open %s"), devname);
+>>>>>>> master-vanilla
 		goto err;
 	}
 #ifdef HAVE_LIBUUID
@@ -143,7 +163,14 @@ static int change_info(const char *devname, const char *label, const char *uuid)
 		}
 	}
 
+<<<<<<< HEAD
 	close(fd);
+=======
+	if (close_fd(fd) != 0) {
+		warn(_("write failed: %s"), devname);
+		return -1;
+	}
+>>>>>>> master-vanilla
 	return 0;
 err:
 	if (fd >= 0)
@@ -153,6 +180,7 @@ err:
 
 static void __attribute__((__noreturn__)) usage(FILE *out)
 {
+<<<<<<< HEAD
 	fprintf(out, _("Usage: %s [options] <device>\n\nOptions:\n"),
 			program_invocation_short_name);
 
@@ -163,6 +191,22 @@ static void __attribute__((__noreturn__)) usage(FILE *out)
 
 	fprintf(out, _("\nFor more information see swaplabel(8).\n"));
 
+=======
+	fputs(USAGE_HEADER, out);
+	fprintf(out, _(" %s [options] <device>\n"),
+		program_invocation_short_name);
+
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Display or change the label or UUID of a swap area.\n"), out);
+
+	fputs(USAGE_OPTIONS, out);
+	fputs(_(" -L, --label <label> specify a new label\n"
+		" -U, --uuid <uuid>   specify a new uuid\n"), out);
+	fputs(USAGE_SEPARATOR, out);
+	fputs(USAGE_HELP, out);
+	fputs(USAGE_VERSION, out);
+	fprintf(out, USAGE_MAN_TAIL("swaplabel(8)"));
+>>>>>>> master-vanilla
 	exit(out == stderr ? EXIT_FAILURE : EXIT_SUCCESS);
 }
 
@@ -174,6 +218,10 @@ int main(int argc, char *argv[])
 
 	static const struct option longopts[] = {
 	    { "help",      0, 0, 'h' },
+<<<<<<< HEAD
+=======
+	    { "version",   0, 0, 'V' },
+>>>>>>> master-vanilla
 	    { "label",     1, 0, 'L' },
 	    { "uuid",      1, 0, 'U' },
 	    { NULL,        0, 0, 0 }
@@ -182,12 +230,24 @@ int main(int argc, char *argv[])
 	setlocale(LC_ALL, "");
 	bindtextdomain(PACKAGE, LOCALEDIR);
 	textdomain(PACKAGE);
+<<<<<<< HEAD
 
 	while ((c = getopt_long(argc, argv, "hL:U:", longopts, NULL)) != -1) {
+=======
+	atexit(close_stdout);
+
+	while ((c = getopt_long(argc, argv, "hVL:U:", longopts, NULL)) != -1) {
+>>>>>>> master-vanilla
 		switch (c) {
 		case 'h':
 			usage(stdout);
 			break;
+<<<<<<< HEAD
+=======
+		case 'V':
+			printf(UTIL_LINUX_VERSION);
+			return EXIT_SUCCESS;
+>>>>>>> master-vanilla
 		case 'L':
 			label = optarg;
 			break;

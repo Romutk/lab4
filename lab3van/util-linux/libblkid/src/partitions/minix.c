@@ -12,7 +12,10 @@
 #include <stdint.h>
 
 #include "partitions.h"
+<<<<<<< HEAD
 #include "dos.h"
+=======
+>>>>>>> master-vanilla
 #include "minix.h"
 
 static int probe_minix_pt(blkid_probe pr,
@@ -26,12 +29,24 @@ static int probe_minix_pt(blkid_probe pr,
 	int i;
 
 	data = blkid_probe_get_sector(pr, 0);
+<<<<<<< HEAD
 	if (!data)
 		goto nothing;
 
 	ls = blkid_probe_get_partlist(pr);
 	if (!ls)
 		goto err;
+=======
+	if (!data) {
+		if (errno)
+			return -errno;
+		goto nothing;
+	}
+
+	ls = blkid_probe_get_partlist(pr);
+	if (!ls)
+		goto nothing;
+>>>>>>> master-vanilla
 
 	/* Parent is required, because Minix uses the same PT as DOS and
 	 * difference is only in primary partition (parent) type.
@@ -40,11 +55,16 @@ static int probe_minix_pt(blkid_probe pr,
 	if (!parent)
 		goto nothing;
 
+<<<<<<< HEAD
 	if (blkid_partition_get_type(parent) != BLKID_MINIX_PARTITION)
+=======
+	if (blkid_partition_get_type(parent) != MBR_MINIX_PARTITION)
+>>>>>>> master-vanilla
 		goto nothing;
 
 	if (blkid_partitions_need_typeonly(pr))
 		/* caller does not ask for details about partitions */
+<<<<<<< HEAD
 		return 0;
 
 	p = (struct dos_partition *) (data + BLKID_MSDOS_PT_OFFSET);
@@ -67,6 +87,30 @@ static int probe_minix_pt(blkid_probe pr,
 			DBG(DEBUG_LOWPROBE, printf(
 				"WARNING: minix partition (%d) overflow "
 				"detected, ignore\n", i));
+=======
+		return BLKID_PROBE_OK;
+
+	tab = blkid_partlist_new_parttable(ls, "minix", MBR_PT_OFFSET);
+	if (!tab)
+		goto err;
+
+	for (i = 0, p = mbr_get_partition(data, 0);
+			i < MINIX_MAXPARTITIONS; i++, p++) {
+
+		uint32_t start, size;
+		blkid_partition par;
+
+		if (p->sys_ind != MBR_MINIX_PARTITION)
+			continue;
+
+		start = dos_partition_get_start(p);
+		size = dos_partition_get_size(p);
+
+		if (parent && !blkid_is_nested_dimension(parent, start, size)) {
+			DBG(LOWPROBE, ul_debug(
+				"WARNING: minix partition (%d) overflow "
+				"detected, ignore", i));
+>>>>>>> master-vanilla
 			continue;
 		}
 
@@ -74,6 +118,7 @@ static int probe_minix_pt(blkid_probe pr,
 		if (!par)
 			goto err;
 
+<<<<<<< HEAD
 		blkid_partition_set_type(par, p->sys_type);
 		blkid_partition_set_flags(par, p->boot_ind);
 	}
@@ -84,6 +129,18 @@ nothing:
 	return 1;
 err:
 	return -1;
+=======
+		blkid_partition_set_type(par, p->sys_ind);
+		blkid_partition_set_flags(par, p->boot_ind);
+	}
+
+	return BLKID_PROBE_OK;
+
+nothing:
+	return BLKID_PROBE_NONE;
+err:
+	return -ENOMEM;
+>>>>>>> master-vanilla
 }
 
 /* same as DOS */

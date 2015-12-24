@@ -14,11 +14,16 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
+<<<<<<< HEAD
 TS_TOPDIR="$(dirname $0)/../.."
+=======
+TS_TOPDIR="${0%/*}/../.."
+>>>>>>> master-vanilla
 TS_DESC="mkfs"
 
 . $TS_TOPDIR/functions.sh
 ts_init "$*"
+<<<<<<< HEAD
 ts_skip_nonroot
 
 set -o pipefail
@@ -41,5 +46,36 @@ ts_is_mounted $DEVICE || ts_die "Cannot find $DEVICE in /proc/mounts" $DEVICE
 ts_log "umount the image"
 $TS_CMD_UMOUNT $DEVICE
 ts_device_deinit $DEVICE
+=======
+
+ts_check_test_command "$TS_CMD_MKMINIX"
+ts_skip_nonroot
+
+ts_scsi_debug_init dev_size_mb=10 num_parts=1
+
+mkfs_and_mount_minix() {
+	ts_init_subtest $1
+	dev=${TS_DEVICE}1
+	ts_log "create minix fs $2"
+	$TS_CMD_MKMINIX $2 $dev >> $TS_OUTPUT 2>&1
+	echo "mkfs return value: $?" >> $TS_OUTPUT
+	udevadm settle
+	[ -d "$TS_MOUNTPOINT" ] || mkdir -p $TS_MOUNTPOINT
+	ts_mount "minix" $dev $TS_MOUNTPOINT
+	ts_is_mounted $dev || ts_die "Cannot find $dev in /proc/mounts"
+	ts_log "umount the image"
+	$TS_CMD_UMOUNT $dev
+	ts_finalize_subtest
+}
+
+mkfs_and_mount_minix 'v1c14' '-1 -n 14'
+mkfs_and_mount_minix 'v1c30' '-1 -n 30'
+mkfs_and_mount_minix 'v2c14' '-2 -n 14'
+mkfs_and_mount_minix 'v2c30' '-2 -n 30'
+mkfs_and_mount_minix 'v3c60' '-3 -n 60'
+
+udevadm settle
+rmmod scsi_debug &>/dev/null
+>>>>>>> master-vanilla
 ts_finalize
 

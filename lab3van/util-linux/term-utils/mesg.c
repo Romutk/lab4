@@ -39,7 +39,11 @@
  * Modified Mon Jul  1 18:14:10 1996, janl@ifi.uio.no, writing to stdout
  *	as suggested by Michael Meskes <meskes@Informatik.RWTH-Aachen.DE>
  *
+<<<<<<< HEAD
  * 1999-02-22 Arkadiusz Mi∂kiewicz <misiek@pld.ORG.PL>
+=======
+ * 1999-02-22 Arkadiusz Mi≈õkiewicz <misiek@pld.ORG.PL>
+>>>>>>> master-vanilla
  * - added Native Language Support
  *
  * 2010-12-01 Marek Polacek <mmpolacek@gmail.com>
@@ -54,8 +58,16 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <getopt.h>
+<<<<<<< HEAD
 #include "nls.h"
 #include "c.h"
+=======
+
+#include "closestream.h"
+#include "nls.h"
+#include "c.h"
+#include "rpmatch.h"
+>>>>>>> master-vanilla
 
 /* exit codes */
 
@@ -65,6 +77,7 @@
 
 static void __attribute__ ((__noreturn__)) usage(FILE * out)
 {
+<<<<<<< HEAD
 	fputs(_("\nUsage:\n"), out);
 	fprintf(out,
 	      _(" %s [options] [y | n]\n"), program_invocation_short_name);
@@ -73,6 +86,22 @@ static void __attribute__ ((__noreturn__)) usage(FILE * out)
 	fputs(_(" -v, --verbose      explain what is being done\n"
 		" -V, --version      output version information and exit\n"
 		" -h, --help         output help screen and exit\n\n"), out);
+=======
+	fputs(USAGE_HEADER, out);
+	/* TRANSLATORS: this program uses for y and n rpmatch(3),
+	 * which means they can be translated.  */
+	fprintf(out,
+	      _(" %s [options] [y | n]\n"), program_invocation_short_name);
+
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Control write access of other users to your terminal.\n"), out);
+
+	fputs(USAGE_OPTIONS, out);
+	fputs(_(" -v, --verbose  explain what is being done\n"), out);
+	fputs(USAGE_HELP, out);
+	fputs(USAGE_VERSION, out);
+	fprintf(out, USAGE_MAN_TAIL("mesg(1)"));
+>>>>>>> master-vanilla
 
 	exit(out == stderr ? MESG_EXIT_FAILURE : EXIT_SUCCESS);
 }
@@ -81,11 +110,15 @@ int main(int argc, char *argv[])
 {
 	struct stat sb;
 	char *tty;
+<<<<<<< HEAD
 	int ch, verbose = FALSE;
 
 	setlocale(LC_ALL, "");
 	bindtextdomain(PACKAGE, LOCALEDIR);
 	textdomain(PACKAGE);
+=======
+	int ch, fd, verbose = FALSE, ret;
+>>>>>>> master-vanilla
 
 	static const struct option longopts[] = {
 		{ "verbose",    no_argument,       0, 'v' },
@@ -94,14 +127,26 @@ int main(int argc, char *argv[])
 		{ NULL,         0, 0, 0 }
 	};
 
+<<<<<<< HEAD
+=======
+	setlocale(LC_ALL, "");
+	bindtextdomain(PACKAGE, LOCALEDIR);
+	textdomain(PACKAGE);
+	atexit(close_stdout);
+
+>>>>>>> master-vanilla
 	while ((ch = getopt_long(argc, argv, "vVh", longopts, NULL)) != -1)
 		switch (ch) {
 		case 'v':
 			verbose = TRUE;
 			break;
 		case 'V':
+<<<<<<< HEAD
 			printf(_("%s from %s\n"), program_invocation_short_name,
 			PACKAGE_STRING);
+=======
+			printf(UTIL_LINUX_VERSION);
+>>>>>>> master-vanilla
 			exit(EXIT_SUCCESS);
 		case 'h':
 			usage(stdout);
@@ -114,11 +159,21 @@ int main(int argc, char *argv[])
 
 	if ((tty = ttyname(STDERR_FILENO)) == NULL)
 		err(MESG_EXIT_FAILURE, _("ttyname failed"));
+<<<<<<< HEAD
 
 	if (stat(tty, &sb) < 0)
 		err(MESG_EXIT_FAILURE, _("stat %s failed"), tty);
 
 	if (!*argv) {
+=======
+	if ((fd = open(tty, O_RDONLY)) < 0)
+		err(MESG_EXIT_FAILURE, _("cannot open %s"), tty);
+	if (fstat(fd, &sb))
+		err(MESG_EXIT_FAILURE, _("stat of %s failed"), tty);
+
+	if (!*argv) {
+		close(fd);
+>>>>>>> master-vanilla
 		if (sb.st_mode & (S_IWGRP | S_IWOTH)) {
 			puts(_("is y"));
 			return IS_ALLOWED;
@@ -127,16 +182,26 @@ int main(int argc, char *argv[])
 		return IS_NOT_ALLOWED;
 	}
 
+<<<<<<< HEAD
 	switch (*argv[0]) {
 	case 'y':
 #ifdef USE_TTY_GROUP
 		if (chmod(tty, sb.st_mode | S_IWGRP) < 0)
 #else
 		if (chmod(tty, sb.st_mode | S_IWGRP | S_IWOTH) < 0)
+=======
+	switch (rpmatch(argv[0])) {
+	case RPMATCH_YES:
+#ifdef USE_TTY_GROUP
+		if (fchmod(fd, sb.st_mode | S_IWGRP) < 0)
+#else
+		if (fchmod(fd, sb.st_mode | S_IWGRP | S_IWOTH) < 0)
+>>>>>>> master-vanilla
 #endif
 			err(MESG_EXIT_FAILURE, _("change %s mode failed"), tty);
 		if (verbose)
 			puts(_("write access to your terminal is allowed"));
+<<<<<<< HEAD
 		return IS_ALLOWED;
 	case 'n':
 		if (chmod(tty, sb.st_mode & ~(S_IWGRP|S_IWOTH)) < 0)
@@ -148,4 +213,23 @@ int main(int argc, char *argv[])
 		warnx(_("invalid argument: %c"), *argv[0]);
 		usage(stderr);
 	}
+=======
+		ret = IS_ALLOWED;
+		break;
+	case RPMATCH_NO:
+		if (fchmod(fd, sb.st_mode & ~(S_IWGRP|S_IWOTH)) < 0)
+			 err(MESG_EXIT_FAILURE, _("change %s mode failed"), tty);
+		if (verbose)
+			puts(_("write access to your terminal is denied"));
+		ret = IS_NOT_ALLOWED;
+		break;
+	case RPMATCH_INVALID:
+		warnx(_("invalid argument: %s"), argv[0]);
+		usage(stderr);
+        default:
+                abort();
+	}
+	close(fd);
+	return ret;
+>>>>>>> master-vanilla
 }

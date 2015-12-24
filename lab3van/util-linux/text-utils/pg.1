@@ -1,12 +1,23 @@
+<<<<<<< HEAD
 .\" @(#)pg.1	1.7 (gritter) 4/25/01
 .TH PG 1 "April 2001" "util-linux" "User Commands"
+=======
+.\" Copyright 2001 Gunnar Ritter
+.TH PG 1 "July 2014" "util-linux" "User Commands"
+>>>>>>> master-vanilla
 .SH NAME
 pg \- browse pagewise through text files
 .SH SYNOPSIS
 .B pg
+<<<<<<< HEAD
 .RB [ \-\fInumber\fP ]
 .RB [ \-p
 .IR string ]
+=======
+.RB [ \-\fIamount\fP ]
+.RB [ \-p
+.IR prompt ]
+>>>>>>> master-vanilla
 .RB [ \-cefnrs ]
 .RB [ +\fIline\fP ]
 .RB [ +/\fIpattern\fP/ ]
@@ -30,14 +41,31 @@ but precedes each file with its name if there is more than one.
 .PP
 If input comes from a pipe,
 .B pg
+<<<<<<< HEAD
 stores the data in a buffer file while reading
+=======
+stores the data in a buffer file while reading,
+>>>>>>> master-vanilla
 to make navigation possible.
 .SH OPTIONS
 .B pg
 accepts the following options:
 .TP
+<<<<<<< HEAD
 .BI \- number
 The number of lines per page.  Usually, this is the number of
+=======
+.BI + number
+Start at the given line number.
+.TP
+.BI +/ pattern /
+Start at the line containing the Basic Regular Expression
+.I pattern
+given.
+.TP
+.BI \- number
+The number of lines per page.  By default, this is the number of
+>>>>>>> master-vanilla
 .SM CRT
 lines minus one.
 .TP
@@ -67,7 +95,11 @@ is displayed.
 If
 .I string
 contains
+<<<<<<< HEAD
 .IR %d ,
+=======
+.BR %d ,
+>>>>>>> master-vanilla
 its first occurrence is replaced by the number of the current page.
 .TP
 .B \-r
@@ -79,6 +111,7 @@ Print messages in
 mode,
 if the terminfo entry for the terminal provides this capability.
 .TP
+<<<<<<< HEAD
 .BI + number
 Start at the given line.
 .TP
@@ -87,10 +120,19 @@ Start at the line containing the Basic Regular Expression
 .I pattern
 given.
 .SH USAGE
+=======
+.BR \-V , " \-\-version"
+Disaplay version information and exit.
+.TP
+.BR \-h , " \-\-help"
+Display help text and exit.
+.SH COMMANDS
+>>>>>>> master-vanilla
 The following commands may be entered at the prompt.  Commands preceded by
 .I i
 in this document accept a number as argument, positive or negative.
 If this argument starts with
+<<<<<<< HEAD
 .I +
 or
 .I \-,
@@ -98,6 +140,15 @@ it is interpreted relative to the current position in the input file,
 otherwise relative to the beginning.
 .TP
 .IB i <newline>
+=======
+.B +
+or
+.BR \- ,
+it is interpreted relative to the current position in the input file,
+otherwise relative to the beginning.
+.TP
+.IB i <Enter>
+>>>>>>> master-vanilla
 Display the next or the indicated page.
 .TP
 \fIi\fR\fBd\fR or \fB^D\fR
@@ -115,8 +166,13 @@ must be a positive number and is always interpreted relative
 to the current position.
 .TP
 \fIi\fR\fBw\fR or \fIi\fR\fBz\fR
+<<<<<<< HEAD
 Behave as
 .I <newline>
+=======
+As
+.B <Enter>
+>>>>>>> master-vanilla
 except that
 .I i
 becomes the new page size.
@@ -192,7 +248,11 @@ In all other situations these keys will terminate
 .BR pg .
 .SH "ENVIRONMENT VARIABLES"
 The following environment variables
+<<<<<<< HEAD
 affect the behaviour of
+=======
+affect the behavior of
+>>>>>>> master-vanilla
 .BR pg :
 .TP
 .B COLUMNS

@@ -1,3 +1,7 @@
 ID_FS_TYPE=swap
 ID_FS_USAGE=other
+<<<<<<< HEAD
 ID_FS_VERSION=1
+=======
+ID_FS_VERSION=0
+>>>>>>> master-vanilla

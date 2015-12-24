@@ -13,9 +13,15 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
+<<<<<<< HEAD
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+=======
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+>>>>>>> master-vanilla
  */
 
 /*
@@ -40,11 +46,19 @@
 
 #include "c.h"
 #include "cramfs.h"
+<<<<<<< HEAD
+=======
+#include "closestream.h"
+>>>>>>> master-vanilla
 #include "md5.h"
 #include "nls.h"
 #include "exitcodes.h"
 #include "strutils.h"
+<<<<<<< HEAD
 #define XALLOC_EXIT_CODE MKFS_ERROR
+=======
+#define XALLOC_EXIT_CODE MKFS_EX_ERROR
+>>>>>>> master-vanilla
 #include "xalloc.h"
 
 /* The kernel only supports PAD_SIZE of 0 and 512. */
@@ -52,7 +66,11 @@
 
 static int verbose = 0;
 
+<<<<<<< HEAD
 static unsigned int blksize; /* settable via -b option */
+=======
+static unsigned int blksize = 0; /* settable via -b option, default page size */
+>>>>>>> master-vanilla
 static long total_blocks = 0, total_nodes = 1; /* pre-count the root node */
 static int image_length = 0;
 static int cramfs_is_big_endian = 0; /* target is big endian */
@@ -65,7 +83,11 @@ static int cramfs_is_big_endian = 0; /* target is big endian */
  * Note that kernels up to at least 2.3.39 don't support cramfs holes,
  * which is why this is turned off by default.
  */
+<<<<<<< HEAD
 static int opt_edition = 0;
+=======
+static unsigned int opt_edition = 0;
+>>>>>>> master-vanilla
 static int opt_errors = 0;
 static int opt_holes = 0;
 static int opt_pad = 0;
@@ -79,10 +101,13 @@ static int warn_skip = 0;
 static int warn_size = 0;
 static int warn_uid = 0;
 
+<<<<<<< HEAD
 #ifndef MIN
 # define MIN(_a,_b) ((_a) < (_b) ? (_a) : (_b))
 #endif
 
+=======
+>>>>>>> master-vanilla
 /* entry.flags */
 #define CRAMFS_EFLAG_MD5	1
 #define CRAMFS_EFLAG_INVALID	2
@@ -147,7 +172,11 @@ usage(int status) {
 static char *
 do_mmap(char *path, unsigned int size, unsigned int mode){
 	int fd;
+<<<<<<< HEAD
 	char *start;
+=======
+	char *start = NULL;
+>>>>>>> master-vanilla
 
 	if (!size)
 		return NULL;
@@ -155,15 +184,22 @@ do_mmap(char *path, unsigned int size, unsigned int mode){
 	if (S_ISLNK(mode)) {
 		start = xmalloc(size);
 		if (readlink(path, start, size) < 0) {
+<<<<<<< HEAD
 			perror(path);
 			warn_skip = 1;
 			start = NULL;
+=======
+			warn(_("readlink failed: %s"), path);
+			warn_skip = 1;
+			goto err;
+>>>>>>> master-vanilla
 		}
 		return start;
 	}
 
 	fd = open(path, O_RDONLY);
 	if (fd < 0) {
+<<<<<<< HEAD
 		perror(path);
 		warn_skip = 1;
 		return NULL;
@@ -175,6 +211,21 @@ do_mmap(char *path, unsigned int size, unsigned int mode){
 	close(fd);
 
 	return start;
+=======
+		warn(_("cannot open %s"), path);
+		warn_skip = 1;
+		goto err;
+	}
+
+	start = mmap(NULL, size, PROT_READ, MAP_PRIVATE, fd, 0);
+	close(fd);
+	if (start == MAP_FAILED)
+		err(MKFS_EX_ERROR, "mmap");
+	return start;
+err:
+	free(start);
+	return NULL;
+>>>>>>> master-vanilla
 }
 
 static void
@@ -216,8 +267,15 @@ identical_file(struct entry *e1, struct entry *e2){
 	if (!start1)
 		return 0;
 	start2 = do_mmap(e2->path, e2->size, e2->mode);
+<<<<<<< HEAD
 	if (!start2)
 		return 0;
+=======
+	if (!start2) {
+		do_munmap(start1, e1->size, e1->mode);
+		return 0;
+	}
+>>>>>>> master-vanilla
 	equal = !memcmp(start1, start2, e1->size);
 	do_munmap(start1, e1->size, e1->mode);
 	do_munmap(start2, e2->size, e2->mode);
@@ -295,7 +353,11 @@ static unsigned int parse_directory(struct entry *root_entry, const char *name, 
 	dircount = scandir(name, &dirlist, 0, cramsort);
 
 	if (dircount < 0)
+<<<<<<< HEAD
 		err(MKFS_ERROR, _("could not read directory %s"), name);
+=======
+		err(MKFS_EX_ERROR, _("could not read directory %s"), name);
+>>>>>>> master-vanilla
 
 	/* process directory */
 	for (dirindex = 0; dirindex < dircount; dirindex++) {
@@ -318,6 +380,7 @@ static unsigned int parse_directory(struct entry *root_entry, const char *name, 
 			}
 		}
 		namelen = strlen(dirent->d_name);
+<<<<<<< HEAD
 		if (namelen > MAX_INPUT_NAMELEN)
 			errx(MKFS_ERROR,
 				_("Very long (%zu bytes) filename `%s' found.\n"
@@ -328,10 +391,22 @@ static unsigned int parse_directory(struct entry *root_entry, const char *name, 
 
 		if (lstat(path, &st) < 0) {
 			perror(endpath);
+=======
+		if (namelen > MAX_INPUT_NAMELEN) {
+			namelen = MAX_INPUT_NAMELEN;
+			warn_namelen = 1;
+		}
+
+		memcpy(endpath, dirent->d_name, namelen + 1);
+
+		if (lstat(path, &st) < 0) {
+			warn(_("stat of %s failed"), endpath);
+>>>>>>> master-vanilla
 			warn_skip = 1;
 			continue;
 		}
 		entry = xcalloc(1, sizeof(struct entry));
+<<<<<<< HEAD
 		entry->name = (unsigned char *)xstrdup(dirent->d_name);
 		if (namelen > 255) {
 			/* Can't happen when reading from ext2fs. */
@@ -341,6 +416,9 @@ static unsigned int parse_directory(struct entry *root_entry, const char *name, 
 			entry->name[namelen = 255] = '\0';
 			warn_namelen = 1;
 		}
+=======
+		entry->name = (unsigned char *)xstrndup(dirent->d_name, namelen);
+>>>>>>> master-vanilla
 		entry->mode = st.st_mode;
 		entry->size = st.st_size;
 		entry->uid = st.st_uid;
@@ -442,7 +520,11 @@ static void set_data_offset(struct entry *entry, char *base, unsigned long offse
 	struct cramfs_inode *inode = (struct cramfs_inode *) (base + entry->dir_offset);
 	inode_to_host(cramfs_is_big_endian, inode, inode);
 	if (offset >= (1 << (2 + CRAMFS_OFFSET_WIDTH)))
+<<<<<<< HEAD
 		errx(MKFS_ERROR, _("filesystem too big.  Exiting."));
+=======
+		errx(MKFS_EX_ERROR, _("filesystem too big.  Exiting."));
+>>>>>>> master-vanilla
 	inode->offset = (offset >> 2);
 	inode_from_host(cramfs_is_big_endian, inode, inode);
 }
@@ -604,7 +686,11 @@ do_compress(char *base, unsigned int offset, unsigned char const *name,
 			printf(_("AIEEE: block \"compressed\" to > "
 				 "2*blocklength (%ld)\n"),
 			       len);
+<<<<<<< HEAD
 			exit(MKFS_ERROR);
+=======
+			exit(MKFS_EX_ERROR);
+>>>>>>> master-vanilla
 		}
 
 		*(uint32_t *) (base + offset) = u32_toggle_endianness(cramfs_is_big_endian, curr);
@@ -660,12 +746,20 @@ static unsigned int write_file(char *file, char *base, unsigned int offset)
 
 	fd = open(file, O_RDONLY);
 	if (fd < 0)
+<<<<<<< HEAD
 		err(MKFS_ERROR, _("cannot open file %s"), file);
+=======
+		err(MKFS_EX_ERROR, _("cannot open %s"), file);
+>>>>>>> master-vanilla
 	buf = mmap(NULL, image_length, PROT_READ, MAP_PRIVATE, fd, 0);
 	memcpy(base + offset, buf, image_length);
 	munmap(buf, image_length);
 	if (close (fd) < 0)
+<<<<<<< HEAD
 		err(MKFS_ERROR, _("cannot close file %s"), file);
+=======
+		err(MKFS_EX_ERROR, _("cannot close file %s"), file);
+>>>>>>> master-vanilla
 	/* Pad up the image_length to a 4-byte boundary */
 	while (image_length & 3) {
 		*(base + offset + image_length) = '\0';
@@ -712,28 +806,45 @@ int main(int argc, char **argv)
 	int c;
 	cramfs_is_big_endian = HOST_IS_BIG_ENDIAN; /* default is to use host order */
 
+<<<<<<< HEAD
 	blksize = getpagesize();
+=======
+>>>>>>> master-vanilla
 	total_blocks = 0;
 
 	setlocale(LC_ALL, "");
 	bindtextdomain(PACKAGE, LOCALEDIR);
 	textdomain(PACKAGE);
+<<<<<<< HEAD
+=======
+	atexit(close_stdout);
+>>>>>>> master-vanilla
 
 	/* command line options */
 	while ((c = getopt(argc, argv, "hb:Ee:i:n:N:psVvz")) != EOF) {
 		switch (c) {
 		case 'h':
+<<<<<<< HEAD
 			usage(MKFS_OK);
 		case 'b':
 			blksize = strtoll_or_err(optarg, _("failed to parse blocksize argument"));
 			if (blksize <= 0)
 				usage(MKFS_USAGE);
+=======
+			usage(MKFS_EX_OK);
+		case 'b':
+			blksize = strtou32_or_err(optarg, _("invalid blocksize argument"));
+>>>>>>> master-vanilla
 			break;
 		case 'E':
 			opt_errors = 1;
 			break;
 		case 'e':
+<<<<<<< HEAD
 			opt_edition = strtoll_or_err(optarg, _("edition number argument failed"));
+=======
+			opt_edition = strtou32_or_err(optarg, _("invalid edition number argument"));
+>>>>>>> master-vanilla
 			break;
 		case 'N':
 			if (strcmp(optarg, "big") == 0)
@@ -743,13 +854,22 @@ int main(int argc, char **argv)
 			else if (strcmp(optarg, "host") == 0)
 				/* default */ ;
 			else
+<<<<<<< HEAD
 				errx(MKFS_USAGE, _("invalid endianness given."
 						   " Must be 'big', 'little', or 'host'"));
+=======
+				errx(MKFS_EX_USAGE, _("invalid endianness given;"
+						   " must be 'big', 'little', or 'host'"));
+>>>>>>> master-vanilla
 			break;
 		case 'i':
 			opt_image = optarg;
 			if (lstat(opt_image, &st) < 0)
+<<<<<<< HEAD
 				err(MKFS_USAGE, _("cannot stat %s"), opt_image);
+=======
+				err(MKFS_EX_USAGE, _("stat of %s failed"), opt_image);
+>>>>>>> master-vanilla
 			image_length = st.st_size; /* may be padded later */
 			fslen_ub += (image_length + 3); /* 3 is for padding */
 			break;
@@ -764,19 +884,30 @@ int main(int argc, char **argv)
 			/* old option, ignored */
 			break;
 		case 'V':
+<<<<<<< HEAD
 			printf(_("%s from %s\n"),
 			       program_invocation_short_name, PACKAGE_STRING);
 			exit(MKFS_OK);
+=======
+			printf(UTIL_LINUX_VERSION);
+			exit(MKFS_EX_OK);
+>>>>>>> master-vanilla
 		case 'v':
 			verbose = 1;
 			break;
 		case 'z':
 			opt_holes = 1;
 			break;
+<<<<<<< HEAD
+=======
+		default:
+			usage(FSCK_EX_USAGE);
+>>>>>>> master-vanilla
 		}
 	}
 
 	if ((argc - optind) != 2)
+<<<<<<< HEAD
 		usage(MKFS_USAGE);
 	dirname = argv[optind];
 	outfile = argv[optind + 1];
@@ -786,6 +917,20 @@ int main(int argc, char **argv)
 	fd = open(outfile, O_WRONLY | O_CREAT | O_TRUNC, 0666);
 	if (fd < 0)
 		err(MKFS_USAGE, _("cannot open %s"), outfile);
+=======
+		usage(MKFS_EX_USAGE);
+	dirname = argv[optind];
+	outfile = argv[optind + 1];
+
+	if (blksize == 0)
+		blksize = getpagesize();
+
+	if (stat(dirname, &st) < 0)
+		err(MKFS_EX_USAGE, _("stat of %s failed"), dirname);
+	fd = open(outfile, O_WRONLY | O_CREAT | O_TRUNC, 0666);
+	if (fd < 0)
+		err(MKFS_EX_USAGE, _("cannot open %s"), outfile);
+>>>>>>> master-vanilla
 
 	root_entry = xcalloc(1, sizeof(struct entry));
 	root_entry->mode = st.st_mode;
@@ -794,6 +939,12 @@ int main(int argc, char **argv)
 
 	root_entry->size = parse_directory(root_entry, dirname, &root_entry->child, &fslen_ub);
 
+<<<<<<< HEAD
+=======
+	/* find duplicate files */
+	eliminate_doubles(root_entry,root_entry, &fslen_ub);
+
+>>>>>>> master-vanilla
 	/* always allocate a multiple of blksize bytes because that's
 	   what we're going to write later on */
 	fslen_ub = ((fslen_ub - 1) | (blksize - 1)) + 1;
@@ -808,9 +959,12 @@ int main(int argc, char **argv)
 		fslen_ub = fslen_max;
 	}
 
+<<<<<<< HEAD
 	/* find duplicate files */
 	eliminate_doubles(root_entry,root_entry, &fslen_ub);
 
+=======
+>>>>>>> master-vanilla
 	/* TODO: Why do we use a private/anonymous mapping here
 	   followed by a write below, instead of just a shared mapping
 	   and a couple of ftruncate calls?  Is it just to save us
@@ -827,7 +981,11 @@ int main(int argc, char **argv)
 			 -1, 0);
 
 	if (-1 == (int) (long) rom_image)
+<<<<<<< HEAD
 		err(MKFS_ERROR, _("ROM image map"));
+=======
+		err(MKFS_EX_ERROR, _("ROM image map"));
+>>>>>>> master-vanilla
 
 	/* Skip the first opt_pad bytes for boot loader code */
 	offset = opt_pad;
@@ -869,17 +1027,29 @@ int main(int argc, char **argv)
 
 	/* Check to make sure we allocated enough space. */
 	if (fslen_ub < offset)
+<<<<<<< HEAD
 		errx(MKFS_ERROR,
+=======
+		errx(MKFS_EX_ERROR,
+>>>>>>> master-vanilla
 			_("not enough space allocated for ROM image "
 			  "(%lld allocated, %zu used)"),
 			(long long) fslen_ub, offset);
 
 	written = write(fd, rom_image, offset);
+<<<<<<< HEAD
 	if (written < 0)
 		err(MKFS_ERROR, _("ROM image"));
 	if (offset != written)
 		errx(MKFS_ERROR, _("ROM image write failed (%zd %zd)"),
 			written, offset);
+=======
+	if (offset != written)
+		errx(MKFS_EX_ERROR, _("ROM image write failed (%zd %zd)"),
+			written, offset);
+	if (close_fd(fd) != 0)
+		err(MKFS_EX_ERROR, _("ROM image"));
+>>>>>>> master-vanilla
 
 	/*
 	 * (These warnings used to come at the start, but they scroll off
@@ -888,7 +1058,11 @@ int main(int argc, char **argv)
 	if (warn_namelen)
 		/* Can't happen when reading from ext2fs. */
 		/* Bytes, not chars: think UTF8. */
+<<<<<<< HEAD
 		warnx(_("warning: filenames truncated to 255 bytes."));
+=======
+		warnx(_("warning: filenames truncated to %u bytes."), MAX_INPUT_NAMELEN);
+>>>>>>> master-vanilla
 	if (warn_skip)
 		warnx(_("warning: files were skipped due to errors."));
 	if (warn_size)
@@ -908,7 +1082,11 @@ int main(int argc, char **argv)
 		      CRAMFS_OFFSET_WIDTH);
 	if (opt_errors &&
 	    (warn_namelen|warn_skip|warn_size|warn_uid|warn_gid|warn_dev))
+<<<<<<< HEAD
 		exit(MKFS_ERROR);
+=======
+		exit(MKFS_EX_ERROR);
+>>>>>>> master-vanilla
 
 	return EXIT_SUCCESS;
 }

@@ -2,7 +2,12 @@
 .\"
 .\" This man page was created for libblkid.so.1.0 from e2fsprogs-1.24.
 .\"
+<<<<<<< HEAD
 .\" This file may be copied under the terms of the GNU Public License.
+=======
+.\" This file may be copied under the terms of the GNU Lesser General Public
+.\" License.
+>>>>>>> master-vanilla
 .\"
 .\" Created  Wed Sep 14 12:02:12 2001, Andreas Dilger
 .TH LIBBLKID 3 "May 2009" "util-linux" "Programmer's Manual"
@@ -23,6 +28,7 @@ filesystem labels/volume names, unique identifiers/serial numbers.
 A common use is to allow use of LABEL= and UUID= tags instead of hard-coding
 specific block device names into configuration files.
 .P
+<<<<<<< HEAD
 The low-level part of the library also allows to extract infomation about
 partitions and block device topology.
 .P
@@ -30,6 +36,13 @@ The high-level part of the library keeps information about block devices
 in a cache file
 .I /etc/blkid.tab
 and is verified to still be valid before being returned to the user
+=======
+The low-level part of the library also allows to extract information about
+partitions and block device topology.
+.P
+The high-level part of the library keeps information about block devices in a
+cache file and is verified to still be valid before being returned to the user
+>>>>>>> master-vanilla
 (if the user has read permission on the raw block device, otherwise not).
 The cache file also allows unprivileged users (normally anyone other
 than root, or those not in the "disk" group) to locate devices by label/id.
@@ -38,11 +51,19 @@ environment variable BLKID_FILE.
 .P
 In situations where one is getting information about a single known device, it
 does not impact performance whether the cache is used or not (unless you are
+<<<<<<< HEAD
 not able to read the block device directly). 
 .P
 The high-level part of the library supports two methods to evaluate LABEL/UUID.
 It reads information directly from a block device or read information from
 /dev/disk/by-* udev symlinks. The udev is preferred method by default.
+=======
+not able to read the block device directly).
+.P
+The high-level part of the library supports two methods to evaluate LABEL/UUID.
+It reads information directly from a block device or read information from
+/dev/disk/by-* udev symlinks.  The udev is preferred method by default.
+>>>>>>> master-vanilla
 .P
 If you are dealing with
 multiple devices, use of the cache is highly recommended (even if empty) as
@@ -58,6 +79,7 @@ in this situation.
 .SH CONFIGURATION FILE
 The standard location of the
 .I /etc/blkid.conf
+<<<<<<< HEAD
 config file can be overridden by the environment variable BLKID_CONF.
 The following options control the libblkid library:
 .TP
@@ -79,12 +101,19 @@ a comma separated list. Default is "udev,scan". The "udev" method uses udev
 symlinks and the "scan" method scans all block devices from the
 .I /proc/partitions
 file.
+=======
+config file can be overridden by the environment variable BLKID_CONF.  For more
+details about the config file see
+.BR blkid (8)
+man page.
+>>>>>>> master-vanilla
 .SH AUTHOR
 .B libblkid
 was written by Andreas Dilger for the ext2 filesystem utilties, with input
 from Ted Ts'o.  The library was subsequently heavily modified by Ted Ts'o.
 
 The low-level probing code was rewritten by Karel Zak.
+<<<<<<< HEAD
 .SH FILES
 .TP 18
 .I /etc/blkid.tab
@@ -96,10 +125,20 @@ configuration file
 .B libblkid
 is part of the util-linux package since version 2.15 and is available from
 ftp://ftp.kernel.org/pub/linux/utils/util-linux/.
+=======
+>>>>>>> master-vanilla
 .SH COPYING
 .B libblkid
 is available under the terms of the GNU Library General Public License (LGPL),
 version 2 (or at your discretion any later version).
 .SH "SEE ALSO"
+<<<<<<< HEAD
 .BR blkid (8)
 .BR findfs (8)
+=======
+.BR blkid (8),
+.BR findfs (8)
+.SH AVAILABILITY
+libblkid is part of the util-linux package since version 2.15 and is available from
+ftp://ftp.kernel.org/pub/linux/utils/util-linux/.
+>>>>>>> master-vanilla

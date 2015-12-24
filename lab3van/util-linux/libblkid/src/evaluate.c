@@ -24,6 +24,10 @@
 
 #include "pathnames.h"
 #include "canonicalize.h"
+<<<<<<< HEAD
+=======
+#include "closestream.h"
+>>>>>>> master-vanilla
 
 #include "blkidP.h"
 
@@ -48,6 +52,10 @@
  * API.
  */
 
+<<<<<<< HEAD
+=======
+#ifdef CONFIG_BLKID_VERIFY_UDEV
+>>>>>>> master-vanilla
 /* returns zero when the device has NAME=value (LABEL/UUID) */
 static int verify_tag(const char *devname, const char *name, const char *value)
 {
@@ -65,7 +73,14 @@ static int verify_tag(const char *devname, const char *name, const char *value)
 	blkid_probe_set_superblocks_flags(pr,
 			BLKID_SUBLKS_LABEL | BLKID_SUBLKS_UUID);
 
+<<<<<<< HEAD
 	fd = open(devname, O_RDONLY);
+=======
+	blkid_probe_enable_partitions(pr, TRUE);
+	blkid_probe_set_partitions_flags(pr, BLKID_PARTS_ENTRY_DETAILS);
+
+	fd = open(devname, O_RDONLY|O_CLOEXEC);
+>>>>>>> master-vanilla
 	if (fd < 0) {
 		errsv = errno;
 		goto done;
@@ -79,7 +94,11 @@ static int verify_tag(const char *devname, const char *name, const char *value)
 	if (!rc)
 		rc = memcmp(value, data, len);
 done:
+<<<<<<< HEAD
 	DBG(DEBUG_EVALUATE, printf("%s: %s verification %s\n",
+=======
+	DBG(EVALUATE, ul_debug("%s: %s verification %s",
+>>>>>>> master-vanilla
 			devname, name, rc == 0 ? "PASS" : "FAILED"));
 	if (fd >= 0)
 		close(fd);
@@ -88,6 +107,10 @@ done:
 	/* for non-root users we use unverified udev links */
 	return errsv == EACCES ? 0 : rc;
 }
+<<<<<<< HEAD
+=======
+#endif /* CONFIG_BLKID_VERIFY_UDEV*/
+>>>>>>> master-vanilla
 
 /**
  * blkid_send_uevent:
@@ -103,7 +126,11 @@ int blkid_send_uevent(const char *devname, const char *action)
 	FILE *f;
 	int rc = -1;
 
+<<<<<<< HEAD
 	DBG(DEBUG_EVALUATE, printf("%s: uevent '%s' requested\n", devname, action));
+=======
+	DBG(EVALUATE, ul_debug("%s: uevent '%s' requested", devname, action));
+>>>>>>> master-vanilla
 
 	if (!devname || !action)
 		return -1;
@@ -113,14 +140,25 @@ int blkid_send_uevent(const char *devname, const char *action)
 	snprintf(uevent, sizeof(uevent), "/sys/dev/block/%d:%d/uevent",
 			major(st.st_rdev), minor(st.st_rdev));
 
+<<<<<<< HEAD
 	f = fopen(uevent, "w");
+=======
+	f = fopen(uevent, "w" UL_CLOEXECSTR);
+>>>>>>> master-vanilla
 	if (f) {
 		rc = 0;
 		if (fputs(action, f) >= 0)
 			rc = 0;
+<<<<<<< HEAD
 		fclose(f);
 	}
 	DBG(DEBUG_EVALUATE, printf("%s: send uevent %s\n",
+=======
+		if (close_stream(f) != 0)
+			DBG(EVALUATE, ul_debug("write failed: %s", uevent));
+	}
+	DBG(EVALUATE, ul_debug("%s: send uevent %s",
+>>>>>>> master-vanilla
 			uevent, rc == 0 ? "SUCCES" : "FAILED"));
 	return rc;
 }
@@ -132,16 +170,29 @@ static char *evaluate_by_udev(const char *token, const char *value, int uevent)
 	size_t len;
 	struct stat st;
 
+<<<<<<< HEAD
 	DBG(DEBUG_EVALUATE,
 	    printf("evaluating by udev %s=%s\n", token, value));
+=======
+	DBG(EVALUATE, ul_debug("evaluating by udev %s=%s", token, value));
+>>>>>>> master-vanilla
 
 	if (!strcmp(token, "UUID"))
 		strcpy(dev, _PATH_DEV_BYUUID "/");
 	else if (!strcmp(token, "LABEL"))
 		strcpy(dev, _PATH_DEV_BYLABEL "/");
+<<<<<<< HEAD
 	else {
 		DBG(DEBUG_EVALUATE,
 		    printf("unsupported token %s\n", token));
+=======
+	else if (!strcmp(token, "PARTLABEL"))
+		strcpy(dev, _PATH_DEV_BYPARTLABEL "/");
+	else if (!strcmp(token, "PARTUUID"))
+		strcpy(dev, _PATH_DEV_BYPARTUUID "/");
+	else {
+		DBG(EVALUATE, ul_debug("unsupported token %s", token));
+>>>>>>> master-vanilla
 		return NULL;	/* unsupported tag */
 	}
 
@@ -149,8 +200,12 @@ static char *evaluate_by_udev(const char *token, const char *value, int uevent)
 	if (blkid_encode_string(value, &dev[len], sizeof(dev) - len) != 0)
 		return NULL;
 
+<<<<<<< HEAD
 	DBG(DEBUG_EVALUATE,
 	    printf("expected udev link: %s\n", dev));
+=======
+	DBG(EVALUATE, ul_debug("expected udev link: %s", dev));
+>>>>>>> master-vanilla
 
 	if (stat(dev, &st))
 		goto failed;	/* link or device does not exist */
@@ -162,12 +217,23 @@ static char *evaluate_by_udev(const char *token, const char *value, int uevent)
 	if (!path)
 		return NULL;
 
+<<<<<<< HEAD
 	if (verify_tag(path, token, value))
 		goto failed;
 	return path;
 
 failed:
 	DBG(DEBUG_EVALUATE, printf("failed to evaluate by udev\n"));
+=======
+#ifdef CONFIG_BLKID_VERIFY_UDEV
+	if (verify_tag(path, token, value))
+		goto failed;
+#endif
+	return path;
+
+failed:
+	DBG(EVALUATE, ul_debug("failed to evaluate by udev"));
+>>>>>>> master-vanilla
 
 	if (uevent && path)
 		blkid_send_uevent(path, "change");
@@ -181,8 +247,12 @@ static char *evaluate_by_scan(const char *token, const char *value,
 	blkid_cache c = cache ? *cache : NULL;
 	char *res;
 
+<<<<<<< HEAD
 	DBG(DEBUG_EVALUATE,
 	    printf("evaluating by blkid scan %s=%s\n", token, value));
+=======
+	DBG(EVALUATE, ul_debug("evaluating by blkid scan %s=%s", token, value));
+>>>>>>> master-vanilla
 
 	if (!c) {
 		char *cachefile = blkid_get_cache_filename(conf);
@@ -223,13 +293,21 @@ char *blkid_evaluate_tag(const char *token, const char *value, blkid_cache *cach
 	if (!cache || !*cache)
 		blkid_init_debug(0);
 
+<<<<<<< HEAD
 	DBG(DEBUG_EVALUATE,
 	    printf("evaluating  %s%s%s\n", token, value ? "=" : "",
+=======
+	DBG(EVALUATE, ul_debug("evaluating  %s%s%s", token, value ? "=" : "",
+>>>>>>> master-vanilla
 		   value ? value : ""));
 
 	if (!value) {
 		if (!strchr(token, '=')) {
+<<<<<<< HEAD
 			ret = blkid_strdup(token);
+=======
+			ret = strdup(token);
+>>>>>>> master-vanilla
 			goto out;
 		}
 		blkid_parse_tag_string(token, &t, &v);
@@ -252,8 +330,12 @@ char *blkid_evaluate_tag(const char *token, const char *value, blkid_cache *cach
 			break;
 	}
 
+<<<<<<< HEAD
 	DBG(DEBUG_EVALUATE,
 	    printf("%s=%s evaluated as %s\n", token, value, ret));
+=======
+	DBG(EVALUATE, ul_debug("%s=%s evaluated as %s", token, value, ret));
+>>>>>>> master-vanilla
 out:
 	blkid_free_config(conf);
 	free(t);

@@ -34,7 +34,11 @@
 uuid_compare \- compare whether two UUIDs are the same
 .SH SYNOPSIS
 .nf
+<<<<<<< HEAD
 .B #include <uuid/uuid.h>
+=======
+.B #include <uuid.h>
+>>>>>>> master-vanilla
 .sp
 .BI "int uuid_compare(uuid_t " uu1 ", uuid_t " uu2)
 .fi
@@ -47,15 +51,27 @@ to each other.
 .SH RETURN VALUE
 Returns an integer less than, equal to, or greater than zero if
 .I uu1
+<<<<<<< HEAD
 is found,  respectively, to be lexigraphically less than, equal, or
 greater than
 .IR uu2 .
 .SH AUTHOR
 Theodore Y. Ts'o
+=======
+is found,  respectively, to be lexicographically less than, equal, or
+greater than
+.IR uu2 .
+.SH AUTHOR
+Theodore Y.\& Ts'o
+>>>>>>> master-vanilla
 .SH AVAILABILITY
 .B libuuid
 is part of the util-linux package since version 2.15.1 and is available from
 ftp://ftp.kernel.org/pub/linux/utils/util-linux/.
+<<<<<<< HEAD
+=======
+.na
+>>>>>>> master-vanilla
 .SH "SEE ALSO"
 .BR uuid (3),
 .BR uuid_clear (3),
@@ -64,3 +80,7 @@ ftp://ftp.kernel.org/pub/linux/utils/util-linux/.
 .BR uuid_is_null (3),
 .BR uuid_parse (3),
 .BR uuid_unparse (3)
+<<<<<<< HEAD
+=======
+.ad
+>>>>>>> master-vanilla

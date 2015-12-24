@@ -21,7 +21,11 @@
  * The probing routines is possible to filter (enable/disable) by type (e.g.
  * fstype "vfat" or partype "gpt") or by usage flags (e.g. BLKID_USAGE_RAID).
  * These filters are per-chain. Note that always when you touch the chain
+<<<<<<< HEAD
  * filter the current probing position is reseted and probing starts from
+=======
+ * filter the current probing position is reset and probing starts from
+>>>>>>> master-vanilla
  * scratch.  It means that the chain filter should not be modified during
  * probing, for example in loop where you call blkid_do_probe().
  *
@@ -36,7 +40,11 @@
  *      The interface is always specific to the probing chain.
  *
  *  Note that the previous probing result (binary or NAME=value) is always
+<<<<<<< HEAD
  *  zeroized when a chain probing function is called. For example
+=======
+ *  zeroized when a chain probing function is called. For example:
+>>>>>>> master-vanilla
  *
  * <informalexample>
  *   <programlisting>
@@ -103,12 +111,24 @@
 #include <inttypes.h>
 #include <stdint.h>
 #include <stdarg.h>
+<<<<<<< HEAD
+=======
+#include <limits.h>
+#include <sys/mman.h>
+>>>>>>> master-vanilla
 
 #ifdef HAVE_LIBUUID
 # include <uuid.h>
 #endif
 
 #include "blkidP.h"
+<<<<<<< HEAD
+=======
+#include "all-io.h"
+#include "sysfs.h"
+#include "strutils.h"
+#include "list.h"
+>>>>>>> master-vanilla
 
 /* chains */
 extern const struct blkid_chaindrv superblocks_drv;
@@ -124,13 +144,22 @@ static const struct blkid_chaindrv *chains_drvs[] = {
 	[BLKID_CHAIN_PARTS] = &partitions_drv
 };
 
+<<<<<<< HEAD
 static void blkid_probe_reset_vals(blkid_probe pr);
+=======
+static struct blkid_prval *blkid_probe_new_value(void);
+static void blkid_probe_reset_values(blkid_probe pr);
+>>>>>>> master-vanilla
 static void blkid_probe_reset_buffer(blkid_probe pr);
 
 /**
  * blkid_new_probe:
  *
+<<<<<<< HEAD
  * Returns: a pointer to the newly allocated probe struct.
+=======
+ * Returns: a pointer to the newly allocated probe struct or NULL in case of error.
+>>>>>>> master-vanilla
  */
 blkid_probe blkid_new_probe(void)
 {
@@ -142,7 +171,11 @@ blkid_probe blkid_new_probe(void)
 	if (!pr)
 		return NULL;
 
+<<<<<<< HEAD
 	DBG(DEBUG_LOWPROBE, printf("allocate a new probe %p\n", pr));
+=======
+	DBG(LOWPROBE, ul_debug("allocate a new probe %p", pr));
+>>>>>>> master-vanilla
 
 	/* initialize chains */
 	for (i = 0; i < BLKID_NCHAINS; i++) {
@@ -151,6 +184,10 @@ blkid_probe blkid_new_probe(void)
 		pr->chains[i].enabled = chains_drvs[i]->dflt_enabled;
 	}
 	INIT_LIST_HEAD(&pr->buffers);
+<<<<<<< HEAD
+=======
+	INIT_LIST_HEAD(&pr->values);
+>>>>>>> master-vanilla
 	return pr;
 }
 
@@ -167,7 +204,11 @@ blkid_probe blkid_clone_probe(blkid_probe parent)
 	if (!parent)
 		return NULL;
 
+<<<<<<< HEAD
 	DBG(DEBUG_LOWPROBE, printf("allocate a probe clone\n"));
+=======
+	DBG(LOWPROBE, ul_debug("allocate a probe clone"));
+>>>>>>> master-vanilla
 
 	pr = blkid_new_probe();
 	if (!pr)
@@ -182,6 +223,11 @@ blkid_probe blkid_clone_probe(blkid_probe parent)
 	pr->flags = parent->flags;
 	pr->parent = parent;
 
+<<<<<<< HEAD
+=======
+	pr->flags &= ~BLKID_FL_PRIVATE_FD;
+
+>>>>>>> master-vanilla
 	return pr;
 }
 
@@ -208,7 +254,11 @@ blkid_probe blkid_new_probe_from_filename(const char *filename)
 	if (!filename)
 		return NULL;
 
+<<<<<<< HEAD
 	fd = open(filename, O_RDONLY);
+=======
+	fd = open(filename, O_RDONLY|O_CLOEXEC);
+>>>>>>> master-vanilla
 	if (fd < 0)
 		return NULL;
 
@@ -253,16 +303,38 @@ void blkid_free_probe(blkid_probe pr)
 	if ((pr->flags & BLKID_FL_PRIVATE_FD) && pr->fd >= 0)
 		close(pr->fd);
 	blkid_probe_reset_buffer(pr);
+<<<<<<< HEAD
 	blkid_free_probe(pr->disk_probe);
 
 	DBG(DEBUG_LOWPROBE, printf("free probe %p\n", pr));
 	free(pr);
 }
 
+=======
+	blkid_probe_reset_values(pr);
+	blkid_free_probe(pr->disk_probe);
+
+	DBG(LOWPROBE, ul_debug("free probe %p", pr));
+	free(pr);
+}
+
+void blkid_probe_free_value(struct blkid_prval *v)
+{
+	if (!v)
+		return;
+
+	list_del(&v->prvals);
+	free(v->data);
+
+	DBG(LOWPROBE, ul_debug(" free value %s", v->name));
+	free(v);
+}
+>>>>>>> master-vanilla
 
 /*
  * Removes chain values from probing result.
  */
+<<<<<<< HEAD
 void blkid_probe_chain_reset_vals(blkid_probe pr, struct blkid_chain *chn)
 {
 	int nvals = pr->nvals;
@@ -282,6 +354,25 @@ void blkid_probe_chain_reset_vals(blkid_probe pr, struct blkid_chain *chn)
 		memcpy(&pr->vals[x++], v, sizeof(struct blkid_prval));
 	}
 	pr->nvals = nvals;
+=======
+void blkid_probe_chain_reset_values(blkid_probe pr, struct blkid_chain *chn)
+{
+
+	struct list_head *p, *pnext;
+
+	if (!pr || list_empty(&pr->values))
+		return;
+
+	DBG(LOWPROBE, ul_debug("reseting %s values", chn->driver->name));
+
+	list_for_each_safe(p, pnext, &pr->values) {
+		struct blkid_prval *v = list_entry(p,
+						struct blkid_prval, prvals);
+
+		if (v->chain == chn)
+			blkid_probe_free_value(v);
+	}
+>>>>>>> master-vanilla
 }
 
 static void blkid_probe_chain_reset_position(struct blkid_chain *chn)
@@ -291,6 +382,7 @@ static void blkid_probe_chain_reset_position(struct blkid_chain *chn)
 }
 
 /*
+<<<<<<< HEAD
  * Copies chain values from probing result to @vals, the max size of @vals is
  * @nvals and returns real number of values.
  */
@@ -307,11 +399,57 @@ int blkid_probe_chain_copy_vals(blkid_probe pr, struct blkid_chain *chn,
 		memcpy(&vals[x++], v, sizeof(struct blkid_prval));
 	}
 	return x;
+=======
+static struct blkid_prval *blkid_probe_copy_value(struct blkid_prval *src)
+{
+	struct blkid_prval *dest = blkid_probe_new_value();
+
+	if (!dest)
+		return NULL;
+
+	memcpy(dest, src, sizeof(struct blkid_prval));
+
+	dest->data = malloc(src->len);
+	if (!dest->data)
+		return NULL;
+
+	memcpy(dest->data, src->data, src->len);
+
+	INIT_LIST_HEAD(&dest->prvals);
+	return dest;
+}
+*/
+
+/*
+ * Move chain values from probing result to @vals
+ */
+int blkid_probe_chain_save_values(blkid_probe pr, struct blkid_chain *chn,
+				struct list_head *vals)
+{
+	struct list_head *p, *pnext;
+	struct blkid_prval *v;
+
+	DBG(LOWPROBE, ul_debug("saving %s values", chn->driver->name));
+
+	list_for_each_safe(p, pnext, &pr->values) {
+
+		v = list_entry(p, struct blkid_prval, prvals);
+		if (v->chain != chn)
+			continue;
+
+		list_del(&v->prvals);
+		INIT_LIST_HEAD(&v->prvals);
+
+		list_add_tail(&v->prvals, vals);
+	}
+	return 0;
+>>>>>>> master-vanilla
 }
 
 /*
  * Appends values from @vals to the probing result
  */
+<<<<<<< HEAD
 void blkid_probe_append_vals(blkid_probe pr, struct blkid_prval *vals, int nvals)
 {
 	int i = 0;
@@ -326,6 +464,28 @@ static void blkid_probe_reset_vals(blkid_probe pr)
 {
 	memset(pr->vals, 0, sizeof(pr->vals));
 	pr->nvals = 0;
+=======
+void blkid_probe_append_values_list(blkid_probe pr, struct list_head *vals)
+{
+	DBG(LOWPROBE, ul_debug("appending values"));
+
+	list_splice(vals, &pr->values);
+	INIT_LIST_HEAD(vals);
+}
+
+
+void blkid_probe_free_values_list(struct list_head *vals)
+{
+	if (!vals)
+		return;
+
+	DBG(LOWPROBE, ul_debug("freeing values list"));
+
+	while (!list_empty(vals)) {
+		struct blkid_prval *v = list_entry(vals->next, struct blkid_prval, prvals);
+		blkid_probe_free_value(v);
+	}
+>>>>>>> master-vanilla
 }
 
 struct blkid_chain *blkid_probe_get_chain(blkid_probe pr)
@@ -333,6 +493,19 @@ struct blkid_chain *blkid_probe_get_chain(blkid_probe pr)
 	return pr->cur_chain;
 }
 
+<<<<<<< HEAD
+=======
+static const char *blkid_probe_get_probername(blkid_probe pr)
+{
+	struct blkid_chain *chn = blkid_probe_get_chain(pr);
+
+	if (chn && chn->idx >= 0 && chn->idx < chn->driver->nidinfos)
+		return chn->driver->idinfos[chn->idx]->name;
+
+	return NULL;
+}
+
+>>>>>>> master-vanilla
 void *blkid_probe_get_binary_data(blkid_probe pr, struct blkid_chain *chn)
 {
 	int rc, org_prob_flags;
@@ -365,8 +538,12 @@ void *blkid_probe_get_binary_data(blkid_probe pr, struct blkid_chain *chn)
 	if (rc != 0)
 		return NULL;
 
+<<<<<<< HEAD
 	DBG(DEBUG_LOWPROBE,
 		printf("returning %s binary data\n", chn->driver->name));
+=======
+	DBG(LOWPROBE, ul_debug("returning %s binary data", chn->driver->name));
+>>>>>>> master-vanilla
 	return chn->data;
 }
 
@@ -386,7 +563,12 @@ void blkid_reset_probe(blkid_probe pr)
 	if (!pr)
 		return;
 
+<<<<<<< HEAD
 	blkid_probe_reset_vals(pr);
+=======
+	blkid_probe_reset_values(pr);
+	blkid_probe_set_wiper(pr, 0, 0);
+>>>>>>> master-vanilla
 
 	pr->cur_chain = NULL;
 
@@ -411,7 +593,11 @@ static int blkid_probe_dump_filter(blkid_probe pr, int chain)
 	for (i = 0; i < chn->driver->nidinfos; i++) {
 		const struct blkid_idinfo *id = chn->driver->idinfos[i];
 
+<<<<<<< HEAD
 		DBG(DEBUG_LOWPROBE, printf("%d: %s: %s\n",
+=======
+		DBG(LOWPROBE, ul_debug("%d: %s: %s",
+>>>>>>> master-vanilla
 			i,
 			id->name,
 			blkid_bmp_get_item(chn->fltr, i)
@@ -433,7 +619,11 @@ unsigned long *blkid_probe_get_filter(blkid_probe pr, int chain, int create)
 
 	chn = &pr->chains[chain];
 
+<<<<<<< HEAD
 	/* always when you touch the chain filter all indexes are reseted and
+=======
+	/* always when you touch the chain filter all indexes are reset and
+>>>>>>> master-vanilla
 	 * probing starts from scratch
 	 */
 	blkid_probe_chain_reset_position(chn);
@@ -459,6 +649,12 @@ int __blkid_probe_invert_filter(blkid_probe pr, int chain)
 	size_t i;
 	struct blkid_chain *chn;
 
+<<<<<<< HEAD
+=======
+	if (!pr)
+		return -1;
+
+>>>>>>> master-vanilla
 	chn = &pr->chains[chain];
 
 	if (!chn->driver->has_fltr || !chn->fltr)
@@ -467,7 +663,11 @@ int __blkid_probe_invert_filter(blkid_probe pr, int chain)
 	for (i = 0; i < blkid_bmp_nwords(chn->driver->nidinfos); i++)
 		chn->fltr[i] = ~chn->fltr[i];
 
+<<<<<<< HEAD
 	DBG(DEBUG_LOWPROBE, printf("probing filter inverted\n"));
+=======
+	DBG(LOWPROBE, ul_debug("probing filter inverted"));
+>>>>>>> master-vanilla
 	/* blkid_probe_dump_filter(pr, chain); */
 	return 0;
 }
@@ -509,21 +709,180 @@ int __blkid_probe_filter_types(blkid_probe pr, int chain, int flag, char *names[
 		}
 	}
 
+<<<<<<< HEAD
 	DBG(DEBUG_LOWPROBE,
 		printf("%s: a new probing type-filter initialized\n",
+=======
+	DBG(LOWPROBE, ul_debug("%s: a new probing type-filter initialized",
+>>>>>>> master-vanilla
 		chn->driver->name));
 	/* blkid_probe_dump_filter(pr, chain); */
 	return 0;
 }
 
+<<<<<<< HEAD
+=======
+/* align to mmap granularity */
+#define PROBE_ALIGN_OFF(p, o)	((o) & ~((p)->mmap_granularity - 1ULL))
+/* default buffer sizes */
+#define PROBE_MMAP_BEGINSIZ	(1024ULL * 1024ULL * 2ULL)	/* begin of the device */
+#define PROBE_MMAP_ENDSIZ	(1024ULL * 1024ULL * 2ULL)	/* end of the device */
+#define PROBE_MMAP_MIDSIZ	(1024ULL * 1024ULL)		/* middle of the device */
+
+#define probe_is_mmap_wanted(p)		(!S_ISCHR((p)->mode))
+
+static struct blkid_bufinfo *mmap_buffer(blkid_probe pr,
+					 blkid_loff_t real_off,
+					 blkid_loff_t len)
+{
+	blkid_loff_t map_len;
+	blkid_loff_t map_off = 0;
+	struct blkid_bufinfo *bf = NULL;
+
+	/*
+	 * libblkid heavily reads begin and end of the device, so it seems
+	 * better to mmap ~2MiB from the begin and end of the device to reduces
+	 * number of syscalls and necessary buffers. For random accees
+	 * somewhere in the middle of the device we use 1MiB buffers.
+	 */
+	if (!pr->mmap_granularity)
+		pr->mmap_granularity = getpagesize();
+
+	/* begin of the device */
+	if (real_off == 0 || real_off + len < PROBE_MMAP_BEGINSIZ) {
+		DBG(BUFFER, ul_debug("\tmapping begin of the device (max size: %ju)",
+					(uintmax_t) pr->size));
+		map_off = 0;
+		map_len = PROBE_MMAP_BEGINSIZ > pr->size ? pr->size : PROBE_MMAP_BEGINSIZ;
+
+
+	/* end of the device */
+	} else if (real_off > pr->off + pr->size - PROBE_MMAP_ENDSIZ) {
+		DBG(BUFFER, ul_debug("\tmapping end of the device (probing area: "
+					"off=%ju, size=%ju)",
+					(uintmax_t) pr->off, (uintmax_t) pr->size));
+
+		map_off = PROBE_ALIGN_OFF(pr, pr->off + pr->size - PROBE_MMAP_ENDSIZ);
+		map_len = pr->off + pr->size - map_off;
+
+	/* middle of the device */
+	} else {
+		blkid_loff_t minlen;
+
+		map_off = PROBE_ALIGN_OFF(pr, real_off);
+		minlen = real_off + len - map_off;
+
+		map_len = minlen > PROBE_MMAP_MIDSIZ ? minlen : PROBE_MMAP_MIDSIZ;
+
+		if (map_off + map_len > pr->off + pr->size)
+			map_len = pr->size - map_off;
+	}
+
+	assert(map_off <= real_off);
+	assert(map_off + map_len >= real_off + len);
+
+	/* allocate buffer handler */
+	bf = malloc(sizeof(*bf));
+	if (!bf) {
+		errno = ENOMEM;
+		return NULL;
+	}
+
+	/* mmap into memmory */
+	bf->data = mmap(NULL, map_len, PROT_READ, MAP_SHARED, pr->fd, map_off);
+	if (bf->data == MAP_FAILED) {
+		DBG(BUFFER, ul_debug("\tmmap failed: %m"));
+		free(bf);
+		return NULL;
+	}
+
+	bf->off = map_off;
+	bf->len = map_len;
+	INIT_LIST_HEAD(&bf->bufs);
+
+	DBG(BUFFER, ul_debug("\tmmap  %p: off=%ju, len=%ju (%ju pages)",
+				bf->data, (uintmax_t) map_off, (uintmax_t) map_len,
+				(uintmax_t) map_len / pr->mmap_granularity));
+	return bf;
+}
+
+static struct blkid_bufinfo *read_buffer(blkid_probe pr,
+					 blkid_loff_t real_off,
+					 blkid_loff_t len)
+{
+	ssize_t ret;
+	struct blkid_bufinfo *bf = NULL;
+
+	if (blkid_llseek(pr->fd, real_off, SEEK_SET) < 0) {
+		errno = 0;
+		return NULL;
+	}
+
+	/* someone trying to overflow some buffers? */
+	if (len > ULONG_MAX - sizeof(struct blkid_bufinfo)) {
+		errno = ENOMEM;
+		return NULL;
+	}
+
+	/* allocate info and space for data by one malloc call */
+	bf = calloc(1, sizeof(struct blkid_bufinfo) + len);
+	if (!bf) {
+		errno = ENOMEM;
+		return NULL;
+	}
+
+	bf->data = ((unsigned char *) bf) + sizeof(struct blkid_bufinfo);
+	bf->len = len;
+	bf->off = real_off;
+	INIT_LIST_HEAD(&bf->bufs);
+
+	DBG(LOWPROBE, ul_debug("\tread %p: off=%jd len=%jd", bf->data, real_off, len));
+
+	ret = read(pr->fd, bf->data, len);
+	if (ret != (ssize_t) len) {
+		DBG(LOWPROBE, ul_debug("\tread failed: %m"));
+		free(bf);
+		if (ret >= 0)
+			errno = 0;
+		return NULL;
+	}
+
+	return bf;
+}
+
+/*
+ * Note that @off is offset within probing area, the probing area is defined by
+ * pr->off and pr->size.
+ */
+>>>>>>> master-vanilla
 unsigned char *blkid_probe_get_buffer(blkid_probe pr,
 				blkid_loff_t off, blkid_loff_t len)
 {
 	struct list_head *p;
 	struct blkid_bufinfo *bf = NULL;
+<<<<<<< HEAD
 
 	if (pr->size <= 0)
 		return NULL;
+=======
+	blkid_loff_t real_off = pr->off + off;
+
+	/*
+	DBG(BUFFER, ul_debug("\t>>>> off=%ju, real-off=%ju (probe <%ju..%ju>, len=%ju",
+				off, real_off, pr->off, pr->off + pr->size, len));
+	*/
+
+	if (pr->size <= 0) {
+		errno = EINVAL;
+		return NULL;
+	}
+
+	if (len == 0 || pr->off + pr->size < real_off + len) {
+		DBG(BUFFER, ul_debug("\t  ignore: request out of probing area"));
+		errno = 0;
+		return NULL;
+	}
+>>>>>>> master-vanilla
 
 	if (pr->parent &&
 	    pr->parent->devno == pr->devno &&
@@ -534,24 +893,40 @@ unsigned char *blkid_probe_get_buffer(blkid_probe pr,
 		 * parent. Let's use parent's buffers.
 		 *
 		 * Note that pr->off (and pr->parent->off) is always from the
+<<<<<<< HEAD
 		 * beginig of the device.
+=======
+		 * begin of the device.
+>>>>>>> master-vanilla
 		 */
 		return blkid_probe_get_buffer(pr->parent,
 				pr->off + off - pr->parent->off, len);
 	}
 
+<<<<<<< HEAD
+=======
+	/* try buffers we already have in memmory */
+>>>>>>> master-vanilla
 	list_for_each(p, &pr->buffers) {
 		struct blkid_bufinfo *x =
 				list_entry(p, struct blkid_bufinfo, bufs);
 
+<<<<<<< HEAD
 		if (x->off <= off && off + len <= x->off + x->len) {
 			DBG(DEBUG_LOWPROBE,
 				printf("\treuse buffer: off=%jd len=%jd pr=%p\n",
 							x->off, x->len, pr));
+=======
+		if (real_off >= x->off && real_off + len <= x->off + x->len) {
+			DBG(BUFFER, ul_debug("\treuse %p: off=%jd len=%jd (for off=%jd len=%jd)",
+						x->data, x->off, x->len,
+						real_off, len));
+>>>>>>> master-vanilla
 			bf = x;
 			break;
 		}
 	}
+<<<<<<< HEAD
 	if (!bf) {
 		ssize_t ret;
 
@@ -587,15 +962,45 @@ unsigned char *blkid_probe_get_buffer(blkid_probe pr,
 static void blkid_probe_reset_buffer(blkid_probe pr)
 {
 	uint64_t read_ct = 0, len_ct = 0;
+=======
+
+	/* not found; read from disk */
+	if (!bf) {
+		if (probe_is_mmap_wanted(pr))
+			bf = mmap_buffer(pr, real_off, len);
+		else
+			bf = read_buffer(pr, real_off, len);
+		if (!bf)
+			return NULL;
+
+		list_add_tail(&bf->bufs, &pr->buffers);
+	}
+
+	assert(bf->off <= real_off);
+	assert(bf->off + bf->len >= real_off + len);
+
+	errno = 0;
+	return real_off ? bf->data + (real_off - bf->off) : bf->data;
+}
+
+static void blkid_probe_reset_buffer(blkid_probe pr)
+{
+	uint64_t ct = 0, len = 0;
+>>>>>>> master-vanilla
 
 	if (!pr || list_empty(&pr->buffers))
 		return;
 
+<<<<<<< HEAD
 	DBG(DEBUG_LOWPROBE, printf("reseting probing buffers pr=%p\n", pr));
+=======
+	DBG(BUFFER, ul_debug("reseting probing buffers pr=%p", pr));
+>>>>>>> master-vanilla
 
 	while (!list_empty(&pr->buffers)) {
 		struct blkid_bufinfo *bf = list_entry(pr->buffers.next,
 						struct blkid_bufinfo, bufs);
+<<<<<<< HEAD
 		read_ct++;
 		len_ct += bf->len;
 		list_del(&bf->bufs);
@@ -606,10 +1011,44 @@ static void blkid_probe_reset_buffer(blkid_probe pr)
 		printf("buffers summary: %"PRIu64" bytes "
 			"by %"PRIu64" read() call(s)\n",
 			len_ct, read_ct));
+=======
+		ct++;
+		len += bf->len;
+		list_del(&bf->bufs);
+
+		DBG(BUFFER, ul_debug(" remove buffer: %p [off=%ju, len=%ju]", bf->data, bf->off, bf->len));
+
+		if (probe_is_mmap_wanted(pr))
+			munmap(bf->data, bf->len);
+		free(bf);
+	}
+
+	DBG(LOWPROBE, ul_debug(" buffers summary: %ju bytes by %ju read/mmap() calls",
+			len, ct));
+>>>>>>> master-vanilla
 
 	INIT_LIST_HEAD(&pr->buffers);
 }
 
+<<<<<<< HEAD
+=======
+static void blkid_probe_reset_values(blkid_probe pr)
+{
+	if (!pr || list_empty(&pr->values))
+		return;
+
+	DBG(LOWPROBE, ul_debug("resetting results pr=%p", pr));
+
+	while (!list_empty(&pr->values)) {
+		struct blkid_prval *v = list_entry(pr->values.next,
+						struct blkid_prval, prvals);
+		blkid_probe_free_value(v);
+	}
+
+	INIT_LIST_HEAD(&pr->values);
+}
+
+>>>>>>> master-vanilla
 /*
  * Small devices need a special care.
  */
@@ -642,6 +1081,10 @@ int blkid_probe_set_device(blkid_probe pr, int fd,
 		blkid_loff_t off, blkid_loff_t size)
 {
 	struct stat sb;
+<<<<<<< HEAD
+=======
+	blkid_loff_t devsiz = 0;
+>>>>>>> master-vanilla
 
 	if (!pr)
 		return -1;
@@ -674,13 +1117,21 @@ int blkid_probe_set_device(blkid_probe pr, int fd,
 	if (fstat(fd, &sb))
 		goto err;
 
+<<<<<<< HEAD
 	if (!S_ISBLK(sb.st_mode) && !S_ISCHR(sb.st_mode) && !S_ISREG(sb.st_mode))
 		goto err;
+=======
+	if (!S_ISBLK(sb.st_mode) && !S_ISCHR(sb.st_mode) && !S_ISREG(sb.st_mode)) {
+		errno = EINVAL;
+		goto err;
+	}
+>>>>>>> master-vanilla
 
 	pr->mode = sb.st_mode;
 	if (S_ISBLK(sb.st_mode) || S_ISCHR(sb.st_mode))
 		pr->devno = sb.st_rdev;
 
+<<<<<<< HEAD
 	if (size)
 		pr->size = size;
 	else {
@@ -701,11 +1152,34 @@ int blkid_probe_set_device(blkid_probe pr, int fd,
 		/* The probing area cannot be larger than whole device, pr->off
 		 * is offset within the device */
 		pr->size -= pr->off;
+=======
+	if (S_ISBLK(sb.st_mode)) {
+		if (blkdev_get_size(fd, (unsigned long long *) &devsiz)) {
+			DBG(LOWPROBE, ul_debug("failed to get device size"));
+			goto err;
+		}
+	} else if (S_ISCHR(sb.st_mode))
+		devsiz = 1;		/* UBI devices are char... */
+	else if (S_ISREG(sb.st_mode))
+		devsiz = sb.st_size;	/* regular file */
+
+	pr->size = size ? size : devsiz;
+
+	if (off && size == 0)
+		/* only offset without size specified */
+		pr->size -= off;
+
+	if (pr->off + pr->size > devsiz) {
+		DBG(LOWPROBE, ul_debug("area specified by offset and size is bigger than device"));
+		errno = EINVAL;
+		goto err;
+>>>>>>> master-vanilla
 	}
 
 	if (pr->size <= 1440 * 1024 && !S_ISCHR(sb.st_mode))
 		pr->flags |= BLKID_FL_TINY_DEV;
 
+<<<<<<< HEAD
 #ifdef CDROM_GET_CAPABILITY
 	if (S_ISBLK(sb.st_mode) && ioctl(fd, CDROM_GET_CAPABILITY, NULL) >= 0)
 		pr->flags |= BLKID_FL_CDROM_DEV;
@@ -714,13 +1188,35 @@ int blkid_probe_set_device(blkid_probe pr, int fd,
 	DBG(DEBUG_LOWPROBE, printf("ready for low-probing, offset=%jd, size=%jd\n",
 				pr->off, pr->size));
 	DBG(DEBUG_LOWPROBE, printf("whole-disk: %s, regfile: %s\n",
+=======
+	if (S_ISBLK(sb.st_mode) && sysfs_devno_is_lvm_private(sb.st_rdev)) {
+		DBG(LOWPROBE, ul_debug("ignore private LVM device"));
+		pr->flags |= BLKID_FL_NOSCAN_DEV;
+	}
+
+#ifdef CDROM_GET_CAPABILITY
+	else if (S_ISBLK(sb.st_mode) &&
+	    !blkid_probe_is_tiny(pr) &&
+	    blkid_probe_is_wholedisk(pr) &&
+	    ioctl(fd, CDROM_GET_CAPABILITY, NULL) >= 0)
+		pr->flags |= BLKID_FL_CDROM_DEV;
+#endif
+
+	DBG(LOWPROBE, ul_debug("ready for low-probing, offset=%jd, size=%jd",
+				pr->off, pr->size));
+	DBG(LOWPROBE, ul_debug("whole-disk: %s, regfile: %s",
+>>>>>>> master-vanilla
 		blkid_probe_is_wholedisk(pr) ?"YES" : "NO",
 		S_ISREG(pr->mode) ? "YES" : "NO"));
 
 	return 0;
 err:
+<<<<<<< HEAD
 	DBG(DEBUG_LOWPROBE,
 		printf("failed to prepare a device for low-probing\n"));
+=======
+	DBG(LOWPROBE, ul_debug("failed to prepare a device for low-probing"));
+>>>>>>> master-vanilla
 	return -1;
 
 }
@@ -742,9 +1238,15 @@ int blkid_probe_set_dimension(blkid_probe pr,
 	if (!pr)
 		return -1;
 
+<<<<<<< HEAD
 	DBG(DEBUG_LOWPROBE, printf(
 		"changing probing area pr=%p: size=%llu, off=%llu "
 		"-to-> size=%llu, off=%llu\n",
+=======
+	DBG(LOWPROBE, ul_debug(
+		"changing probing area pr=%p: size=%llu, off=%llu "
+		"-to-> size=%llu, off=%llu",
+>>>>>>> master-vanilla
 		pr,
 		(unsigned long long) pr->size,
 		(unsigned long long) pr->off,
@@ -763,6 +1265,14 @@ int blkid_probe_set_dimension(blkid_probe pr,
 	return 0;
 }
 
+<<<<<<< HEAD
+=======
+/*
+ * Check for matching magic value.
+ * Returns BLKID_PROBE_OK if found, BLKID_PROBE_NONE if not found
+ * or no magic present, or negative value on error.
+ */
+>>>>>>> master-vanilla
 int blkid_probe_get_idmag(blkid_probe pr, const struct blkid_idinfo *id,
 			blkid_loff_t *offset, const struct blkid_idmag **res)
 {
@@ -770,7 +1280,11 @@ int blkid_probe_get_idmag(blkid_probe pr, const struct blkid_idinfo *id,
 	blkid_loff_t off = 0;
 
 	if (id)
+<<<<<<< HEAD
 		mag = id->magics ? &id->magics[0] : NULL;
+=======
+		mag = &id->magics[0];
+>>>>>>> master-vanilla
 	if (res)
 		*res = NULL;
 
@@ -781,30 +1295,56 @@ int blkid_probe_get_idmag(blkid_probe pr, const struct blkid_idinfo *id,
 		off = (mag->kboff + (mag->sboff >> 10)) << 10;
 		buf = blkid_probe_get_buffer(pr, off, 1024);
 
+<<<<<<< HEAD
 		if (buf && !memcmp(mag->magic,
 				buf + (mag->sboff & 0x3ff), mag->len)) {
 			DBG(DEBUG_LOWPROBE, printf(
 				"\tmagic sboff=%u, kboff=%ld\n",
+=======
+		if (!buf && errno)
+			return -errno;
+
+		if (buf && !memcmp(mag->magic,
+				buf + (mag->sboff & 0x3ff), mag->len)) {
+
+			DBG(LOWPROBE, ul_debug("\tmagic sboff=%u, kboff=%ld",
+>>>>>>> master-vanilla
 				mag->sboff, mag->kboff));
 			if (offset)
 				*offset = off + (mag->sboff & 0x3ff);
 			if (res)
 				*res = mag;
+<<<<<<< HEAD
 			return 0;
+=======
+			return BLKID_PROBE_OK;
+>>>>>>> master-vanilla
 		}
 		mag++;
 	}
 
+<<<<<<< HEAD
 	if (id->magics && id->magics[0].magic)
 		/* magic string(s) defined, but not found */
 		return 1;
 
 	return 0;
+=======
+	if (id && id->magics[0].magic)
+		/* magic string(s) defined, but not found */
+		return BLKID_PROBE_NONE;
+
+	return BLKID_PROBE_OK;
+>>>>>>> master-vanilla
 }
 
 static inline void blkid_probe_start(blkid_probe pr)
 {
 	if (pr) {
+<<<<<<< HEAD
+=======
+		DBG(LOWPROBE, ul_debug("%p: start probe", pr));
+>>>>>>> master-vanilla
 		pr->cur_chain = NULL;
 		pr->prob_flags = 0;
 		blkid_probe_set_wiper(pr, 0, 0);
@@ -814,6 +1354,10 @@ static inline void blkid_probe_start(blkid_probe pr)
 static inline void blkid_probe_end(blkid_probe pr)
 {
 	if (pr) {
+<<<<<<< HEAD
+=======
+		DBG(LOWPROBE, ul_debug("%p: end probe", pr));
+>>>>>>> master-vanilla
 		pr->cur_chain = NULL;
 		pr->prob_flags = 0;
 		blkid_probe_set_wiper(pr, 0, 0);
@@ -827,7 +1371,11 @@ static inline void blkid_probe_end(blkid_probe pr)
  * Calls probing functions in all enabled chains. The superblocks chain is
  * enabled by default. The blkid_do_probe() stores result from only one
  * probing function. It's necessary to call this routine in a loop to get
+<<<<<<< HEAD
  * results from all probing functions in all chains. The probing is reseted
+=======
+ * results from all probing functions in all chains. The probing is reset
+>>>>>>> master-vanilla
  * by blkid_reset_probe() or by filter functions.
  *
  * This is string-based NAME=value interface only.
@@ -835,7 +1383,10 @@ static inline void blkid_probe_end(blkid_probe pr)
  * <example>
  *   <title>basic case - use the first result only</title>
  *   <programlisting>
+<<<<<<< HEAD
  *
+=======
+>>>>>>> master-vanilla
  *	if (blkid_do_probe(pr) == 0) {
  *		int nvals = blkid_probe_numof_values(pr);
  *		for (n = 0; n < nvals; n++) {
@@ -849,7 +1400,10 @@ static inline void blkid_probe_end(blkid_probe pr)
  * <example>
  *   <title>advanced case - probe for all signatures</title>
  *   <programlisting>
+<<<<<<< HEAD
  *
+=======
+>>>>>>> master-vanilla
  *	while (blkid_do_probe(pr) == 0) {
  *		int nvals = blkid_probe_numof_values(pr);
  *		...
@@ -868,6 +1422,12 @@ int blkid_do_probe(blkid_probe pr)
 	if (!pr)
 		return -1;
 
+<<<<<<< HEAD
+=======
+	if (pr->flags & BLKID_FL_NOSCAN_DEV)
+		return 1;
+
+>>>>>>> master-vanilla
 	do {
 		struct blkid_chain *chn = pr->cur_chain;
 
@@ -897,7 +1457,11 @@ int blkid_do_probe(blkid_probe pr)
 
 		chn->binary = FALSE;		/* for sure... */
 
+<<<<<<< HEAD
 		DBG(DEBUG_LOWPROBE, printf("chain probe %s %s (idx=%d)\n",
+=======
+		DBG(LOWPROBE, ul_debug("chain probe %s %s (idx=%d)",
+>>>>>>> master-vanilla
 				chn->driver->name,
 				chn->enabled? "ENABLED" : "DISABLED",
 				chn->idx));
@@ -914,6 +1478,191 @@ int blkid_do_probe(blkid_probe pr)
 }
 
 /**
+<<<<<<< HEAD
+=======
+ * blkid_do_wipe:
+ * @pr: prober
+ * @dryrun: if TRUE then don't touch the device.
+ *
+ * This function erases the current signature detected by @pr. The @pr has to
+ * be open in O_RDWR mode, BLKID_SUBLKS_MAGIC or/and BLKID_PARTS_MAGIC flags
+ * has to be enabled (if you want to errase also superblock with broken check
+ * sums then use BLKID_SUBLKS_BADCSUM too).
+ *
+ * After successful signature removing the @pr prober will be moved one step
+ * back and the next blkid_do_probe() call will again call previously called
+ * probing function.
+ *
+ *  <example>
+ *  <title>wipe all filesystems or raids from the device</title>
+ *   <programlisting>
+ *      fd = open(devname, O_RDWR|O_CLOEXEC);
+ *      blkid_probe_set_device(pr, fd, 0, 0);
+ *
+ *      blkid_probe_enable_superblocks(pr, 1);
+ *      blkid_probe_set_superblocks_flags(pr, BLKID_SUBLKS_MAGIC);
+ *
+ *	while (blkid_do_probe(pr) == 0)
+ *		blkid_do_wipe(pr, FALSE);
+ *  </programlisting>
+ * </example>
+ *
+ * See also blkid_probe_step_back() if you cannot use this build-in wipe
+ * function, but you want to use libblkid probing as a source for wiping.
+ *
+ * Returns: 0 on success, and -1 in case of error.
+ */
+int blkid_do_wipe(blkid_probe pr, int dryrun)
+{
+	const char *off = NULL;
+	size_t len = 0;
+	loff_t offset, l;
+	char buf[BUFSIZ];
+	int fd, rc = 0;
+	struct blkid_chain *chn;
+
+	if (!pr)
+		return -1;
+
+	chn = pr->cur_chain;
+	if (!chn)
+		return -1;
+
+	switch (chn->driver->id) {
+	case BLKID_CHAIN_SUBLKS:
+		rc = blkid_probe_lookup_value(pr, "SBMAGIC_OFFSET", &off, NULL);
+		if (!rc)
+			rc = blkid_probe_lookup_value(pr, "SBMAGIC", NULL, &len);
+		break;
+	case BLKID_CHAIN_PARTS:
+		rc = blkid_probe_lookup_value(pr, "PTMAGIC_OFFSET", &off, NULL);
+		if (!rc)
+			rc = blkid_probe_lookup_value(pr, "PTMAGIC", NULL, &len);
+		break;
+	default:
+		return 0;
+	}
+
+	if (rc || len == 0 || off == NULL)
+		return 0;
+
+	offset = strtoll(off, NULL, 10);
+	fd = blkid_probe_get_fd(pr);
+	if (fd < 0)
+		return -1;
+
+	if (len > sizeof(buf))
+		len = sizeof(buf);
+
+	DBG(LOWPROBE, ul_debug(
+	    "do_wipe [offset=0x%jx, len=%zd, chain=%s, idx=%d, dryrun=%s]\n",
+	    offset, len, chn->driver->name, chn->idx, dryrun ? "yes" : "not"));
+
+	l = lseek(fd, offset, SEEK_SET);
+	if (l == (off_t) -1)
+		return -1;
+
+	memset(buf, 0, len);
+
+	if (!dryrun && len) {
+		if (write_all(fd, buf, len))
+			return -1;
+		fsync(fd);
+		return blkid_probe_step_back(pr);
+	}
+
+	return 0;
+}
+
+/**
+ * blkid_probe_step_back:
+ * @pr: prober
+ *
+ * This function move pointer to the probing chain one step back -- it means
+ * that the previously used probing function will be called again in the next
+ * blkid_do_probe() call.
+ *
+ * This is necessary for example if you erase or modify on-disk superblock
+ * according to the current libblkid probing result.
+ *
+ * <example>
+ *  <title>wipe all superblock, but use libblkid only for probing</title>
+ *  <programlisting>
+ *      pr = blkid_new_probe_from_filename(devname);
+ *
+ *      blkid_probe_enable_superblocks(pr, 1);
+ *      blkid_probe_set_superblocks_flags(pr, BLKID_SUBLKS_MAGIC);
+ *
+ *      blkid_probe_enable_partitions(pr, 1);
+ *      blkid_probe_set_partitions_flags(pr, BLKID_PARTS_MAGIC);
+ *
+ *	while (blkid_do_probe(pr) == 0) {
+ *		const char *ostr = NULL;
+ *		size_t len = 0;
+ *
+ *		// superblocks
+ *		if (blkid_probe_lookup_value(pr, "SBMAGIC_OFFSET", &ostr, NULL) == 0)
+ *			blkid_probe_lookup_value(pr, "SBMAGIC", NULL, &len);
+ *
+ *		// partition tables
+ *		if (len == 0 && blkid_probe_lookup_value(pr, "PTMAGIC_OFFSET", &ostr, NULL) == 0)
+ *			blkid_probe_lookup_value(pr, "PTMAGIC", NULL, &len);
+ *
+ *		if (!len || !str)
+ *			continue;
+ *
+ *		// convert ostr to the real offset by off = strtoll(ostr, NULL, 10);
+ *              // use your stuff to errase @len bytes at the @off
+ *              ....
+ *
+ *		// retry the last probing to check for backup superblocks ..etc.
+ *              blkid_probe_step_back(pr);
+ *	}
+ *  </programlisting>
+ * </example>
+ *
+ * Returns: 0 on success, and -1 in case of error.
+ */
+int blkid_probe_step_back(blkid_probe pr)
+{
+	struct blkid_chain *chn;
+
+	if (!pr)
+		return -1;
+
+	chn = pr->cur_chain;
+	if (!chn)
+		return -1;
+
+	blkid_probe_reset_buffer(pr);
+
+	if (chn->idx >= 0) {
+		chn->idx--;
+		DBG(LOWPROBE, ul_debug("step back: moving %s chain index to %d",
+			chn->driver->name,
+			chn->idx));
+	}
+
+	if (chn->idx == -1) {
+		/* blkid_do_probe() goes to the next chain if the index
+		 * of the current chain is -1, so we have to set the
+		 * chain pointer to the previous chain.
+		 */
+		size_t idx = chn->driver->id > 0 ? chn->driver->id - 1 : 0;
+
+		DBG(LOWPROBE, ul_debug("step back: moving to previous chain"));
+
+		if (idx > 0)
+			pr->cur_chain = &pr->chains[idx];
+		else if (idx == 0)
+			pr->cur_chain = NULL;
+	}
+
+	return 0;
+}
+
+/**
+>>>>>>> master-vanilla
  * blkid_do_safeprobe:
  * @pr: prober
  *
@@ -937,6 +1686,11 @@ int blkid_do_safeprobe(blkid_probe pr)
 
 	if (!pr)
 		return -1;
+<<<<<<< HEAD
+=======
+	if (pr->flags & BLKID_FL_NOSCAN_DEV)
+		return 1;
+>>>>>>> master-vanilla
 
 	blkid_probe_start(pr);
 
@@ -946,7 +1700,11 @@ int blkid_do_safeprobe(blkid_probe pr)
 		chn = pr->cur_chain = &pr->chains[i];
 		chn->binary = FALSE;		/* for sure... */
 
+<<<<<<< HEAD
 		DBG(DEBUG_LOWPROBE, printf("chain safeprobe %s %s\n",
+=======
+		DBG(LOWPROBE, ul_debug("chain safeprobe %s %s",
+>>>>>>> master-vanilla
 				chn->driver->name,
 				chn->enabled? "ENABLED" : "DISABLED"));
 
@@ -991,17 +1749,29 @@ int blkid_do_fullprobe(blkid_probe pr)
 
 	if (!pr)
 		return -1;
+<<<<<<< HEAD
+=======
+	if (pr->flags & BLKID_FL_NOSCAN_DEV)
+		return 1;
+>>>>>>> master-vanilla
 
 	blkid_probe_start(pr);
 
 	for (i = 0; i < BLKID_NCHAINS; i++) {
+<<<<<<< HEAD
 		int rc;
+=======
+>>>>>>> master-vanilla
 		struct blkid_chain *chn;
 
 		chn = pr->cur_chain = &pr->chains[i];
 		chn->binary = FALSE;		/* for sure... */
 
+<<<<<<< HEAD
 		DBG(DEBUG_LOWPROBE, printf("chain fullprobe %s: %s\n",
+=======
+		DBG(LOWPROBE, ul_debug("chain fullprobe %s: %s",
+>>>>>>> master-vanilla
 				chn->driver->name,
 				chn->enabled? "ENABLED" : "DISABLED"));
 
@@ -1039,6 +1809,7 @@ struct blkid_prval *blkid_probe_assign_value(
 			blkid_probe pr, const char *name)
 {
 	struct blkid_prval *v;
+<<<<<<< HEAD
 
 	if (!name)
 		return NULL;
@@ -1072,6 +1843,49 @@ int blkid_probe_reset_last_value(blkid_probe pr)
 
 	return 0;
 
+=======
+	if (!name)
+		return NULL;
+
+	v = blkid_probe_new_value();
+	if (!v)
+		return NULL;
+
+	v->name = name;
+	v->chain = pr->cur_chain;
+	list_add_tail(&v->prvals, &pr->values);
+
+	DBG(LOWPROBE, ul_debug("assigning %s [%s]", name, v->chain->driver->name));
+	return v;
+}
+
+static struct blkid_prval *blkid_probe_new_value(void)
+{
+	struct blkid_prval *v = calloc(1, sizeof(struct blkid_prval));
+	if (!v)
+		return NULL;
+
+	INIT_LIST_HEAD(&v->prvals);
+
+	return v;
+}
+
+/* Note that value data is always terminated by zero to keep things robust,
+ * this extra zero is not count to the value lenght. It's caller responsibility
+ * to set proper value lenght (for strings we count terminator to the lenght,
+ * for binary data it's without terminator).
+ */
+int blkid_probe_value_set_data(struct blkid_prval *v,
+		unsigned char *data, size_t len)
+{
+	v->data = calloc(1, len + 1);	/* always terminate by \0 */
+
+	if (!v->data)
+		return -ENOMEM;
+	memcpy(v->data, data, len);
+	v->len = len;
+	return 0;
+>>>>>>> master-vanilla
 }
 
 int blkid_probe_set_value(blkid_probe pr, const char *name,
@@ -1079,22 +1893,30 @@ int blkid_probe_set_value(blkid_probe pr, const char *name,
 {
 	struct blkid_prval *v;
 
+<<<<<<< HEAD
 	if (len > BLKID_PROBVAL_BUFSIZ)
 		len = BLKID_PROBVAL_BUFSIZ;
 
+=======
+>>>>>>> master-vanilla
 	v = blkid_probe_assign_value(pr, name);
 	if (!v)
 		return -1;
 
+<<<<<<< HEAD
 	memcpy(v->data, data, len);
 	v->len = len;
 	return 0;
+=======
+	return blkid_probe_value_set_data(v, data, len);
+>>>>>>> master-vanilla
 }
 
 int blkid_probe_vsprintf_value(blkid_probe pr, const char *name,
 		const char *fmt, va_list ap)
 {
 	struct blkid_prval *v;
+<<<<<<< HEAD
 	size_t len;
 
 	v = blkid_probe_assign_value(pr, name);
@@ -1106,6 +1928,19 @@ int blkid_probe_vsprintf_value(blkid_probe pr, const char *name,
 	if (len <= 0) {
 		blkid_probe_reset_last_value(pr);
 		return -1;
+=======
+	ssize_t len;
+
+	v = blkid_probe_assign_value(pr, name);
+	if (!v)
+		return -ENOMEM;
+
+	len = vasprintf((char **) &v->data, fmt, ap);
+
+	if (len <= 0) {
+		blkid_probe_free_value(v);
+		return len == 0 ? -EINVAL : -ENOMEM;
+>>>>>>> master-vanilla
 	}
 	v->len = len + 1;
 	return 0;
@@ -1124,11 +1959,76 @@ int blkid_probe_sprintf_value(blkid_probe pr, const char *name,
 	return rc;
 }
 
+<<<<<<< HEAD
+=======
+int blkid_probe_set_magic(blkid_probe pr, blkid_loff_t offset,
+			size_t len, unsigned char *magic)
+{
+	int rc = 0;
+	struct blkid_chain *chn = blkid_probe_get_chain(pr);
+
+	if (!chn || !magic || !len || chn->binary)
+		return 0;
+
+	switch (chn->driver->id) {
+	case BLKID_CHAIN_SUBLKS:
+		if (!(chn->flags & BLKID_SUBLKS_MAGIC))
+			return 0;
+		rc = blkid_probe_set_value(pr, "SBMAGIC", magic, len);
+		if (!rc)
+			rc = blkid_probe_sprintf_value(pr,
+					"SBMAGIC_OFFSET", "%llu", (unsigned long long)offset);
+		break;
+	case BLKID_CHAIN_PARTS:
+		if (!(chn->flags & BLKID_PARTS_MAGIC))
+			return 0;
+		rc = blkid_probe_set_value(pr, "PTMAGIC", magic, len);
+		if (!rc)
+			rc = blkid_probe_sprintf_value(pr,
+					"PTMAGIC_OFFSET", "%llu", (unsigned long long)offset);
+		break;
+	default:
+		break;
+	}
+
+	return rc;
+}
+
+int blkid_probe_verify_csum(blkid_probe pr, uint64_t csum, uint64_t expected)
+{
+	if (csum != expected) {
+		struct blkid_chain *chn = blkid_probe_get_chain(pr);
+
+		DBG(LOWPROBE, ul_debug(
+				"incorrect checksum for type %s,"
+				" got %jX, expected %jX",
+				blkid_probe_get_probername(pr),
+				csum, expected));
+		/*
+		 * Accept bad checksum if BLKID_SUBLKS_BADCSUM flags is set
+		 */
+		if (chn->driver->id == BLKID_CHAIN_SUBLKS
+		    && (chn->flags & BLKID_SUBLKS_BADCSUM)) {
+			blkid_probe_set_value(pr, "SBBADCSUM", (unsigned char *) "1", 2);
+			goto accept;
+		}
+		return 0;	/* bad checksum */
+	}
+
+accept:
+	return 1;
+}
+
+>>>>>>> master-vanilla
 /**
  * blkid_probe_get_devno:
  * @pr: probe
  *
+<<<<<<< HEAD
  * Returns: block device number, or 0 for regilar files.
+=======
+ * Returns: block device number, or 0 for regular files.
+>>>>>>> master-vanilla
  */
 dev_t blkid_probe_get_devno(blkid_probe pr)
 {
@@ -1139,7 +2039,11 @@ dev_t blkid_probe_get_devno(blkid_probe pr)
  * blkid_probe_get_wholedisk_devno:
  * @pr: probe
  *
+<<<<<<< HEAD
  * Returns: device number of the wholedisk, or 0 for regilar files.
+=======
+ * Returns: device number of the wholedisk, or 0 for regular files.
+>>>>>>> master-vanilla
  */
 dev_t blkid_probe_get_wholedisk_devno(blkid_probe pr)
 {
@@ -1150,7 +2054,11 @@ dev_t blkid_probe_get_wholedisk_devno(blkid_probe pr)
 		if (!devno)
 			return 0;
 
+<<<<<<< HEAD
 		 if (blkid_devno_to_wholedisk(devno, NULL, 0, &disk_devno) == 0)
+=======
+		if (blkid_devno_to_wholedisk(devno, NULL, 0, &disk_devno) == 0)
+>>>>>>> master-vanilla
 			pr->disk_devno = disk_devno;
 	}
 	return pr->disk_devno;
@@ -1203,9 +2111,18 @@ blkid_probe blkid_probe_get_wholedisk_probe(blkid_probe pr)
 		if (!disk_path)
 			return NULL;
 
+<<<<<<< HEAD
 		DBG(DEBUG_LOWPROBE, printf("allocate a wholedisk probe\n"));
 
 		pr->disk_probe = blkid_new_probe_from_filename(disk_path);
+=======
+		DBG(LOWPROBE, ul_debug("allocate a wholedisk probe"));
+
+		pr->disk_probe = blkid_new_probe_from_filename(disk_path);
+
+		free(disk_path);
+
+>>>>>>> master-vanilla
 		if (!pr->disk_probe)
 			return NULL;	/* ENOMEM? */
 	}
@@ -1245,7 +2162,11 @@ blkid_loff_t blkid_probe_get_offset(blkid_probe pr)
  * blkid_probe_get_fd:
  * @pr: probe
  *
+<<<<<<< HEAD
  * Returns: file descriptor for assigned device/file.
+=======
+ * Returns: file descriptor for assigned device/file or -1 in case of error.
+>>>>>>> master-vanilla
  */
 int blkid_probe_get_fd(blkid_probe pr)
 {
@@ -1293,9 +2214,20 @@ blkid_loff_t blkid_probe_get_sectors(blkid_probe pr)
  */
 int blkid_probe_numof_values(blkid_probe pr)
 {
+<<<<<<< HEAD
 	if (!pr)
 		return -1;
 	return pr->nvals;
+=======
+	int i = 0;
+	struct list_head *p;
+	if (!pr)
+		return -1;
+
+	list_for_each(p, &pr->values)
+		++i;
+	return i;
+>>>>>>> master-vanilla
 }
 
 /**
@@ -1325,7 +2257,11 @@ int blkid_probe_get_value(blkid_probe pr, int num, const char **name,
 	if (len)
 		*len = v->len;
 
+<<<<<<< HEAD
 	DBG(DEBUG_LOWPROBE, printf("returning %s value\n", v->name));
+=======
+	DBG(LOWPROBE, ul_debug("returning %s value", v->name));
+>>>>>>> master-vanilla
 	return 0;
 }
 
@@ -1369,16 +2305,43 @@ int blkid_probe_has_value(blkid_probe pr, const char *name)
 	return 0;
 }
 
+<<<<<<< HEAD
 struct blkid_prval *__blkid_probe_get_value(blkid_probe pr, int num)
 {
 	if (pr == NULL || num < 0 || num >= pr->nvals)
 		return NULL;
 
 	return &pr->vals[num];
+=======
+struct blkid_prval *blkid_probe_last_value(blkid_probe pr)
+{
+	if (!pr || list_empty(&pr->values))
+		return NULL;
+
+	return list_last_entry(&pr->values, struct blkid_prval, prvals);
+}
+
+
+struct blkid_prval *__blkid_probe_get_value(blkid_probe pr, int num)
+{
+	int i = 0;
+	struct list_head *p;
+
+	if (!pr || num < 0)
+		return NULL;
+
+	list_for_each(p, &pr->values) {
+		if (i++ != num)
+			continue;
+		return list_entry(p, struct blkid_prval, prvals);
+	}
+	return NULL;
+>>>>>>> master-vanilla
 }
 
 struct blkid_prval *__blkid_probe_lookup_value(blkid_probe pr, const char *name)
 {
+<<<<<<< HEAD
 	int i;
 
 	if (pr == NULL || pr->nvals == 0 || name == NULL)
@@ -1389,6 +2352,19 @@ struct blkid_prval *__blkid_probe_lookup_value(blkid_probe pr, const char *name)
 
 		if (v->name && strcmp(name, v->name) == 0) {
 			DBG(DEBUG_LOWPROBE, printf("returning %s value\n", v->name));
+=======
+	struct list_head *p;
+
+	if (!pr || list_empty(&pr->values) || !name)
+		return NULL;
+
+	list_for_each(p, &pr->values) {
+		struct blkid_prval *v = list_entry(p, struct blkid_prval,
+						prvals);
+
+		if (v->name && strcmp(name, v->name) == 0) {
+			DBG(LOWPROBE, ul_debug("returning %s value", v->name));
+>>>>>>> master-vanilla
 			return v;
 		}
 	}
@@ -1417,6 +2393,19 @@ void blkid_unparse_uuid(const unsigned char *uuid, char *str, size_t len)
 }
 #endif
 
+<<<<<<< HEAD
+=======
+/* like uuid_is_null() from libuuid, but works with arbitrary size of UUID */
+int blkid_uuid_is_empty(const unsigned char *buf, size_t len)
+{
+	size_t i;
+
+	for (i = 0; i < len; i++)
+		if (buf[i])
+			return 0;
+	return 1;
+}
+>>>>>>> master-vanilla
 
 /* Removes whitespace from the right-hand side of a string (trailing
  * whitespace).
@@ -1425,6 +2414,7 @@ void blkid_unparse_uuid(const unsigned char *uuid, char *str, size_t len)
  */
 size_t blkid_rtrim_whitespace(unsigned char *str)
 {
+<<<<<<< HEAD
 	size_t i = strlen((char *) str);
 
 	while (i--) {
@@ -1433,6 +2423,18 @@ size_t blkid_rtrim_whitespace(unsigned char *str)
 	}
 	str[++i] = '\0';
 	return i;
+=======
+	return rtrim_whitespace(str);
+}
+
+/* Removes whitespace from the left-hand side of a string.
+ *
+ * Returns size of the new string (without \0).
+ */
+size_t blkid_ltrim_whitespace(unsigned char *str)
+{
+	return ltrim_whitespace(str);
+>>>>>>> master-vanilla
 }
 
 /*
@@ -1441,8 +2443,14 @@ size_t blkid_rtrim_whitespace(unsigned char *str)
  * for later resolution to conflicts between superblocks.
  *
  * For example we found valid LVM superblock, LVM wipes 8KiB at the begin of
+<<<<<<< HEAD
  * the device. If we found another signature (for example MBR) this wiped area
  * then the signature has been added later and LVM superblock should be ignore.
+=======
+ * the device. If we found another signature (for example MBR) within the
+ * wiped area then the signature has been added later and LVM superblock
+ * should be ignore.
+>>>>>>> master-vanilla
  *
  * Note that this heuristic is not 100% reliable, for example "pvcreate --zero
  * n" allows to keep the begin of the device unmodified. It's probably better
@@ -1450,6 +2458,19 @@ size_t blkid_rtrim_whitespace(unsigned char *str)
  * than for conflicts between filesystem superblocks -- existence of unwanted
  * partition table is very unusual, because PT is pretty visible (parsed and
  * interpreted by kernel).
+<<<<<<< HEAD
+=======
+ *
+ * Note that we usually expect only one signature on the device, it means that
+ * we have to remember only one wiped area from previously successfully
+ * detected signature.
+ *
+ * blkid_probe_set_wiper() -- defines wiped area (e.g. LVM)
+ * blkid_probe_use_wiper() -- try to use area (e.g. MBR)
+ *
+ * Note that there is not relation between _wiper and blkid_to_wipe().
+ *
+>>>>>>> master-vanilla
  */
 void blkid_probe_set_wiper(blkid_probe pr, blkid_loff_t off, blkid_loff_t size)
 {
@@ -1459,7 +2480,11 @@ void blkid_probe_set_wiper(blkid_probe pr, blkid_loff_t off, blkid_loff_t size)
 		return;
 
 	if (!size) {
+<<<<<<< HEAD
 		DBG(DEBUG_LOWPROBE, printf("zeroize wiper\n"));
+=======
+		DBG(LOWPROBE, ul_debug("zeroize wiper"));
+>>>>>>> master-vanilla
 		pr->wipe_size = pr->wipe_off = 0;
 		pr->wipe_chain = NULL;
 		return;
@@ -1475,8 +2500,13 @@ void blkid_probe_set_wiper(blkid_probe pr, blkid_loff_t off, blkid_loff_t size)
 	pr->wipe_off = off;
 	pr->wipe_chain = chn;
 
+<<<<<<< HEAD
 	DBG(DEBUG_LOWPROBE,
 		printf("wiper set to %s::%s off=%jd size=%jd\n",
+=======
+	DBG(LOWPROBE,
+		ul_debug("wiper set to %s::%s off=%jd size=%jd",
+>>>>>>> master-vanilla
 			chn->driver->name,
 			chn->driver->idinfos[chn->idx]->name,
 			pr->wipe_off, pr->wipe_size));
@@ -1500,14 +2530,30 @@ int blkid_probe_is_wiped(blkid_probe pr, struct blkid_chain **chn,
 	return 0;
 }
 
+<<<<<<< HEAD
+=======
+/*
+ *  Try to use any area -- if the area has been previously wiped then the
+ *  previous probing result should be ignored (reseted).
+ */
+>>>>>>> master-vanilla
 void blkid_probe_use_wiper(blkid_probe pr, blkid_loff_t off, blkid_loff_t size)
 {
 	struct blkid_chain *chn = NULL;
 
 	if (blkid_probe_is_wiped(pr, &chn, off, size) && chn) {
+<<<<<<< HEAD
 		DBG(DEBUG_LOWPROBE, printf("wiped area detected -- ignore previous results\n"));
 		blkid_probe_set_wiper(pr, 0, 0);
 		blkid_probe_chain_reset_vals(pr, chn);
 	}
 }
 
+=======
+		DBG(LOWPROBE, ul_debug("previously wiped area modified "
+				       " -- ignore previous results"));
+		blkid_probe_set_wiper(pr, 0, 0);
+		blkid_probe_chain_reset_values(pr, chn);
+	}
+}
+>>>>>>> master-vanilla

@@ -48,11 +48,20 @@ int main(int argc, char *argv[])
 		errx(EXIT_FAILURE, "%s: does not contains any "
 				 "known partition table\n", devname);
 
+<<<<<<< HEAD
 	printf("size: %jd, sector size: %u, PT: %s, offset: %jd\n---\n",
 		blkid_probe_get_size(pr),
 		blkid_probe_get_sectorsize(pr),
 		blkid_parttable_get_type(root_tab),
 		blkid_parttable_get_offset(root_tab));
+=======
+	printf("size: %jd, sector size: %u, PT: %s, offset: %jd, id=%s\n---\n",
+		blkid_probe_get_size(pr),
+		blkid_probe_get_sectorsize(pr),
+		blkid_parttable_get_type(root_tab),
+		blkid_parttable_get_offset(root_tab),
+		blkid_parttable_get_id(root_tab));
+>>>>>>> master-vanilla
 
 	/*
 	 * List partitions

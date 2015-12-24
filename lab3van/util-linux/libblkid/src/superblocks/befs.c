@@ -122,7 +122,11 @@ struct bplustree_node {
 	char		name[0];
 } __attribute__((packed));
 
+<<<<<<< HEAD
 unsigned char *get_block_run(blkid_probe pr, const struct befs_super_block *bs,
+=======
+static unsigned char *get_block_run(blkid_probe pr, const struct befs_super_block *bs,
+>>>>>>> master-vanilla
 					const struct block_run *br, int fs_le)
 {
 	return blkid_probe_get_buffer(pr,
@@ -135,7 +139,11 @@ unsigned char *get_block_run(blkid_probe pr, const struct befs_super_block *bs,
 					<< FS32_TO_CPU(bs->block_shift, fs_le));
 }
 
+<<<<<<< HEAD
 unsigned char *get_custom_block_run(blkid_probe pr,
+=======
+static unsigned char *get_custom_block_run(blkid_probe pr,
+>>>>>>> master-vanilla
 				const struct befs_super_block *bs,
 				const struct block_run *br,
 				int64_t offset, uint32_t length, int fs_le)
@@ -154,7 +162,11 @@ unsigned char *get_custom_block_run(blkid_probe pr,
 			length);
 }
 
+<<<<<<< HEAD
 unsigned char *get_tree_node(blkid_probe pr, const struct befs_super_block *bs,
+=======
+static unsigned char *get_tree_node(blkid_probe pr, const struct befs_super_block *bs,
+>>>>>>> master-vanilla
 				const struct data_stream *ds,
 				int64_t start, uint32_t length, int fs_le)
 {
@@ -230,7 +242,11 @@ unsigned char *get_tree_node(blkid_probe pr, const struct befs_super_block *bs,
 	return NULL;
 }
 
+<<<<<<< HEAD
 int32_t compare_keys(const char keys1[], uint16_t keylengths1[], int32_t index,
+=======
+static int32_t compare_keys(const char keys1[], uint16_t keylengths1[], int32_t index,
+>>>>>>> master-vanilla
 			const char *key2, uint16_t keylength2, int fs_le)
 {
 	const char *key1;
@@ -251,7 +267,11 @@ int32_t compare_keys(const char keys1[], uint16_t keylengths1[], int32_t index,
 	return result;
 }
 
+<<<<<<< HEAD
 int64_t get_key_value(blkid_probe pr, const struct befs_super_block *bs,
+=======
+static int64_t get_key_value(blkid_probe pr, const struct befs_super_block *bs,
+>>>>>>> master-vanilla
 			const struct befs_inode *bi, const char *key, int fs_le)
 {
 	struct bplustree_header *bh;
@@ -261,6 +281,7 @@ int64_t get_key_value(blkid_probe pr, const struct befs_super_block *bs,
 	int64_t node_pointer;
 	int32_t first, last, mid, cmp;
 
+<<<<<<< HEAD
 	bh = (struct bplustree_header *) get_tree_node(pr, bs, &bi->data, 0,
 					sizeof(struct bplustree_header), fs_le);
 	if (!bh)
@@ -268,14 +289,32 @@ int64_t get_key_value(blkid_probe pr, const struct befs_super_block *bs,
 
 	if ((int32_t) FS32_TO_CPU(bh->magic, fs_le) != BPLUSTREE_MAGIC)
 		return -1;
+=======
+	errno = 0;
+	bh = (struct bplustree_header *) get_tree_node(pr, bs, &bi->data, 0,
+					sizeof(struct bplustree_header), fs_le);
+	if (!bh)
+		return errno ? -errno : -ENOENT;
+
+	if ((int32_t) FS32_TO_CPU(bh->magic, fs_le) != BPLUSTREE_MAGIC)
+		return -ENOENT;
+>>>>>>> master-vanilla
 
 	node_pointer = FS64_TO_CPU(bh->root_node_pointer, fs_le);
 
 	do {
+<<<<<<< HEAD
 		bn = (struct bplustree_node *) get_tree_node(pr, bs, &bi->data,
 			node_pointer, FS32_TO_CPU(bh->node_size, fs_le), fs_le);
 		if (!bn)
 			return -1;
+=======
+		errno = 0;
+		bn = (struct bplustree_node *) get_tree_node(pr, bs, &bi->data,
+			node_pointer, FS32_TO_CPU(bh->node_size, fs_le), fs_le);
+		if (!bn)
+			return errno ? -errno : -ENOENT;
+>>>>>>> master-vanilla
 
 		keylengths = (uint16_t *) ((uint8_t *) bn
 				+ ((sizeof(struct bplustree_node)
@@ -328,7 +367,11 @@ int64_t get_key_value(blkid_probe pr, const struct befs_super_block *bs,
 	return 0;
 }
 
+<<<<<<< HEAD
 int get_uuid(blkid_probe pr, const struct befs_super_block *bs,
+=======
+static int get_uuid(blkid_probe pr, const struct befs_super_block *bs,
+>>>>>>> master-vanilla
 					uint64_t * const uuid, int fs_le)
 {
 	struct befs_inode *bi;
@@ -336,10 +379,17 @@ int get_uuid(blkid_probe pr, const struct befs_super_block *bs,
 
 	bi = (struct befs_inode *) get_block_run(pr, bs, &bs->root_dir, fs_le);
 	if (!bi)
+<<<<<<< HEAD
 		return -1;
 
 	if (FS32_TO_CPU(bi->magic1, fs_le) != INODE_MAGIC1)
 		return -1;
+=======
+		return errno ? -errno : BLKID_PROBE_NONE;
+
+	if (FS32_TO_CPU(bi->magic1, fs_le) != INODE_MAGIC1)
+		return BLKID_PROBE_NONE;
+>>>>>>> master-vanilla
 
 	sd = (struct small_data *) bi->small_data;
 
@@ -348,9 +398,17 @@ int get_uuid(blkid_probe pr, const struct befs_super_block *bs,
 			&& FS16_TO_CPU(sd->name_size, fs_le) == strlen(KEY_NAME)
 			&& FS16_TO_CPU(sd->data_size, fs_le) == KEY_SIZE
 			&& strcmp(sd->name, KEY_NAME) == 0) {
+<<<<<<< HEAD
 			*uuid = *(uint64_t *) ((uint8_t *) sd->name
 					+ FS16_TO_CPU(sd->name_size, fs_le)
 					+ 3);
+=======
+
+			memcpy(uuid,
+			       sd->name + FS16_TO_CPU(sd->name_size, fs_le) + 3,
+			       sizeof(uint64_t));
+
+>>>>>>> master-vanilla
 			break;
 		} else if (FS32_TO_CPU(sd->type, fs_le) == 0
 				&& FS16_TO_CPU(sd->name_size, fs_le) == 0
@@ -374,6 +432,7 @@ int get_uuid(blkid_probe pr, const struct befs_super_block *bs,
 		bi = (struct befs_inode *) get_block_run(pr, bs,
 							&bi->attributes, fs_le);
 		if (!bi)
+<<<<<<< HEAD
 			return -1;
 
 		if (FS32_TO_CPU(bi->magic1, fs_le) != INODE_MAGIC1)
@@ -383,15 +442,33 @@ int get_uuid(blkid_probe pr, const struct befs_super_block *bs,
 
 		if (value < 0)
 			return value;
+=======
+			return errno ? -errno : BLKID_PROBE_NONE;
+
+		if (FS32_TO_CPU(bi->magic1, fs_le) != INODE_MAGIC1)
+			return BLKID_PROBE_NONE;
+
+		value = get_key_value(pr, bs, bi, KEY_NAME, fs_le);
+		if (value < 0)
+			return value == -ENOENT ? BLKID_PROBE_NONE : value;
+
+>>>>>>> master-vanilla
 		else if (value > 0) {
 			bi = (struct befs_inode *) blkid_probe_get_buffer(pr,
 				value << FS32_TO_CPU(bs->block_shift, fs_le),
 				FS32_TO_CPU(bs->block_size, fs_le));
 			if (!bi)
+<<<<<<< HEAD
 				return -1;
 
 			if (FS32_TO_CPU(bi->magic1, fs_le) != INODE_MAGIC1)
 				return -1;
+=======
+				return errno ? -errno : BLKID_PROBE_NONE;
+
+			if (FS32_TO_CPU(bi->magic1, fs_le) != INODE_MAGIC1)
+				return 1;
+>>>>>>> master-vanilla
 
 			if (FS32_TO_CPU(bi->type, fs_le) == B_UINT64_TYPE
 				&& FS64_TO_CPU(bi->data.size, fs_le) == KEY_SIZE
@@ -402,7 +479,11 @@ int get_uuid(blkid_probe pr, const struct befs_super_block *bs,
 				attr_data = (uint64_t *) get_block_run(pr, bs,
 						&bi->data.direct[0], fs_le);
 				if (!attr_data)
+<<<<<<< HEAD
 					return -1;
+=======
+					return errno ? -errno : BLKID_PROBE_NONE;
+>>>>>>> master-vanilla
 
 				*uuid = *attr_data;
 			}
@@ -422,7 +503,11 @@ static int probe_befs(blkid_probe pr, const struct blkid_idmag *mag)
 					mag->sboff - B_OS_NAME_LENGTH,
 					sizeof(struct befs_super_block));
 	if (!bs)
+<<<<<<< HEAD
 		return -1;
+=======
+		return errno ? -errno : BLKID_PROBE_NONE;
+>>>>>>> master-vanilla
 
 	if (le32_to_cpu(bs->magic1) == SUPER_BLOCK_MAGIC1
 		&& le32_to_cpu(bs->magic2) == SUPER_BLOCK_MAGIC2
@@ -437,11 +522,19 @@ static int probe_befs(blkid_probe pr, const struct blkid_idmag *mag)
 		fs_le = 0;
 		version = "big-endian";
 	} else
+<<<<<<< HEAD
 		return -1;
 
 	ret = get_uuid(pr, bs, &volume_id, fs_le);
 
 	if (ret < 0)
+=======
+		return BLKID_PROBE_NONE;
+
+	ret = get_uuid(pr, bs, &volume_id, fs_le);
+
+	if (ret != 0)
+>>>>>>> master-vanilla
 		return ret;
 
 	/*
@@ -457,7 +550,11 @@ static int probe_befs(blkid_probe pr, const struct blkid_idmag *mag)
 		blkid_probe_sprintf_uuid(pr, (unsigned char *) &volume_id,
 					sizeof(volume_id), "%016" PRIx64,
 					FS64_TO_CPU(volume_id, fs_le));
+<<<<<<< HEAD
 	return 0;
+=======
+	return BLKID_PROBE_OK;
+>>>>>>> master-vanilla
 }
 
 const struct blkid_idinfo befs_idinfo =

@@ -11,7 +11,11 @@
  */
 
 #include <stdio.h>
+<<<<<<< HEAD
 #if HAVE_UNISTD_H
+=======
+#ifdef HAVE_UNISTD_H
+>>>>>>> master-vanilla
 #include <unistd.h>
 #endif
 #include <stdlib.h>
@@ -32,6 +36,7 @@ char *blkid_get_tag_value(blkid_cache cache, const char *tagname,
 	blkid_cache c = cache;
 	char *ret = NULL;
 
+<<<<<<< HEAD
 	DBG(DEBUG_RESOLVE, printf("looking for %s on %s\n", tagname, devname));
 
 	if (!devname)
@@ -45,6 +50,18 @@ char *blkid_get_tag_value(blkid_cache cache, const char *tagname,
 	if ((dev = blkid_get_dev(c, devname, BLKID_DEV_NORMAL)) &&
 	    (found = blkid_find_tag_dev(dev, tagname)))
 		ret = blkid_strdup(found->bit_val);
+=======
+	DBG(TAG, ul_debug("looking for %s on %s", tagname, devname));
+
+	if (!devname)
+		return NULL;
+	if (!cache && blkid_get_cache(&c, NULL) < 0)
+		return NULL;
+
+	if ((dev = blkid_get_dev(c, devname, BLKID_DEV_NORMAL)) &&
+	    (found = blkid_find_tag_dev(dev, tagname)))
+		ret = found->bit_val ? strdup(found->bit_val) : NULL;
+>>>>>>> master-vanilla
 
 	if (!cache)
 		blkid_put_cache(c);
@@ -68,6 +85,7 @@ char *blkid_get_devname(blkid_cache cache, const char *token,
 
 	if (!token)
 		return NULL;
+<<<<<<< HEAD
 
 	if (!cache) {
 		if (blkid_get_cache(&c, NULL) < 0)
@@ -76,11 +94,21 @@ char *blkid_get_devname(blkid_cache cache, const char *token,
 
 	DBG(DEBUG_RESOLVE,
 	    printf("looking for %s%s%s %s\n", token, value ? "=" : "",
+=======
+	if (!cache && blkid_get_cache(&c, NULL) < 0)
+		return NULL;
+
+	DBG(TAG, ul_debug("looking for %s%s%s %s", token, value ? "=" : "",
+>>>>>>> master-vanilla
 		   value ? value : "", cache ? "in cache" : "from disk"));
 
 	if (!value) {
 		if (!strchr(token, '=')) {
+<<<<<<< HEAD
 			ret = blkid_strdup(token);
+=======
+			ret = strdup(token);
+>>>>>>> master-vanilla
 			goto out;
 		}
 		blkid_parse_tag_string(token, &t, &v);
@@ -94,6 +122,7 @@ char *blkid_get_devname(blkid_cache cache, const char *token,
 	if (!dev)
 		goto out;
 
+<<<<<<< HEAD
 	ret = blkid_strdup(blkid_dev_devname(dev));
 
 out:
@@ -103,6 +132,15 @@ out:
 		blkid_put_cache(c);
 	}
 	return (ret);
+=======
+	ret = dev->bid_name ? strdup(dev->bid_name) : NULL;
+out:
+	free(t);
+	free(v);
+	if (!cache)
+		blkid_put_cache(c);
+	return ret;
+>>>>>>> master-vanilla
 }
 
 #ifdef TEST_PROGRAM
@@ -111,7 +149,11 @@ int main(int argc, char **argv)
 	char *value;
 	blkid_cache cache;
 
+<<<<<<< HEAD
 	blkid_init_debug(DEBUG_ALL);
+=======
+	blkid_init_debug(BLKID_DEBUG_ALL);
+>>>>>>> master-vanilla
 	if (argc != 2 && argc != 3) {
 		fprintf(stderr, "Usage:\t%s tagname=value\n"
 			"\t%s tagname devname\n"

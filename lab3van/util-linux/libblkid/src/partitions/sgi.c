@@ -13,6 +13,7 @@
 #include <stdint.h>
 
 #include "partitions.h"
+<<<<<<< HEAD
 
 #define SGI_MAXPARTITIONS	16
 
@@ -88,6 +89,9 @@ static uint32_t count_checksum(struct sgi_disklabel *label)
 	return sum;
 }
 
+=======
+#include "pt-sgi.h"
+>>>>>>> master-vanilla
 
 static int probe_sgi_pt(blkid_probe pr,
 		const struct blkid_idmag *mag __attribute__((__unused__)))
@@ -99,22 +103,42 @@ static int probe_sgi_pt(blkid_probe pr,
 	int i;
 
 	l = (struct sgi_disklabel *) blkid_probe_get_sector(pr, 0);
+<<<<<<< HEAD
 	if (!l)
 		goto nothing;
 
 	if (count_checksum(l)) {
 		DBG(DEBUG_LOWPROBE, printf(
 			"detected corrupted sgi disk label -- ignore\n"));
+=======
+	if (!l) {
+		if (errno)
+			return -errno;
+		goto nothing;
+	}
+
+	if (sgi_pt_checksum(l)) {
+		DBG(LOWPROBE, ul_debug(
+			"detected corrupted sgi disk label -- ignore"));
+>>>>>>> master-vanilla
 		goto nothing;
 	}
 
 	if (blkid_partitions_need_typeonly(pr))
 		/* caller does not ask for details about partitions */
+<<<<<<< HEAD
 		return 0;
 
 	ls = blkid_probe_get_partlist(pr);
 	if (!ls)
 		goto err;
+=======
+		return BLKID_PROBE_OK;
+
+	ls = blkid_probe_get_partlist(pr);
+	if (!ls)
+		goto nothing;
+>>>>>>> master-vanilla
 
 	tab = blkid_partlist_new_parttable(ls, "sgi", 0);
 	if (!tab)
@@ -126,8 +150,12 @@ static int probe_sgi_pt(blkid_probe pr,
 		uint32_t type = be32_to_cpu(p->type);
 		blkid_partition par;
 
+<<<<<<< HEAD
 		if (size == 0 || type == SGI_TYPE_VOLULME ||
 			         type == SGI_TYPE_VOLHDR) {
+=======
+		if (!size) {
+>>>>>>> master-vanilla
 			blkid_partlist_increment_partno(ls);
 			continue;
 		}
@@ -138,12 +166,21 @@ static int probe_sgi_pt(blkid_probe pr,
 		blkid_partition_set_type(par, type);
 	}
 
+<<<<<<< HEAD
 	return 0;
 
 nothing:
 	return 1;
 err:
 	return -1;
+=======
+	return BLKID_PROBE_OK;
+
+nothing:
+	return BLKID_PROBE_NONE;
+err:
+	return -ENOMEM;
+>>>>>>> master-vanilla
 }
 
 const struct blkid_idinfo sgi_pt_idinfo =

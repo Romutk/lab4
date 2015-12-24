@@ -58,3 +58,11 @@ target: /mnt/gogogo
 fstype: cifs
 optstr: user=SRGROUP/baby,noauto
 user-optstr: user=SRGROUP/baby,noauto
+<<<<<<< HEAD
+=======
+------ fs:
+source: /dev/foo
+target: /any/foo/
+fstype: auto
+optstr: defaults
+>>>>>>> master-vanilla

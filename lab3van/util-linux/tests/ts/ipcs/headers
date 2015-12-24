@@ -15,12 +15,21 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
+<<<<<<< HEAD
 TS_TOPDIR="$(dirname $0)/../.."
+=======
+TS_TOPDIR="${0%/*}/../.."
+>>>>>>> master-vanilla
 TS_DESC="headers"
 
 . $TS_TOPDIR/functions.sh
 ts_init "$*"
 
+<<<<<<< HEAD
+=======
+ts_check_test_command "$TS_CMD_IPCS"
+
+>>>>>>> master-vanilla
 ts_log "test: shm headers"
 $TS_CMD_IPCS -m -t | grep --after-context=1 "^---"  >> $TS_OUTPUT
 $TS_CMD_IPCS -m -p | grep --after-context=1 "^---"  >> $TS_OUTPUT

@@ -22,6 +22,7 @@ static int probe_aix_pt(blkid_probe pr,
 
 	if (blkid_partitions_need_typeonly(pr))
 		/* caller does not ask for details about partitions */
+<<<<<<< HEAD
 		return 0;
 
 	ls = blkid_probe_get_partlist(pr);
@@ -35,6 +36,19 @@ static int probe_aix_pt(blkid_probe pr,
 	return 0;
 err:
 	return -1;
+=======
+		return BLKID_PROBE_OK;
+
+	ls = blkid_probe_get_partlist(pr);
+	if (!ls)
+		return BLKID_PROBE_NONE;
+
+	tab = blkid_partlist_new_parttable(ls, "aix", 0);
+	if (!tab)
+		return -ENOMEM;
+
+	return BLKID_PROBE_OK;
+>>>>>>> master-vanilla
 }
 
 /*
@@ -42,7 +56,11 @@ err:
  * magic number at begin of the disk.
  *
  * Note, Linux kernel is tring to be smart and AIX signature is ignored when
+<<<<<<< HEAD
  * there is a valid DOS partitions table. We don't support such behaviour. All
+=======
+ * there is a valid DOS partitions table. We don't support such behavior. All
+>>>>>>> master-vanilla
  * fdisk-like programs has to properly wipe the fist sector. Everything other
  * is a bug.
  */

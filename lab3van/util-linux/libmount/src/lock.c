@@ -10,9 +10,15 @@
  * @title: Locking
  * @short_description: locking methods for /etc/mtab or another libmount files
  *
+<<<<<<< HEAD
  * The mtab lock is backwardly compatible with the standard linux /etc/mtab
  * locking.  Note, it's necessary to use the same locking schema in all
  * application that access the file.
+=======
+ * The mtab lock is backwards compatible with the standard linux /etc/mtab
+ * locking.  Note, it's necessary to use the same locking schema in all
+ * applications that access the file.
+>>>>>>> master-vanilla
  */
 #include <sys/time.h>
 #include <time.h>
@@ -21,8 +27,16 @@
 #include <limits.h>
 #include <sys/file.h>
 
+<<<<<<< HEAD
 #include "pathnames.h"
 #include "mountP.h"
+=======
+#include "strutils.h"
+#include "closestream.h"
+#include "pathnames.h"
+#include "mountP.h"
+#include "monotonic.h"
+>>>>>>> master-vanilla
 
 /*
  * lock handler
@@ -78,7 +92,11 @@ struct libmnt_lock *mnt_new_lock(const char *datafile, pid_t id)
 	ml->linkfile = ln;
 	ml->lockfile = lo;
 
+<<<<<<< HEAD
 	DBG(LOCKS, mnt_debug_h(ml, "alloc: default linkfile=%s, lockfile=%s", ln, lo));
+=======
+	DBG(LOCKS, ul_debugobj(ml, "alloc: default linkfile=%s, lockfile=%s", ln, lo));
+>>>>>>> master-vanilla
 	return ml;
 err:
 	free(lo);
@@ -98,7 +116,11 @@ void mnt_free_lock(struct libmnt_lock *ml)
 {
 	if (!ml)
 		return;
+<<<<<<< HEAD
 	DBG(LOCKS, mnt_debug_h(ml, "free%s", ml->locked ? " !!! LOCKED !!!" : ""));
+=======
+	DBG(LOCKS, ul_debugobj(ml, "free%s", ml->locked ? " !!! LOCKED !!!" : ""));
+>>>>>>> master-vanilla
 	free(ml->lockfile);
 	free(ml->linkfile);
 	free(ml);
@@ -118,7 +140,11 @@ int mnt_lock_block_signals(struct libmnt_lock *ml, int enable)
 {
 	if (!ml)
 		return -EINVAL;
+<<<<<<< HEAD
 	DBG(LOCKS, mnt_debug_h(ml, "signals: %s", enable ? "BLOCKED" : "UNBLOCKED"));
+=======
+	DBG(LOCKS, ul_debugobj(ml, "signals: %s", enable ? "BLOCKED" : "UNBLOCKED"));
+>>>>>>> master-vanilla
 	ml->sigblock = enable ? 1 : 0;
 	return 0;
 }
@@ -134,10 +160,21 @@ int mnt_lock_use_simplelock(struct libmnt_lock *ml, int enable)
 
 	assert(ml->lockfile);
 
+<<<<<<< HEAD
 	DBG(LOCKS, mnt_debug_h(ml, "flock: %s", enable ? "ENABLED" : "DISABLED"));
 	ml->simplelock = enable ? 1 : 0;
 
 	sz = strlen(ml->lockfile);
+=======
+	DBG(LOCKS, ul_debugobj(ml, "flock: %s", enable ? "ENABLED" : "DISABLED"));
+	ml->simplelock = enable ? 1 : 0;
+
+	sz = strlen(ml->lockfile);
+	assert(sz);
+
+	if (sz < 1)
+		return -EINVAL;
+>>>>>>> master-vanilla
 
 	/* Change lock name:
 	 *
@@ -150,7 +187,11 @@ int mnt_lock_use_simplelock(struct libmnt_lock *ml, int enable)
 	else if (!ml->simplelock && endswith(ml->lockfile, ".lock"))
 		 memcpy(ml->lockfile + sz - 5, "~", 2);
 
+<<<<<<< HEAD
 	DBG(LOCKS, mnt_debug_h(ml, "new lock filename: '%s'", ml->lockfile));
+=======
+	DBG(LOCKS, ul_debugobj(ml, "new lock filename: '%s'", ml->lockfile));
+>>>>>>> master-vanilla
 	return 0;
 }
 
@@ -182,7 +223,11 @@ static void unlock_simplelock(struct libmnt_lock *ml)
 	assert(ml->simplelock);
 
 	if (ml->lockfile_fd >= 0) {
+<<<<<<< HEAD
 		DBG(LOCKS, mnt_debug_h(ml, "%s: unflocking",
+=======
+		DBG(LOCKS, ul_debugobj(ml, "%s: unflocking",
+>>>>>>> master-vanilla
 					mnt_lock_get_lockfile(ml)));
 		close(ml->lockfile_fd);
 	}
@@ -198,7 +243,11 @@ static int lock_simplelock(struct libmnt_lock *ml)
 
 	lfile = mnt_lock_get_lockfile(ml);
 
+<<<<<<< HEAD
 	DBG(LOCKS, mnt_debug_h(ml, "%s: locking", lfile));
+=======
+	DBG(LOCKS, ul_debugobj(ml, "%s: locking", lfile));
+>>>>>>> master-vanilla
 
 	if (ml->sigblock) {
 		sigset_t sigs;
@@ -243,7 +292,11 @@ static void mnt_lockalrm_handler(int sig __attribute__((__unused__)))
 
 /*
  * Waits for F_SETLKW, unfortunately we have to use SIGALRM here to interrupt
+<<<<<<< HEAD
  * fcntl() to avoid never ending waiting.
+=======
+ * fcntl() to avoid neverending waiting.
+>>>>>>> master-vanilla
  *
  * Returns: 0 on success, 1 on timeout, -errno on error.
  */
@@ -253,7 +306,16 @@ static int mnt_wait_mtab_lock(struct libmnt_lock *ml, struct flock *fl, time_t m
 	struct sigaction sa, osa;
 	int ret = 0;
 
+<<<<<<< HEAD
 	gettimeofday(&now, NULL);
+=======
+	gettime_monotonic(&now);
+	DBG(LOCKS, ul_debugobj(ml, "(%d) waiting for F_SETLKW (now=%lu, maxtime=%lu, diff=%lu)",
+				getpid(),
+				(unsigned long) now.tv_sec,
+				(unsigned long) maxtime,
+				(unsigned long) (maxtime - now.tv_sec)));
+>>>>>>> master-vanilla
 
 	if (now.tv_sec >= maxtime)
 		return 1;		/* timeout */
@@ -265,7 +327,10 @@ static int mnt_wait_mtab_lock(struct libmnt_lock *ml, struct flock *fl, time_t m
 
 	sigaction(SIGALRM, &sa, &osa);
 
+<<<<<<< HEAD
 	DBG(LOCKS, mnt_debug_h(ml, "(%d) waiting for F_SETLKW", getpid()));
+=======
+>>>>>>> master-vanilla
 
 	alarm(maxtime - now.tv_sec);
 	if (fcntl(ml->lockfile_fd, F_SETLKW, fl) == -1)
@@ -275,7 +340,11 @@ static int mnt_wait_mtab_lock(struct libmnt_lock *ml, struct flock *fl, time_t m
 	/* restore old sigaction */
 	sigaction(SIGALRM, &osa, NULL);
 
+<<<<<<< HEAD
 	DBG(LOCKS, mnt_debug_h(ml, "(%d) leaving mnt_wait_setlkw(), rc=%d",
+=======
+	DBG(LOCKS, ul_debugobj(ml, "(%d) leaving mnt_wait_setlkw(), rc=%d",
+>>>>>>> master-vanilla
 				getpid(), ret));
 	return ret;
 }
@@ -289,7 +358,11 @@ static int mnt_wait_mtab_lock(struct libmnt_lock *ml, struct flock *fl, time_t m
  * soon as the lock file is deleted by the first mount, and immediately
  * afterwards a third mount comes, creates a new /etc/mtab~, applies
  * flock to that, and also proceeds, so that the second and third mount
+<<<<<<< HEAD
  * now both are scribbling in /etc/mtab.
+=======
+ * are now both scribbling in /etc/mtab.
+>>>>>>> master-vanilla
  *
  * The new code uses a link() instead of a creat(), where we proceed
  * only if it was us that created the lock, and hence we always have
@@ -298,12 +371,17 @@ static int mnt_wait_mtab_lock(struct libmnt_lock *ml, struct flock *fl, time_t m
  *
  * Where does the link point to? Obvious choices are mtab and mtab~~.
  * HJLu points out that the latter leads to races. Right now we use
+<<<<<<< HEAD
  * mtab~.<pid> instead.
+=======
+ * mtab~.pid instead.
+>>>>>>> master-vanilla
  *
  *
  * The original mount locking code has used sleep(1) between attempts and
  * maximal number of attempts has been 5.
  *
+<<<<<<< HEAD
  * There was very small number of attempts and extremely long waiting (1s)
  * that is useless on machines with large number of mount processes.
  *
@@ -311,6 +389,15 @@ static int mnt_wait_mtab_lock(struct libmnt_lock *ml, struct flock *fl, time_t m
  * time limit (30s) rather than limit for number of attempts. The advantage
  * is that this method also counts time which we spend in fcntl(F_SETLKW) and
  * number of attempts is not restricted.
+=======
+ * There was a very small number of attempts and extremely long waiting (1s)
+ * that is useless on machines with large number of mount processes.
+ *
+ * Now we wait for a few thousand microseconds between attempts and we have a global
+ * time limit (30s) rather than a limit for the number of attempts. The advantage
+ * is that this method also counts time which we spend in fcntl(F_SETLKW) and
+ * the number of attempts is not restricted.
+>>>>>>> master-vanilla
  * -- kzak@redhat.com [Mar-2007]
  *
  *
@@ -319,11 +406,19 @@ static int mnt_wait_mtab_lock(struct libmnt_lock *ml, struct flock *fl, time_t m
  * backwardly compatible code.
  *
  * Don't forget that this code has to be compatible with 3rd party mounts
+<<<<<<< HEAD
  * (/sbin/mount.<foo>) and has to work with NFS.
  * -- kzak@redhat.com [May-2009]
  */
 
 /* maximum seconds between first and last attempt */
+=======
+ * (/sbin/mount.foo) and has to work with NFS.
+ * -- kzak@redhat.com [May-2009]
+ */
+
+/* maximum seconds between the first and the last attempt */
+>>>>>>> master-vanilla
 #define MOUNTLOCK_MAXTIME		30
 
 /* sleep time (in microseconds, max=999999) between attempts */
@@ -336,9 +431,15 @@ static void unlock_mtab(struct libmnt_lock *ml)
 
 	if (!ml->locked && ml->lockfile && ml->linkfile)
 	{
+<<<<<<< HEAD
 		/* We have (probably) all files, but we don't own the lock,
 		 * Really? Check it! Maybe ml->locked wasn't set properly
 		 * because code was interrupted by signal. Paranoia? Yes.
+=======
+		/* We (probably) have all the files, but we don't own the lock,
+		 * Really? Check it! Maybe ml->locked wasn't set properly
+		 * because the code was interrupted by a signal. Paranoia? Yes.
+>>>>>>> master-vanilla
 		 *
 		 * We own the lock when linkfile == lockfile.
 		 */
@@ -355,7 +456,11 @@ static void unlock_mtab(struct libmnt_lock *ml)
 		close(ml->lockfile_fd);
 	if (ml->locked && ml->lockfile) {
 		unlink(ml->lockfile);
+<<<<<<< HEAD
 		DBG(LOCKS, mnt_debug_h(ml, "unlink %s", ml->lockfile));
+=======
+		DBG(LOCKS, ul_debugobj(ml, "unlink %s", ml->lockfile));
+>>>>>>> master-vanilla
 	}
 }
 
@@ -392,7 +497,11 @@ static int lock_mtab(struct libmnt_lock *ml)
 		sigprocmask(SIG_BLOCK, &sigs, &ml->oldsigmask);
 	}
 
+<<<<<<< HEAD
 	i = open(linkfile, O_WRONLY|O_CREAT, S_IRUSR|S_IWUSR);
+=======
+	i = open(linkfile, O_WRONLY|O_CREAT|O_CLOEXEC, S_IRUSR|S_IWUSR);
+>>>>>>> master-vanilla
 	if (i < 0) {
 		/* linkfile does not exist (as a file) and we cannot create it.
 		 * Read-only or full filesystem? Too many files open in the system?
@@ -403,7 +512,11 @@ static int lock_mtab(struct libmnt_lock *ml)
 	}
 	close(i);
 
+<<<<<<< HEAD
 	gettimeofday(&maxtime, NULL);
+=======
+	gettime_monotonic(&maxtime);
+>>>>>>> master-vanilla
 	maxtime.tv_sec += MOUNTLOCK_MAXTIME;
 
 	waittime.tv_sec = 0;
@@ -424,12 +537,20 @@ static int lock_mtab(struct libmnt_lock *ml)
 				rc = -errno;
 			goto failed;
 		}
+<<<<<<< HEAD
 		ml->lockfile_fd = open(lockfile, O_WRONLY);
+=======
+		ml->lockfile_fd = open(lockfile, O_WRONLY|O_CLOEXEC);
+>>>>>>> master-vanilla
 
 		if (ml->lockfile_fd < 0) {
 			/* Strange... Maybe the file was just deleted? */
 			int errsv = errno;
+<<<<<<< HEAD
 			gettimeofday(&now, NULL);
+=======
+			gettime_monotonic(&now);
+>>>>>>> master-vanilla
 			if (errsv == ENOENT && now.tv_sec < maxtime.tv_sec) {
 				ml->locked = 0;
 				continue;
@@ -447,7 +568,11 @@ static int lock_mtab(struct libmnt_lock *ml)
 		if (ml->locked) {
 			/* We made the link. Now claim the lock. */
 			if (fcntl (ml->lockfile_fd, F_SETLK, &flock) == -1) {
+<<<<<<< HEAD
 				DBG(LOCKS, mnt_debug_h(ml,
+=======
+				DBG(LOCKS, ul_debugobj(ml,
+>>>>>>> master-vanilla
 					"%s: can't F_SETLK lockfile, errno=%d\n",
 					lockfile, errno));
 				/* proceed, since it was us who created the lockfile anyway */
@@ -458,7 +583,11 @@ static int lock_mtab(struct libmnt_lock *ml)
 			int err = mnt_wait_mtab_lock(ml, &flock, maxtime.tv_sec);
 
 			if (err == 1) {
+<<<<<<< HEAD
 				DBG(LOCKS, mnt_debug_h(ml,
+=======
+				DBG(LOCKS, ul_debugobj(ml,
+>>>>>>> master-vanilla
 					"%s: can't create link: time out (perhaps "
 					"there is a stale lock file?)", lockfile));
 				rc = -ETIMEDOUT;
@@ -473,7 +602,11 @@ static int lock_mtab(struct libmnt_lock *ml)
 			ml->lockfile_fd = -1;
 		}
 	}
+<<<<<<< HEAD
 	DBG(LOCKS, mnt_debug_h(ml, "%s: (%d) successfully locked",
+=======
+	DBG(LOCKS, ul_debugobj(ml, "%s: (%d) successfully locked",
+>>>>>>> master-vanilla
 					lockfile, getpid()));
 	unlink(linkfile);
 	return 0;
@@ -488,10 +621,17 @@ failed:
  * mnt_lock_file
  * @ml: pointer to struct libmnt_lock instance
  *
+<<<<<<< HEAD
  * Creates lock file (e.g. /etc/mtab~). Note that this function may
  * use alarm().
  *
  * Your application has to always call mnt_unlock_file() before exit.
+=======
+ * Creates a lock file (e.g. /etc/mtab~). Note that this function may
+ * use alarm().
+ *
+ * Your application always has to call mnt_unlock_file() before exit.
+>>>>>>> master-vanilla
  *
  * Traditional mtab locking scheme:
  *
@@ -500,6 +640,13 @@ failed:
  *   3. a) link() success: setups F_SETLK lock (see fcnlt(2))
  *      b) link() failed:  wait (max 30s) on F_SETLKW lock, goto 2.
  *
+<<<<<<< HEAD
+=======
+ * Note that when the lock is used by mnt_update_table() interface then libmount
+ * uses flock() for private library file /run/mount/utab. The fcnlt(2) is used only
+ * for backwardly compatible stuff like /etc/mtab.
+ *
+>>>>>>> master-vanilla
  * Returns: 0 on success or negative number in case of error (-ETIMEOUT is case
  * of stale lock file).
  */
@@ -518,7 +665,11 @@ int mnt_lock_file(struct libmnt_lock *ml)
  * mnt_unlock_file:
  * @ml: lock struct
  *
+<<<<<<< HEAD
  * Unlocks the file. The function could be called independently on the
+=======
+ * Unlocks the file. The function could be called independently of the
+>>>>>>> master-vanilla
  * lock status (for example from exit(3)).
  */
 void mnt_unlock_file(struct libmnt_lock *ml)
@@ -526,7 +677,11 @@ void mnt_unlock_file(struct libmnt_lock *ml)
 	if (!ml)
 		return;
 
+<<<<<<< HEAD
 	DBG(LOCKS, mnt_debug_h(ml, "(%d) %s", getpid(),
+=======
+	DBG(LOCKS, ul_debugobj(ml, "(%d) %s", getpid(),
+>>>>>>> master-vanilla
 			ml->locked ? "unlocking" : "cleaning"));
 
 	if (ml->simplelock)
@@ -538,7 +693,11 @@ void mnt_unlock_file(struct libmnt_lock *ml)
 	ml->lockfile_fd = -1;
 
 	if (ml->sigblock) {
+<<<<<<< HEAD
 		DBG(LOCKS, mnt_debug_h(ml, "restoring sigmask"));
+=======
+		DBG(LOCKS, ul_debugobj(ml, "restoring sigmask"));
+>>>>>>> master-vanilla
 		sigprocmask(SIG_SETMASK, &ml->oldsigmask, NULL);
 	}
 }
@@ -557,7 +716,11 @@ void increment_data(const char *filename, int verbose, int loopno)
 	FILE *f;
 	char buf[256];
 
+<<<<<<< HEAD
 	if (!(f = fopen(filename, "r")))
+=======
+	if (!(f = fopen(filename, "r" UL_CLOEXECSTR)))
+>>>>>>> master-vanilla
 		err(EXIT_FAILURE, "%d: failed to open: %s", getpid(), filename);
 
 	if (!fgets(buf, sizeof(buf), f))
@@ -566,11 +729,21 @@ void increment_data(const char *filename, int verbose, int loopno)
 	fclose(f);
 	num = atol(buf) + 1;
 
+<<<<<<< HEAD
 	if (!(f = fopen(filename, "w")))
 		err(EXIT_FAILURE, "%d: failed to open: %s", getpid(), filename);
 
 	fprintf(f, "%ld", num);
 	fclose(f);
+=======
+	if (!(f = fopen(filename, "w" UL_CLOEXECSTR)))
+		err(EXIT_FAILURE, "%d: failed to open: %s", getpid(), filename);
+
+	fprintf(f, "%ld", num);
+
+	if (close_stream(f) != 0)
+		err(EXIT_FAILURE, "write failed: %s", filename);
+>>>>>>> master-vanilla
 
 	if (verbose)
 		fprintf(stderr, "%d: %s: %ld --> %ld (loop=%d)\n", getpid(),
@@ -585,7 +758,11 @@ void clean_lock(void)
 	mnt_free_lock(lock);
 }
 
+<<<<<<< HEAD
 void sig_handler(int sig)
+=======
+void __attribute__((__noreturn__)) sig_handler(int sig)
+>>>>>>> master-vanilla
 {
 	errx(EXIT_FAILURE, "\n%d: catch signal: %s\n", getpid(), strsignal(sig));
 }
@@ -594,7 +771,10 @@ int test_lock(struct libmnt_test *ts, int argc, char *argv[])
 {
 	time_t synctime = 0;
 	unsigned int usecs;
+<<<<<<< HEAD
 	struct timeval tv;
+=======
+>>>>>>> master-vanilla
 	const char *datafile = NULL;
 	int verbose = 0, loops = 0, l, idx = 1;
 
@@ -639,11 +819,20 @@ int test_lock(struct libmnt_test *ts, int argc, char *argv[])
 
 	/* start the test in exactly defined time */
 	if (synctime) {
+<<<<<<< HEAD
+=======
+		struct timeval tv;
+
+>>>>>>> master-vanilla
 		gettimeofday(&tv, NULL);
 		if (synctime && synctime - tv.tv_sec > 1) {
 			usecs = ((synctime - tv.tv_sec) * 1000000UL) -
 						(1000000UL - tv.tv_usec);
+<<<<<<< HEAD
 			usleep(usecs);
+=======
+			xusleep(usecs);
+>>>>>>> master-vanilla
 		}
 	}
 
@@ -664,12 +853,20 @@ int test_lock(struct libmnt_test *ts, int argc, char *argv[])
 		mnt_free_lock(lock);
 		lock = NULL;
 
+<<<<<<< HEAD
 		/* The mount command usually finish after mtab update. We
+=======
+		/* The mount command usually finishes after a mtab update. We
+>>>>>>> master-vanilla
 		 * simulate this via short sleep -- it's also enough to make
 		 * concurrent processes happy.
 		 */
 		if (synctime)
+<<<<<<< HEAD
 			usleep(25000);
+=======
+			xusleep(25000);
+>>>>>>> master-vanilla
 	}
 
 	return 0;

@@ -4,7 +4,11 @@
 
 #include "md5.h"
 
+<<<<<<< HEAD
 int main()
+=======
+int main(void)
+>>>>>>> master-vanilla
 {
 	int i, ret;
 	struct MD5Context ctx;

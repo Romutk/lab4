@@ -4,12 +4,21 @@
  * Copyright (C) 2004 Theodore Ts'o.
  *
  * %Begin-Header%
+<<<<<<< HEAD
  * This file may be redistributed under the terms of the GNU Public
  * License.
  * %End-Header%
  */
 
 #if HAVE_UNISTD_H
+=======
+ * This file may be redistributed under the terms of the GNU Lesser General
+ * Public License.
+ * %End-Header%
+ */
+
+#ifdef HAVE_UNISTD_H
+>>>>>>> master-vanilla
 #include <unistd.h>
 #endif
 #include <string.h>

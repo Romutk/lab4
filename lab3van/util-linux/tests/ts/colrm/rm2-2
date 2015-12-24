@@ -15,12 +15,21 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
+<<<<<<< HEAD
 TS_TOPDIR="$(dirname $0)/../.."
+=======
+TS_TOPDIR="${0%/*}/../.."
+>>>>>>> master-vanilla
 TS_DESC="basic check"
 
 . $TS_TOPDIR/functions.sh
 ts_init "$*"
 
+<<<<<<< HEAD
+=======
+ts_check_test_command "$TS_CMD_COLRM"
+
+>>>>>>> master-vanilla
 printf "a       b\nc\td\nef\b\tg\n" | $TS_CMD_COLRM 2 2 > $TS_OUTPUT 2>&1
 
 ts_finalize

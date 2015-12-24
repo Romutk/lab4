@@ -29,7 +29,11 @@ static int probe_romfs(blkid_probe pr, const struct blkid_idmag *mag)
 
 	ros = blkid_probe_get_sb(pr, mag, struct romfs_super_block);
 	if (!ros)
+<<<<<<< HEAD
 		return -1;
+=======
+		return errno ? -errno : 1;
+>>>>>>> master-vanilla
 
 	if (strlen((char *) ros->ros_volume))
 		blkid_probe_set_label(pr, ros->ros_volume,

@@ -48,7 +48,11 @@ uint64_t ary64[] = {
 	0x0000000000000000, 0x0000000000000000
 	};
 
+<<<<<<< HEAD
 int main()
+=======
+int main(void)
+>>>>>>> master-vanilla
 {
 	int	i;
 	int	errors = 0;

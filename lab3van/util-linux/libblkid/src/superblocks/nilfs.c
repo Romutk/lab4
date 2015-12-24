@@ -63,6 +63,7 @@ struct nilfs_super_block {
 	uint32_t	s_reserved[192];
 };
 
+<<<<<<< HEAD
 /* nilfs2 magic string */
 #define NILFS_SB_MAGIC		"\x34\x34"
 /* nilfs2 super block offset */
@@ -75,22 +76,79 @@ struct nilfs_super_block {
 static int probe_nilfs2(blkid_probe pr, const struct blkid_idmag *mag)
 {
 	struct nilfs_super_block *sb;
+=======
+#define NILFS_SB_MAGIC		0x3434
+#define NILFS_SB_OFFSET		0x400
+#define NILFS_SBB_OFFSET(_sz)	((((_sz) / 0x200) - 8) * 0x200)
+
+static int nilfs_valid_sb(blkid_probe pr, struct nilfs_super_block *sb, int is_bak)
+{
+>>>>>>> master-vanilla
 	static unsigned char sum[4];
 	const int sumoff = offsetof(struct nilfs_super_block, s_sum);
 	size_t bytes;
 	uint32_t crc;
 
+<<<<<<< HEAD
 	sb = blkid_probe_get_sb(pr, mag, struct nilfs_super_block);
 	if (!sb)
 		return -1;
+=======
+	if (!sb || le16_to_cpu(sb->s_magic) != NILFS_SB_MAGIC)
+		return 0;
+
+	if (is_bak && blkid_probe_is_wholedisk(pr) &&
+	    sb->s_dev_size != pr->size)
+		return 0;
+>>>>>>> master-vanilla
 
 	bytes = le16_to_cpu(sb->s_bytes);
 	crc = crc32(le32_to_cpu(sb->s_crc_seed), (unsigned char *)sb, sumoff);
 	crc = crc32(crc, sum, 4);
 	crc = crc32(crc, (unsigned char *)sb + sumoff + 4, bytes - sumoff - 4);
 
+<<<<<<< HEAD
 	if (crc != le32_to_cpu(sb->s_sum))
 		return -1;
+=======
+	return blkid_probe_verify_csum(pr, crc, le32_to_cpu(sb->s_sum));
+}
+
+static int probe_nilfs2(blkid_probe pr, const struct blkid_idmag *mag)
+{
+	struct nilfs_super_block *sb, *sbp, *sbb;
+	int valid[2], swp = 0;
+	uint64_t magoff;
+
+	/* primary */
+	sbp = (struct nilfs_super_block *) blkid_probe_get_buffer(
+			pr, NILFS_SB_OFFSET, sizeof(struct nilfs_super_block));
+	if (!sbp)
+		return errno ? -errno : 1;
+
+	/* backup */
+	sbb = (struct nilfs_super_block *) blkid_probe_get_buffer(
+			pr, NILFS_SBB_OFFSET(pr->size), sizeof(struct nilfs_super_block));
+	if (!sbb)
+		return errno ? -errno : 1;
+
+	/*
+	 * Compare two super blocks and set 1 in swp if the secondary
+	 * super block is valid and newer.  Otherwise, set 0 in swp.
+	 */
+	valid[0] = nilfs_valid_sb(pr, sbp, 0);
+	valid[1] = nilfs_valid_sb(pr, sbb, 1);
+	if (!valid[0] && !valid[1])
+		return 1;
+
+	swp = valid[1] && (!valid[0] ||
+			   le64_to_cpu(sbp->s_last_cno) >
+			   le64_to_cpu(sbb->s_last_cno));
+	sb = swp ? sbb : sbp;
+
+	DBG(LOWPROBE, ul_debug("nilfs2: primary=%d, backup=%d, swap=%d",
+				valid[0], valid[1], swp));
+>>>>>>> master-vanilla
 
 	if (strlen(sb->s_volume_name))
 		blkid_probe_set_label(pr, (unsigned char *) sb->s_volume_name,
@@ -99,6 +157,16 @@ static int probe_nilfs2(blkid_probe pr, const struct blkid_idmag *mag)
 	blkid_probe_set_uuid(pr, sb->s_uuid);
 	blkid_probe_sprintf_version(pr, "%u", le32_to_cpu(sb->s_rev_level));
 
+<<<<<<< HEAD
+=======
+	magoff = swp ? NILFS_SBB_OFFSET(pr->size) : NILFS_SB_OFFSET;
+	magoff += offsetof(struct nilfs_super_block, s_magic);
+
+	if (blkid_probe_set_magic(pr, magoff, sizeof(sb->s_magic),
+				(unsigned char *) &sb->s_magic))
+		return 1;
+
+>>>>>>> master-vanilla
 	return 0;
 }
 
@@ -107,6 +175,7 @@ const struct blkid_idinfo nilfs2_idinfo =
 	.name		= "nilfs2",
 	.usage		= BLKID_USAGE_FILESYSTEM,
 	.probefunc	= probe_nilfs2,
+<<<<<<< HEAD
 	.magics		=
 	{
 		{
@@ -117,4 +186,9 @@ const struct blkid_idinfo nilfs2_idinfo =
 		},
 		{ NULL }
 	}
+=======
+	/* default min.size is 128MiB, but 1MiB for "mkfs.nilfs2 -b 1024 -B 16" */
+	.minsz		= (1024 * 1024),
+	.magics		= BLKID_NONE_MAGIC
+>>>>>>> master-vanilla
 };

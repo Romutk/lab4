@@ -28,14 +28,24 @@
 #		uniq >  words
 #
 
+<<<<<<< HEAD
 TS_TOPDIR="$(dirname $0)/../.."
+=======
+TS_TOPDIR="${0%/*}/../.."
+>>>>>>> master-vanilla
 TS_DESC="separator"
 
 . $TS_TOPDIR/functions.sh
 ts_init "$*"
 
+<<<<<<< HEAD
 [ -f "/usr/share/dict/words" ] || ts_skip "/usr/share/dict/words not such file"
 
 $TS_CMD_LOOK apple-pie >> $TS_OUTPUT
+=======
+ts_check_test_command "$TS_CMD_LOOK"
+
+$TS_CMD_LOOK apple-pie $TS_TOPDIR/ts/look/words >> $TS_OUTPUT
+>>>>>>> master-vanilla
 ts_finalize
 

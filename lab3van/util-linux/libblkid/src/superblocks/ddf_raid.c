@@ -81,7 +81,11 @@ static int probe_ddf(blkid_probe pr,
 	uint64_t off, lba;
 
 	if (pr->size < 0x30000)
+<<<<<<< HEAD
 		return -1;
+=======
+		return 1;
+>>>>>>> master-vanilla
 
 	for (i = 0; i < ARRAY_SIZE(hdrs); i++) {
 		off = ((pr->size / 0x200) - hdrs[i]) * 0x200;
@@ -90,8 +94,12 @@ static int probe_ddf(blkid_probe pr,
 					off,
 					sizeof(struct ddf_header));
 		if (!ddf)
+<<<<<<< HEAD
 			return -1;
 
+=======
+			return errno ? -errno : 1;
+>>>>>>> master-vanilla
 		if (ddf->signature == cpu_to_be32(DDF_MAGIC) ||
 		    ddf->signature == cpu_to_le32(DDF_MAGIC))
 			break;
@@ -99,7 +107,11 @@ static int probe_ddf(blkid_probe pr,
 	}
 
 	if (!ddf)
+<<<<<<< HEAD
 		return -1;
+=======
+		return 1;
+>>>>>>> master-vanilla
 
 	lba = ddf->signature == cpu_to_be32(DDF_MAGIC) ?
 			be64_to_cpu(ddf->primary_lba) :
@@ -111,8 +123,16 @@ static int probe_ddf(blkid_probe pr,
 
 		buf = blkid_probe_get_buffer(pr,
 					lba << 9, sizeof(ddf->signature));
+<<<<<<< HEAD
 		if (!buf || memcmp(buf, &ddf->signature, 4))
 			return -1;
+=======
+		if (!buf)
+			return errno ? -errno : 1;
+
+		if (memcmp(buf, &ddf->signature, 4) != 0)
+			return 1;
+>>>>>>> master-vanilla
 	}
 
 	blkid_probe_strncpy_uuid(pr, ddf->guid, sizeof(ddf->guid));
@@ -121,11 +141,19 @@ static int probe_ddf(blkid_probe pr,
 	*(version + sizeof(ddf->ddf_rev)) = '\0';
 
 	if (blkid_probe_set_version(pr, version) != 0)
+<<<<<<< HEAD
 		return -1;
 	if (blkid_probe_set_magic(pr, off,
 			sizeof(ddf->signature),
 			(unsigned char *) &ddf->signature))
 		return -1;
+=======
+		return 1;
+	if (blkid_probe_set_magic(pr, off,
+			sizeof(ddf->signature),
+			(unsigned char *) &ddf->signature))
+		return 1;
+>>>>>>> master-vanilla
 	return 0;
 }
 

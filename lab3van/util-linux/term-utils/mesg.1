@@ -31,6 +31,7 @@
 .\"
 .\"	@(#)mesg.1	8.1 (Berkeley) 6/6/93
 .\"
+<<<<<<< HEAD
 .\" Fri Mar 10 20:31:02 1995, modified for standard man macros,
 .\" faith@cs.unc.edu
 .\"
@@ -42,12 +43,25 @@ mesg \- display (do not display) messages from other users
 .SH SYNOPSIS
 .B mesg
 .RB [options]
+=======
+.TH MESG 1 "July 2014" "util-linux" "User Commands"
+.SH NAME
+mesg \- display (or do not display) messages from other users
+.SH SYNOPSIS
+.B mesg
+[option]
+>>>>>>> master-vanilla
 .RB [ n | y ]
 .SH DESCRIPTION
 The
 .B mesg
+<<<<<<< HEAD
 utility is invoked by a users to control write access others have to the
 terminal device associated with the standard error output.  If write access
+=======
+utility is invoked by a user to control write access others have to the
+terminal device associated with standard error output.  If write access
+>>>>>>> master-vanilla
 is allowed, then programs such as
 .BR talk (1)
 and
@@ -63,6 +77,7 @@ should be executed in your login scripts.
 .SH ARGUMENTS
 .TP
 .B n
+<<<<<<< HEAD
 Disallows messages.
 .TP
 .B y
@@ -94,6 +109,41 @@ Messages are not allowed.
 .TP
 .I "\>1"
 An error has occurred.
+=======
+Disallow messages.
+.TP
+.B y
+Allow messages to be displayed.
+.PP
+If no arguments are given,
+.B mesg
+shows the current message status on standard error output.
+.SH OPTIONS
+.TP
+.BR \-v , " \-\-verbose"
+Explain what is being done.
+.TP
+.BR \-V , " \-\-version"
+Display version information and exit.
+.TP
+.BR \-h , " \-\-help"
+Display help text and exit.
+.SH EXIT STATUS
+The
+.B mesg
+utility exits with one of the following values:
+.RS 4
+.TP
+.B "\ 0"
+Messages are allowed.
+.TP
+.B "\ 1"
+Messages are not allowed.
+.TP
+.B ">1"
+An error has occurred.
+.RE
+>>>>>>> master-vanilla
 .SH FILES
 .I /dev/[pt]ty[pq]?
 .SH "SEE ALSO"

@@ -37,7 +37,11 @@
  *                           last line that has no newline correctly.
  * 3-Jun-1998: Patched by Nicolai Langfeldt to work better on Linux:
  *	Handle any-length-lines.  Code copied from util-linux' setpwnam.c
+<<<<<<< HEAD
  * 1999-02-22 Arkadiusz Mi∂kiewicz <misiek@pld.ORG.PL>
+=======
+ * 1999-02-22 Arkadiusz Mi≈õkiewicz <misiek@pld.ORG.PL>
+>>>>>>> master-vanilla
  *	added Native Language Support
  * 1999-09-19 Bruno Haible <haible@clisp.cons.org>
  *	modified to work correctly in multi-byte locales
@@ -62,6 +66,10 @@
 #include "xalloc.h"
 #include "widechar.h"
 #include "c.h"
+<<<<<<< HEAD
+=======
+#include "closestream.h"
+>>>>>>> master-vanilla
 
 wchar_t *buf;
 
@@ -76,30 +84,71 @@ static void __attribute__ ((__noreturn__)) usage(FILE * out)
 	fprintf(out, _("Usage: %s [options] [file ...]\n"),
 		program_invocation_short_name);
 
+<<<<<<< HEAD
 	fprintf(out, _("\nOptions:\n"
 		       " -V, --version   output version information and exit\n"
 		       " -h, --help      display this help and exit\n"));
 
 	fprintf(out, _("\nFor more information see rev(1).\n"));
+=======
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Reverse lines characterwise.\n"), out);
+
+	fputs(USAGE_OPTIONS, out);
+	fputs(USAGE_HELP, out);
+	fputs(USAGE_VERSION, out);
+	fprintf(out, USAGE_MAN_TAIL("rev(1)"));
+>>>>>>> master-vanilla
 
 	exit(out == stderr ? EXIT_FAILURE : EXIT_SUCCESS);
+}
+
+<<<<<<< HEAD
+int main(int argc, char *argv[])
+{
+	char *filename = "stdin";
+	wchar_t *t;
+=======
+static void reverse_str(wchar_t *str, size_t n)
+{
+	size_t i;
+
+	for (i = 0; i < n / 2; ++i) {
+		wchar_t tmp = str[i];
+		str[i] = str[n - 1 - i];
+		str[n - 1 - i] = tmp;
+	}
 }
 
 int main(int argc, char *argv[])
 {
 	char *filename = "stdin";
-	wchar_t *t;
+>>>>>>> master-vanilla
 	size_t len, bufsiz = BUFSIZ;
 	FILE *fp = stdin;
 	int ch, rval = EXIT_SUCCESS;
 
+<<<<<<< HEAD
 	setlocale(LC_ALL, "");
 	bindtextdomain(PACKAGE, LOCALEDIR);
 	textdomain(PACKAGE);
+=======
+	static const struct option longopts[] = {
+		{ "version",    no_argument,       0, 'V' },
+		{ "help",       no_argument,       0, 'h' },
+		{ NULL,         0, 0, 0 }
+	};
+
+	setlocale(LC_ALL, "");
+	bindtextdomain(PACKAGE, LOCALEDIR);
+	textdomain(PACKAGE);
+	atexit(close_stdout);
+>>>>>>> master-vanilla
 
 	signal(SIGINT, sig_handler);
 	signal(SIGTERM, sig_handler);
 
+<<<<<<< HEAD
 	static const struct option longopts[] = {
 		{ "version",    no_argument,       0, 'V' },
 		{ "help",       no_argument,       0, 'h' },
@@ -111,6 +160,12 @@ int main(int argc, char *argv[])
 		case 'V':
 			printf(_("%s from %s\n"), program_invocation_short_name,
 						  PACKAGE_STRING);
+=======
+	while ((ch = getopt_long(argc, argv, "Vh", longopts, NULL)) != -1)
+		switch(ch) {
+		case 'V':
+			printf(UTIL_LINUX_VERSION);
+>>>>>>> master-vanilla
 			exit(EXIT_SUCCESS);
 		case 'h':
 			usage(stdout);
@@ -126,7 +181,11 @@ int main(int argc, char *argv[])
 	do {
 		if (*argv) {
 			if ((fp = fopen(*argv, "r")) == NULL) {
+<<<<<<< HEAD
 				warn(_("%s: open failed"), *argv );
+=======
+				warn(_("cannot open %s"), *argv );
+>>>>>>> master-vanilla
 				rval = EXIT_FAILURE;
 				++argv;
 				continue;
@@ -151,6 +210,7 @@ int main(int argc, char *argv[])
 
 				len = wcslen(buf);
 			}
+<<<<<<< HEAD
 
 			t = buf + len - 1 - (*(buf+len-1)=='\r' || *(buf+len-1)=='\n');
 			for ( ; t >= buf; --t) {
@@ -161,12 +221,23 @@ int main(int argc, char *argv[])
 		}
 
 		fflush(fp);
+=======
+			if (buf[len - 1] == '\n')
+				buf[len--] = '\0';
+			reverse_str(buf, len);
+			fputws(buf, stdout);
+		}
+>>>>>>> master-vanilla
 		if (ferror(fp)) {
 			warn("%s", filename);
 			rval = EXIT_FAILURE;
 		}
+<<<<<<< HEAD
 		if (fclose(fp))
 			rval = EXIT_FAILURE;
+=======
+		fclose(fp);
+>>>>>>> master-vanilla
 	} while(*argv);
 
 	free(buf);

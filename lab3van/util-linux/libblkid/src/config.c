@@ -50,8 +50,13 @@ static int parse_evaluate(struct blkid_config *conf, char *s)
 	}
 	return 0;
 err:
+<<<<<<< HEAD
 	DBG(DEBUG_CONFIG, printf(
 		"config file: unknown evaluation method '%s'.\n", s));
+=======
+	DBG(CONFIG, ul_debug(
+		"config file: unknown evaluation method '%s'.", s));
+>>>>>>> master-vanilla
 	return -1;
 }
 
@@ -71,8 +76,13 @@ static int parse_next(FILE *fd, struct blkid_config *conf)
 			if (feof(fd))
 				s = strchr (buf, '\0');
 			else {
+<<<<<<< HEAD
 				DBG(DEBUG_CONFIG, fprintf(stderr,
 					"libblkid: config file: missing newline at line '%s'.\n",
+=======
+				DBG(CONFIG, ul_debug(
+					"config file: missing newline at line '%s'.",
+>>>>>>> master-vanilla
 					buf));
 				return -1;
 			}
@@ -96,14 +106,23 @@ static int parse_next(FILE *fd, struct blkid_config *conf)
 	} else if (!strncmp(s, "CACHE_FILE=", 11)) {
 		s += 11;
 		if (*s)
+<<<<<<< HEAD
 			conf->cachefile = blkid_strdup(s);
+=======
+			conf->cachefile = strdup(s);
+>>>>>>> master-vanilla
 	} else if (!strncmp(s, "EVALUATE=", 9)) {
 		s += 9;
 		if (*s && parse_evaluate(conf, s) == -1)
 			return -1;
 	} else {
+<<<<<<< HEAD
 		DBG(DEBUG_CONFIG, printf(
 			"config file: unknown option '%s'.\n", s));
+=======
+		DBG(CONFIG, ul_debug(
+			"config file: unknown option '%s'.", s));
+>>>>>>> master-vanilla
 		return -1;
 	}
 	return 0;
@@ -125,6 +144,7 @@ struct blkid_config *blkid_read_config(const char *filename)
 		return NULL;
 	conf->uevent = -1;
 
+<<<<<<< HEAD
 	DBG(DEBUG_CONFIG, fprintf(stderr,
 		"reading config file: %s.\n", filename));
 
@@ -132,12 +152,23 @@ struct blkid_config *blkid_read_config(const char *filename)
 	if (!f) {
 		DBG(DEBUG_CONFIG, fprintf(stderr,
 			"%s: does not exist, using built-in default\n", filename));
+=======
+	DBG(CONFIG, ul_debug("reading config file: %s.", filename));
+
+	f = fopen(filename, "r" UL_CLOEXECSTR);
+	if (!f) {
+		DBG(CONFIG, ul_debug("%s: does not exist, using built-in default", filename));
+>>>>>>> master-vanilla
 		goto dflt;
 	}
 	while (!feof(f)) {
 		if (parse_next(f, conf)) {
+<<<<<<< HEAD
 			DBG(DEBUG_CONFIG, fprintf(stderr,
 				"%s: parse error\n", filename));
+=======
+			DBG(CONFIG, ul_debug("%s: parse error", filename));
+>>>>>>> master-vanilla
 			goto err;
 		}
 	}
@@ -148,7 +179,11 @@ dflt:
 		conf->nevals = 2;
 	}
 	if (!conf->cachefile)
+<<<<<<< HEAD
 		conf->cachefile = blkid_strdup(BLKID_CACHE_FILE);
+=======
+		conf->cachefile = strdup(BLKID_CACHE_FILE);
+>>>>>>> master-vanilla
 	if (conf->uevent == -1)
 		conf->uevent = TRUE;
 	if (f)
@@ -178,7 +213,11 @@ int main(int argc, char *argv[])
 	struct blkid_config *conf;
 	char *filename = NULL;
 
+<<<<<<< HEAD
 	blkid_init_debug(DEBUG_ALL);
+=======
+	blkid_init_debug(BLKID_DEBUG_ALL);
+>>>>>>> master-vanilla
 
 	if (argc == 2)
 		filename = argv[1];

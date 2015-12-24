@@ -15,12 +15,21 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
+<<<<<<< HEAD
 TS_TOPDIR="$(dirname $0)/../.."
+=======
+TS_TOPDIR="${0%/*}/../.."
+>>>>>>> master-vanilla
 TS_DESC="multibyte input"
 
 . $TS_TOPDIR/functions.sh
 ts_init "$*"
 
+<<<<<<< HEAD
+=======
+ts_check_test_command "$TS_CMD_COL"
+
+>>>>>>> master-vanilla
 cat $TS_SELF/multibyte.data | $TS_CMD_COL > /dev/null  2> $TS_OUTPUT
 
 ts_finalize

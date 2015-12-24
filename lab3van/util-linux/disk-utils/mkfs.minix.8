@@ -1,10 +1,15 @@
 .\" Copyright 1992, 1993, 1994 Rickard E. Faith (faith@cs.unc.edu)
 .\" May be freely distributed.
+<<<<<<< HEAD
 .TH MKFS.MINIX 8 "June 2011" "util-linux" "System Administration"
+=======
+.TH MKFS.MINIX 8 "June 2015" "util-linux" "System Administration"
+>>>>>>> master-vanilla
 .SH NAME
 mkfs.minix \- make a Minix filesystem
 .SH SYNOPSIS
 .B mkfs.minix
+<<<<<<< HEAD
 .RB [ \-c | \-l
 .IR filename ]
 .RB [ \-n
@@ -12,6 +17,9 @@ mkfs.minix \- make a Minix filesystem
 .RB [ \-i
 .IR inodecount ]
 .RB [ \-v ]
+=======
+[options]
+>>>>>>> master-vanilla
 .I device
 .RI [ size-in-blocks ]
 .SH DESCRIPTION
@@ -24,6 +32,7 @@ is usually of the following form:
 
 .nf
 .RS
+<<<<<<< HEAD
 /dev/hda[1-8] (IDE disk 1)
 /dev/hdb[1-8] (IDE disk 2)
 /dev/sda[1-8] (SCSI disk 1)
@@ -31,6 +40,18 @@ is usually of the following form:
 .RE
 .fi
 
+=======
+/dev/hda[1\(en8] (IDE disk 1)
+/dev/hdb[1\(en8] (IDE disk 2)
+/dev/sda[1\(en8] (SCSI disk 1)
+/dev/sdb[1\(en8] (SCSI disk 2)
+.RE
+.fi
+
+The device may be a block device or a image file of one, but this is not
+enforced.  Expect not much fun on a character device :-).
+.PP
+>>>>>>> master-vanilla
 The
 .I size-in-blocks
 parameter is the desired size of the file system, in blocks.
@@ -40,6 +61,7 @@ Only block counts strictly greater than 10 and strictly less than
 65536 are allowed.
 .SH OPTIONS
 .TP
+<<<<<<< HEAD
 .B \-c
 Check the device for bad blocks before creating the filesystem.  If any
 are found, the count is printed.
@@ -54,19 +76,48 @@ only accept namelength 14.
 Specify the number of inodes for the filesystem.
 .TP
 .BI \-l " filename"
+=======
+\fB\-c\fR, \fB\-\-check\fR
+Check the device for bad blocks before creating the filesystem.  If any
+are found, the count is printed.
+.TP
+\fB\-n\fR, \fB\-\-namelength\fR \fIlength\fR
+Specify the maximum length of filenames.  Currently, the only allowable
+values are 14 and 30 for file system versions 1 and 2.  Version 3 allows
+only value 60.  The default is 30.
+.TP
+\fB\-i\fR, \fB\-\-inodes\fR \fInumber\fR
+Specify the number of inodes for the filesystem.
+.TP
+\fB\-l\fR, \fB\-\-badblocks\fR \fIfilename\fR
+>>>>>>> master-vanilla
 Read the list of bad blocks from
 .IR filename .
 The file has one bad-block number per line.  The count of bad blocks read
 is printed.
 .TP
 .B \-1
+<<<<<<< HEAD
 Make a Minix version 1 filesystem.
+=======
+Make a Minix version 1 filesystem.  This is the default.
+>>>>>>> master-vanilla
 .TP
 .BR \-2 , " \-v"
 Make a Minix version 2 filesystem.
 .TP
 .B \-3
 Make a Minix version 3 filesystem.
+<<<<<<< HEAD
+=======
+.TP
+\fB\-V\fR, \fB\-\-version\fR
+Display version information and exit.  The long option cannot be combined
+with other options.
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Display help text and exit.
+>>>>>>> master-vanilla
 .SH "EXIT CODES"
 The exit code returned by
 .B mkfs.minix

@@ -13,8 +13,13 @@
 #ifndef _BLKID_BLKIDP_H
 #define _BLKID_BLKIDP_H
 
+<<<<<<< HEAD
 
 #define CONFIG_BLKID_DEBUG 1
+=======
+/* Always confirm that /dev/disk-by symlinks match with LABEL/UUID on device */
+/* #define CONFIG_BLKID_VERIFY_UDEV 1 */
+>>>>>>> master-vanilla
 
 #include <sys/types.h>
 #include <dirent.h>
@@ -27,6 +32,10 @@
 #include "bitops.h"	/* $(top_srcdir)/include/ */
 #include "blkdev.h"
 
+<<<<<<< HEAD
+=======
+#include "debug.h"
+>>>>>>> master-vanilla
 #include "blkid.h"
 #include "list.h"
 
@@ -117,6 +126,7 @@ struct blkid_chaindrv {
 /*
  * Low-level probe result
  */
+<<<<<<< HEAD
 #define BLKID_PROBVAL_BUFSIZ	64
 
 #define BLKID_NVALS_SUBLKS	14
@@ -135,6 +145,16 @@ struct blkid_prval
 	size_t		len;			/* length of value data */
 
 	struct blkid_chain	*chain;		/* owner */
+=======
+struct blkid_prval
+{
+	const char	*name;		/* value name */
+	unsigned char	*data;		/* value data */
+	size_t		len;		/* length of value data */
+
+	struct blkid_chain	*chain;		/* owner */
+	struct list_head	prvals;		/* list of results */
+>>>>>>> master-vanilla
 };
 
 /*
@@ -189,6 +209,10 @@ struct blkid_struct_probe
 	int			fd;		/* device file descriptor */
 	blkid_loff_t		off;		/* begin of data on the device */
 	blkid_loff_t		size;		/* end of data on the device */
+<<<<<<< HEAD
+=======
+	size_t			mmap_granularity; /* minimal size of mmaped buffer (PAGE_SIZE) */
+>>>>>>> master-vanilla
 
 	dev_t			devno;		/* device number (st.st_rdev) */
 	dev_t			disk_devno;	/* devno of the whole-disk or 0 */
@@ -207,8 +231,12 @@ struct blkid_struct_probe
 	struct blkid_chain	chains[BLKID_NCHAINS];	/* array of chains */
 	struct blkid_chain	*cur_chain;		/* current chain */
 
+<<<<<<< HEAD
 	struct blkid_prval	vals[BLKID_NVALS];	/* results */
 	int			nvals;		/* number of assigned vals */
+=======
+	struct list_head	values;		/* results */
+>>>>>>> master-vanilla
 
 	struct blkid_struct_probe *parent;	/* for clones */
 	struct blkid_struct_probe *disk_probe;	/* whole-disk probing */
@@ -218,6 +246,10 @@ struct blkid_struct_probe
 #define BLKID_FL_PRIVATE_FD	(1 << 1)	/* see blkid_new_probe_from_filename() */
 #define BLKID_FL_TINY_DEV	(1 << 2)	/* <= 1.47MiB (floppy or so) */
 #define BLKID_FL_CDROM_DEV	(1 << 3)	/* is a CD/DVD drive */
+<<<<<<< HEAD
+=======
+#define BLKID_FL_NOSCAN_DEV	(1 << 4)	/* do not scan this device */
+>>>>>>> master-vanilla
 
 /* private per-probing flags */
 #define BLKID_PROBE_FL_IGNORE_PT (1 << 1)	/* ignore partition table */
@@ -245,7 +277,12 @@ struct blkid_config {
 	char *cachefile;		/* CACHE_FILE=<path> option */
 };
 
+<<<<<<< HEAD
 extern struct blkid_config *blkid_read_config(const char *filename);
+=======
+extern struct blkid_config *blkid_read_config(const char *filename)
+			__ul_attribute__((warn_unused_result));
+>>>>>>> master-vanilla
 extern void blkid_free_config(struct blkid_config *conf);
 
 /*
@@ -282,6 +319,7 @@ struct blkid_struct_cache
 #define BLKID_BIC_FL_PROBED	0x0002	/* We probed /proc/partition devices */
 #define BLKID_BIC_FL_CHANGED	0x0004	/* Cache has changed from disk */
 
+<<<<<<< HEAD
 extern char *blkid_strdup(const char *s);
 extern char *blkid_strndup(const char *s, const int length);
 extern char *blkid_strconcat(const char *a, const char *b, const char *c);
@@ -289,6 +327,22 @@ extern char *blkid_strconcat(const char *a, const char *b, const char *c);
 #define BLKID_CACHE_FILE	"/etc/blkid.tab"
 #define BLKID_CONFIG_FILE	"/etc/blkid.conf"
 
+=======
+/* config file */
+#define BLKID_CONFIG_FILE	"/etc/blkid.conf"
+
+/* cache file on systemds with /run */
+#define BLKID_RUNTIME_TOPDIR	"/run"
+#define BLKID_RUNTIME_DIR	BLKID_RUNTIME_TOPDIR "/blkid"
+#define BLKID_CACHE_FILE	BLKID_RUNTIME_DIR "/blkid.tab"
+
+/* old systems */
+#define BLKID_CACHE_FILE_OLD	"/etc/blkid.tab"
+
+#define BLKID_PROBE_OK	 0
+#define BLKID_PROBE_NONE 1
+
+>>>>>>> master-vanilla
 #define BLKID_ERR_IO	 5
 #define BLKID_ERR_PROC	 9
 #define BLKID_ERR_MEM	12
@@ -306,6 +360,7 @@ extern char *blkid_strconcat(const char *a, const char *b, const char *c);
 #define BLKID_PRI_LVM	20
 #define BLKID_PRI_MD	10
 
+<<<<<<< HEAD
 #if defined(TEST_PROGRAM) && !defined(CONFIG_BLKID_DEBUG)
 #define CONFIG_BLKID_DEBUG
 #endif
@@ -338,19 +393,52 @@ extern void blkid_debug_dump_tag(blkid_tag tag);
 #define DBG(m,x)
 #define blkid_init_debug(x)
 #endif /* CONFIG_BLKID_DEBUG */
+=======
+#define BLKID_DEBUG_HELP	(1 << 0)
+#define BLKID_DEBUG_INIT	(1 << 1)
+#define BLKID_DEBUG_CACHE	(1 << 2)
+#define BLKID_DEBUG_CONFIG	(1 << 3)
+#define BLKID_DEBUG_DEV		(1 << 4)
+#define BLKID_DEBUG_DEVNAME	(1 << 5)
+#define BLKID_DEBUG_DEVNO	(1 << 6)
+#define BLKID_DEBUG_EVALUATE	(1 << 7)
+#define BLKID_DEBUG_LOWPROBE	(1 << 8)
+#define BLKID_DEBUG_PROBE	(1 << 9)
+#define BLKID_DEBUG_READ	(1 << 10)
+#define BLKID_DEBUG_SAVE	(1 << 11)
+#define BLKID_DEBUG_TAG		(1 << 12)
+#define BLKID_DEBUG_BUFFER	(1 << 13)
+#define BLKID_DEBUG_ALL		0xFFFF		/* (1 << 16) aka FFFF is expected by API */
+
+UL_DEBUG_DECLARE_MASK(libblkid);
+#define DBG(m, x)	__UL_DBG(libblkid, BLKID_DEBUG_, m, x)
+#define ON_DBG(m, x)    __UL_DBG_CALL(libblkid, BLKID_DEBUG_, m, x)
+
+extern void blkid_debug_dump_dev(blkid_dev dev);
+extern void blkid_debug_dump_tag(blkid_tag tag);
+
+>>>>>>> master-vanilla
 
 /* devno.c */
 struct dir_list {
 	char	*name;
 	struct dir_list *next;
 };
+<<<<<<< HEAD
 extern void blkid__scan_dir(char *, dev_t, struct dir_list **, char **);
 extern int blkid_driver_has_major(const char *drvname, int major);
+=======
+extern void blkid__scan_dir(char *, dev_t, struct dir_list **, char **)
+			__attribute__((nonnull(1,4)));
+extern int blkid_driver_has_major(const char *drvname, int major)
+			__attribute__((warn_unused_result));
+>>>>>>> master-vanilla
 
 /* lseek.c */
 extern blkid_loff_t blkid_llseek(int fd, blkid_loff_t offset, int whence);
 
 /* read.c */
+<<<<<<< HEAD
 extern void blkid_read_cache(blkid_cache cache);
 
 /* save.c */
@@ -360,17 +448,44 @@ extern int blkid_flush_cache(blkid_cache cache);
 extern char *blkid_safe_getenv(const char *arg);
 extern char *blkid_get_cache_filename(struct blkid_config *conf);
 
+=======
+extern void blkid_read_cache(blkid_cache cache)
+			__attribute__((nonnull));
+
+/* save.c */
+extern int blkid_flush_cache(blkid_cache cache)
+			__attribute__((nonnull));
+
+/* cache */
+extern char *blkid_safe_getenv(const char *arg)
+			__attribute__((nonnull))
+			__attribute__((warn_unused_result));
+
+extern char *blkid_get_cache_filename(struct blkid_config *conf)
+			__attribute__((warn_unused_result));
+>>>>>>> master-vanilla
 /*
  * Functions to create and find a specific tag type: tag.c
  */
 extern void blkid_free_tag(blkid_tag tag);
+<<<<<<< HEAD
 extern blkid_tag blkid_find_tag_dev(blkid_dev dev, const char *type);
 extern int blkid_set_tag(blkid_dev dev, const char *name,
 			 const char *value, const int vlength);
+=======
+extern blkid_tag blkid_find_tag_dev(blkid_dev dev, const char *type)
+			__attribute__((nonnull))
+			__attribute__((warn_unused_result));
+
+extern int blkid_set_tag(blkid_dev dev, const char *name,
+			 const char *value, const int vlength)
+			__attribute__((nonnull(1,2)));
+>>>>>>> master-vanilla
 
 /*
  * Functions to create and find a specific tag type: dev.c
  */
+<<<<<<< HEAD
 extern blkid_dev blkid_new_dev(void);
 extern void blkid_free_dev(blkid_dev dev);
 
@@ -390,12 +505,47 @@ extern int blkid_probe_set_dimension(blkid_probe pr,
 
 extern int blkid_probe_get_idmag(blkid_probe pr, const struct blkid_idinfo *id,
 			blkid_loff_t *offset, const struct blkid_idmag **res);
+=======
+extern blkid_dev blkid_new_dev(void)
+			__attribute__((warn_unused_result));
+extern void blkid_free_dev(blkid_dev dev);
+
+/* probe.c */
+extern int blkid_probe_is_tiny(blkid_probe pr)
+			__attribute__((nonnull))
+			__attribute__((warn_unused_result));
+extern int blkid_probe_is_cdrom(blkid_probe pr)
+			__attribute__((nonnull))
+			__attribute__((warn_unused_result));
+
+extern unsigned char *blkid_probe_get_buffer(blkid_probe pr,
+                                blkid_loff_t off, blkid_loff_t len)
+			__attribute__((nonnull))
+			__attribute__((warn_unused_result));
+
+extern unsigned char *blkid_probe_get_sector(blkid_probe pr, unsigned int sector)
+			__attribute__((nonnull))
+			__attribute__((warn_unused_result));
+
+extern int blkid_probe_get_dimension(blkid_probe pr,
+	                blkid_loff_t *off, blkid_loff_t *size)
+			__attribute__((nonnull));
+
+extern int blkid_probe_set_dimension(blkid_probe pr,
+	                blkid_loff_t off, blkid_loff_t size)
+			__attribute__((nonnull));
+
+extern int blkid_probe_get_idmag(blkid_probe pr, const struct blkid_idinfo *id,
+			blkid_loff_t *offset, const struct blkid_idmag **res)
+			__attribute__((nonnull(1)));
+>>>>>>> master-vanilla
 
 /* returns superblok according to 'struct blkid_idmag' */
 #define blkid_probe_get_sb(_pr, _mag, type) \
 			((type *) blkid_probe_get_buffer((_pr),\
 					(_mag)->kboff << 10, sizeof(type)))
 
+<<<<<<< HEAD
 extern blkid_partlist blkid_probe_get_partlist(blkid_probe pr);
 
 extern int blkid_probe_is_covered_by_pt(blkid_probe pr,
@@ -435,6 +585,109 @@ extern void blkid_probe_set_wiper(blkid_probe pr, blkid_loff_t off,
 extern int blkid_probe_is_wiped(blkid_probe pr, struct blkid_chain **chn,
 		                blkid_loff_t off, blkid_loff_t size);
 extern void blkid_probe_use_wiper(blkid_probe pr, blkid_loff_t off, blkid_loff_t size);
+=======
+extern blkid_partlist blkid_probe_get_partlist(blkid_probe pr)
+			__attribute__((nonnull))
+			__attribute__((warn_unused_result));
+
+extern int blkid_probe_is_covered_by_pt(blkid_probe pr,
+					blkid_loff_t offset, blkid_loff_t size)
+			__attribute__((warn_unused_result));
+
+extern void blkid_probe_chain_reset_values(blkid_probe pr, struct blkid_chain *chn)
+			__attribute__((nonnull));
+extern int blkid_probe_chain_save_values(blkid_probe pr,
+				       struct blkid_chain *chn,
+			               struct list_head *vals)
+			__attribute__((nonnull));
+
+extern struct blkid_prval *blkid_probe_assign_value(blkid_probe pr,
+					const char *name)
+			__attribute__((nonnull))
+			__attribute__((warn_unused_result));
+
+extern void blkid_probe_free_value(struct blkid_prval *v);
+
+
+extern void blkid_probe_append_values_list(blkid_probe pr,
+				    struct list_head *vals)
+			__attribute__((nonnull));
+
+extern void blkid_probe_free_values_list(struct list_head *vals);
+
+extern struct blkid_chain *blkid_probe_get_chain(blkid_probe pr)
+			__attribute__((nonnull))
+			__attribute__((warn_unused_result));
+
+extern struct blkid_prval *blkid_probe_last_value(blkid_probe pr);
+
+extern struct blkid_prval *__blkid_probe_get_value(blkid_probe pr, int num)
+			__attribute__((nonnull))
+			__attribute__((warn_unused_result));
+
+extern struct blkid_prval *__blkid_probe_lookup_value(blkid_probe pr, const char *name)
+			__attribute__((nonnull))
+			__attribute__((warn_unused_result));
+
+extern unsigned long *blkid_probe_get_filter(blkid_probe pr, int chain, int create)
+			__attribute__((nonnull))
+			__attribute__((warn_unused_result));
+
+extern int __blkid_probe_invert_filter(blkid_probe pr, int chain)
+			__attribute__((nonnull));
+extern int __blkid_probe_reset_filter(blkid_probe pr, int chain)
+			__attribute__((nonnull));
+extern int __blkid_probe_filter_types(blkid_probe pr, int chain, int flag, char *names[])
+			__attribute__((nonnull));
+
+extern void *blkid_probe_get_binary_data(blkid_probe pr, struct blkid_chain *chn)
+			__attribute__((nonnull))
+			__attribute__((warn_unused_result));
+
+extern struct blkid_prval *blkid_probe_new_val(void)
+			__attribute__((warn_unused_result));
+extern int blkid_probe_set_value(blkid_probe pr, const char *name,
+				unsigned char *data, size_t len)
+			__attribute__((nonnull));
+extern int blkid_probe_value_set_data(struct blkid_prval *v,
+				unsigned char *data, size_t len)
+			__attribute__((nonnull));
+
+extern int blkid_probe_vsprintf_value(blkid_probe pr, const char *name,
+				const char *fmt, va_list ap)
+			__attribute__((nonnull));
+
+extern int blkid_probe_sprintf_value(blkid_probe pr, const char *name,
+				const char *fmt, ...)
+			__attribute__((nonnull))
+			__attribute__ ((__format__ (__printf__, 3, 4)));
+
+extern int blkid_probe_set_magic(blkid_probe pr, blkid_loff_t offset,
+				size_t len, unsigned char *magic)
+			__attribute__((nonnull));
+
+extern int blkid_probe_verify_csum(blkid_probe pr, uint64_t csum, uint64_t expected)
+			__attribute__((nonnull));
+
+extern void blkid_unparse_uuid(const unsigned char *uuid, char *str, size_t len)
+			__attribute__((nonnull));
+extern int blkid_uuid_is_empty(const unsigned char *buf, size_t len);
+
+extern size_t blkid_rtrim_whitespace(unsigned char *str)
+			__attribute__((nonnull));
+extern size_t blkid_ltrim_whitespace(unsigned char *str)
+			__attribute__((nonnull));
+
+extern void blkid_probe_set_wiper(blkid_probe pr, blkid_loff_t off,
+				  blkid_loff_t size)
+			__attribute__((nonnull));
+extern int blkid_probe_is_wiped(blkid_probe pr, struct blkid_chain **chn,
+		                blkid_loff_t off, blkid_loff_t size)
+			__attribute__((nonnull))
+			__attribute__((warn_unused_result));
+extern void blkid_probe_use_wiper(blkid_probe pr, blkid_loff_t off, blkid_loff_t size)
+			__attribute__((nonnull));
+>>>>>>> master-vanilla
 
 /* filter bitmap macros */
 #define blkid_bmp_wordsize		(8 * sizeof(unsigned long))
@@ -457,8 +710,15 @@ extern void blkid_probe_use_wiper(blkid_probe pr, blkid_loff_t off, blkid_loff_t
 		(blkid_bmp_nwords(max_items) * sizeof(unsigned long))
 
 /* encode.c */
+<<<<<<< HEAD
 extern size_t blkid_encode_to_utf8(int enc, unsigned char *dest, size_t len,
 			const unsigned char *src, size_t count);
+=======
+extern unsigned char *blkid_encode_alloc(size_t count, size_t *reslen);
+extern size_t blkid_encode_to_utf8(int enc, unsigned char *dest, size_t len,
+				const unsigned char *src, size_t count)
+			__attribute__((nonnull));
+>>>>>>> master-vanilla
 
 #define BLKID_ENC_UTF16BE	0
 #define BLKID_ENC_UTF16LE	1

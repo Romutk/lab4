@@ -68,7 +68,11 @@ static int probe_hpfs(blkid_probe pr, const struct blkid_idmag *mag)
 	/* super block */
 	hs = blkid_probe_get_sb(pr, mag, struct hpfs_super_block);
 	if (!hs)
+<<<<<<< HEAD
 		return -1;
+=======
+		return errno ? -errno : 1;
+>>>>>>> master-vanilla
 	version = hs->version;
 
 	/* spare super block */
@@ -77,9 +81,15 @@ static int probe_hpfs(blkid_probe pr, const struct blkid_idmag *mag)
 				HPFS_SBSPARE_OFFSET,
 				sizeof(struct hpfs_spare_super));
 	if (!hss)
+<<<<<<< HEAD
 		return -1;
 	if (memcmp(hss->magic, "\x49\x18\x91\xf9", 4) != 0)
 		return -1;
+=======
+		return errno ? -errno : 1;
+	if (memcmp(hss->magic, "\x49\x18\x91\xf9", 4) != 0)
+		return 1;
+>>>>>>> master-vanilla
 
 	/* boot block (with UUID and LABEL) */
 	hbb = (struct hpfs_boot_block *)
@@ -87,7 +97,11 @@ static int probe_hpfs(blkid_probe pr, const struct blkid_idmag *mag)
 				0,
 				sizeof(struct hpfs_boot_block));
 	if (!hbb)
+<<<<<<< HEAD
 		return -1;
+=======
+		return errno ? -errno : 1;
+>>>>>>> master-vanilla
 	if (memcmp(hbb->magic, "\x55\xaa", 2) == 0 &&
 	    memcmp(hbb->sig_hpfs, "HPFS", 4) == 0 &&
 	    hbb->sig_28h == 0x28) {

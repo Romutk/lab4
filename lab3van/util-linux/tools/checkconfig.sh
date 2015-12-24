@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 #!/bin/bash
+=======
+#!/bin/sh
+>>>>>>> master-vanilla
 
 #
 # This script checks for HAVE_ and ENABLE_ macros which are
@@ -11,11 +15,29 @@
 #
 
 
+<<<<<<< HEAD
 function die() {
+=======
+die() {
+>>>>>>> master-vanilla
 	echo "error: $1"
 	exit 1
 }
 
+<<<<<<< HEAD
+=======
+usage() {
+	echo "Usage:"
+	echo " $0 <top_srcdir> <srcfile> [<srcfile> ...]"
+	echo "Example:"
+	echo " find . -name '*.c' | xargs $0 \$(git rev-parse --show-toplevel)"
+}
+
+if [ $# -eq 0 ]; then
+	usage
+	exit 1
+fi
+>>>>>>> master-vanilla
 srcdir=$1
 config="$srcdir/config.h.in"
 
@@ -24,7 +46,11 @@ config="$srcdir/config.h.in"
 
 shift
 
+<<<<<<< HEAD
 while (( "$#" )); do
+=======
+while [ "$#" -ne 0 ]; do
+>>>>>>> master-vanilla
 	srcfile=$1
 	shift
 

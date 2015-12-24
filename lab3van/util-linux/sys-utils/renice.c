@@ -31,7 +31,11 @@
  * SUCH DAMAGE.
  */
 
+<<<<<<< HEAD
  /* 1999-02-22 Arkadiusz Mi∂kiewicz <misiek@pld.ORG.PL>
+=======
+ /* 1999-02-22 Arkadiusz Mi≈õkiewicz <misiek@pld.ORG.PL>
+>>>>>>> master-vanilla
   * - added Native Language Support
   */
 
@@ -46,6 +50,7 @@
 #include <errno.h>
 #include "nls.h"
 #include "c.h"
+<<<<<<< HEAD
 
 static int donice(int,int,int);
 
@@ -78,6 +83,73 @@ static void __attribute__((__noreturn__)) usage(FILE *out)
  */
 int
 main(int argc, char **argv)
+=======
+#include "closestream.h"
+
+const char *idtype[] = {
+	[PRIO_PROCESS]	= N_("process ID"),
+	[PRIO_PGRP]	= N_("process group ID"),
+	[PRIO_USER]	= N_("user ID"),
+};
+
+static void __attribute__((__noreturn__)) usage(FILE *out)
+{
+	fputs(USAGE_HEADER, out);
+	fprintf(out,
+	      _(" %1$s [-n] <priority> [-p|--pid] <pid>...\n"
+		" %1$s [-n] <priority>  -g|--pgrp <pgid>...\n"
+		" %1$s [-n] <priority>  -u|--user <user>...\n"),
+		program_invocation_short_name);
+
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Alter the priority of running processes.\n"), out);
+
+	fputs(USAGE_OPTIONS, out);
+	fputs(_(" -n, --priority <num>   specify the nice increment value\n"), out);
+	fputs(_(" -p, --pid <id>         interpret argument as process ID (default)\n"), out);
+	fputs(_(" -g, --pgrp <id>        interpret argument as process group ID\n"), out);
+	fputs(_(" -u, --user <name>|<id> interpret argument as username or user ID\n"), out);
+	fputs(USAGE_SEPARATOR, out);
+	fputs(USAGE_HELP, out);
+	fputs(USAGE_VERSION, out);
+	fprintf(out, USAGE_MAN_TAIL("renice(1)"));
+	exit(out == stderr ? EXIT_FAILURE : EXIT_SUCCESS);
+}
+
+static int getprio(const int which, const int who, int *prio)
+{
+	errno = 0;
+	*prio = getpriority(which, who);
+	if (*prio == -1 && errno) {
+		warn(_("failed to get priority for %d (%s)"), who, idtype[which]);
+		return -errno;
+	}
+	return 0;
+}
+
+static int donice(const int which, const int who, const int prio)
+{
+	int oldprio, newprio;
+
+	if (getprio(which, who, &oldprio) != 0)
+		return 1;
+	if (setpriority(which, who, prio) < 0) {
+		warn(_("failed to set priority for %d (%s)"), who, idtype[which]);
+		return 1;
+	}
+	if (getprio(which, who, &newprio) != 0)
+		return 1;
+	printf(_("%d (%s) old priority %d, new priority %d\n"),
+	       who, idtype[which], oldprio, newprio);
+	return 0;
+}
+
+/*
+ * Change the priority (the nice value) of processes
+ * or groups of processes which are already running.
+ */
+int main(int argc, char **argv)
+>>>>>>> master-vanilla
 {
 	int which = PRIO_PROCESS;
 	int who = 0, prio, errs = 0;
@@ -86,6 +158,10 @@ main(int argc, char **argv)
 	setlocale(LC_ALL, "");
 	bindtextdomain(PACKAGE, LOCALEDIR);
 	textdomain(PACKAGE);
+<<<<<<< HEAD
+=======
+	atexit(close_stdout);
+>>>>>>> master-vanilla
 
 	argc--;
 	argv++;
@@ -96,6 +172,7 @@ main(int argc, char **argv)
 			usage(stdout);
 
 		if (strcmp(*argv, "-v") == 0 ||
+<<<<<<< HEAD
 		    strcmp(*argv, "--version") == 0) {
 			printf(_("renice from %s\n"), PACKAGE_STRING);
 			exit(EXIT_SUCCESS);
@@ -106,10 +183,26 @@ main(int argc, char **argv)
 		usage(stderr);
 
 	if (strcmp(*argv, "-n") == 0 || strcmp(*argv, "--priority") == 0) {
+=======
+		    strcmp(*argv, "-V") == 0 ||
+		    strcmp(*argv, "--version") == 0) {
+			printf(UTIL_LINUX_VERSION);
+			return EXIT_SUCCESS;
+		}
+	}
+
+	if (*argv && (strcmp(*argv, "-n") == 0 || strcmp(*argv, "--priority") == 0)) {
+>>>>>>> master-vanilla
 		argc--;
 		argv++;
 	}
 
+<<<<<<< HEAD
+=======
+	if (argc < 2)
+		usage(stderr);
+
+>>>>>>> master-vanilla
 	prio = strtol(*argv, &endptr, 10);
 	if (*endptr)
 		usage(stderr);
@@ -131,6 +224,7 @@ main(int argc, char **argv)
 			continue;
 		}
 		if (which == PRIO_USER) {
+<<<<<<< HEAD
 			register struct passwd *pwd = getpwnam(*argv);
 
 			if (pwd == NULL) {
@@ -181,3 +275,30 @@ donice(int which, int who, int prio) {
 	       who, idtype, oldprio, newprio);
 	return 0;
 }
+=======
+			struct passwd *pwd = getpwnam(*argv);
+
+			if (pwd != NULL)
+				who = pwd->pw_uid;
+			else
+				who = strtol(*argv, &endptr, 10);
+			if (who < 0 || *endptr) {
+				warnx(_("unknown user %s"), *argv);
+				errs = 1;
+				continue;
+			}
+		} else {
+			who = strtol(*argv, &endptr, 10);
+			if (who < 0 || *endptr) {
+				/* TRANSLATORS: The first %s is one of the above
+				 * three ID names. Read: "bad value for %s: %s" */
+				warnx(_("bad %s value: %s"), idtype[which], *argv);
+				errs = 1;
+				continue;
+			}
+		}
+		errs |= donice(which, who, prio);
+	}
+	return errs != 0 ? EXIT_FAILURE : EXIT_SUCCESS;
+}
+>>>>>>> master-vanilla

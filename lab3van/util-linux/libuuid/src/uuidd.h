@@ -35,7 +35,11 @@
 #ifndef _UUID_UUIDD_H
 #define _UUID_UUIDD_H
 
+<<<<<<< HEAD
 #define UUIDD_DIR		"/var/run/uuidd"
+=======
+#define UUIDD_DIR		_PATH_LOCALSTATEDIR "/uuidd"
+>>>>>>> master-vanilla
 #define UUIDD_SOCKET_PATH	UUIDD_DIR "/request"
 #define UUIDD_PIDFILE_PATH	UUIDD_DIR "/uuidd.pid"
 #define UUIDD_PATH		"/usr/sbin/uuidd"

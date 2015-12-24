@@ -12,7 +12,11 @@ switch_root \- switch to another filesystem as the root of the mount tree
 .RI [ arg ...]
 .SH DESCRIPTION
 .B switch_root
+<<<<<<< HEAD
 moves already mounted /proc, /dev and /sys to
+=======
+moves already mounted /proc, /dev, /sys and /run to
+>>>>>>> master-vanilla
 .I newroot
 and makes
 .I newroot
@@ -24,9 +28,15 @@ process.
 
 .SH OPTIONS
 .IP "\fB\-h, \-\-help\fP"
+<<<<<<< HEAD
 show help and exit
 .IP "\fB\-V, \-\-version\fP"
 show version number and exit
+=======
+Display help text and exit.
+.IP "\fB\-V, \-\-version\fP"
+Display version information and exit.
+>>>>>>> master-vanilla
 
 .SH RETURN VALUE
 .B switch_root
@@ -46,9 +56,15 @@ mount --bind $DIR $DIR
 .fi
 
 .SH "SEE ALSO"
+<<<<<<< HEAD
 .BR mount (8)
 .BR chroot (2)
 .BR init (8)
+=======
+.BR mount (8),
+.BR chroot (2),
+.BR init (8),
+>>>>>>> master-vanilla
 .BR mkinitrd (8)
 .SH AUTHORS
 .nf

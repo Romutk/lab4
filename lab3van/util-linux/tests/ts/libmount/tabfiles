@@ -2,7 +2,11 @@
 
 # Copyright (C) 2010 Karel Zak <kzak@redhat.com>
 
+<<<<<<< HEAD
 TS_TOPDIR="$(dirname $0)/../.."
+=======
+TS_TOPDIR="${0%/*}/../.."
+>>>>>>> master-vanilla
 TS_DESC="tab files"
 
 . $TS_TOPDIR/functions.sh
@@ -13,42 +17,89 @@ TESTPROG="$TS_HELPER_LIBMOUNT_TAB"
 [ -x $TESTPROG ] || ts_skip "test not compiled"
 
 ts_init_subtest "parse-fstab"
+<<<<<<< HEAD
 $TESTPROG --parse "$TS_SELF/files/fstab" &> $TS_OUTPUT
+=======
+ts_valgrind $TESTPROG --parse "$TS_SELF/files/fstab" &> $TS_OUTPUT
+sed -i -e 's/fs: 0x.*/fs:/g' $TS_OUTPUT
+ts_finalize_subtest
+
+ts_init_subtest "parse-fstab-full"
+ts_valgrind $TESTPROG --parse "$TS_SELF/files/fstab.comment" --comments &> $TS_OUTPUT
+>>>>>>> master-vanilla
 sed -i -e 's/fs: 0x.*/fs:/g' $TS_OUTPUT
 ts_finalize_subtest
 
 ts_init_subtest "parse-mtab"
+<<<<<<< HEAD
 $TESTPROG --parse "$TS_SELF/files/mtab" &> $TS_OUTPUT
+=======
+ts_valgrind $TESTPROG --parse "$TS_SELF/files/mtab" &> $TS_OUTPUT
+>>>>>>> master-vanilla
 sed -i -e 's/fs: 0x.*/fs:/g' $TS_OUTPUT
 ts_finalize_subtest
 
 ts_init_subtest "parse-fstab-broken"
+<<<<<<< HEAD
 $TESTPROG --parse "$TS_SELF/files/fstab.broken" &> $TS_OUTPUT
+=======
+ts_valgrind $TESTPROG --parse "$TS_SELF/files/fstab.broken" &> $TS_OUTPUT
+>>>>>>> master-vanilla
 sed -i -e 's/.*fstab.broken:[[:digit:]]*: parse error//g; s/fs: 0x.*/fs:/g' $TS_OUTPUT
 ts_finalize_subtest
 
 ts_init_subtest "parse-mountinfo"
+<<<<<<< HEAD
 $TESTPROG --parse "$TS_SELF/files/mountinfo" &> $TS_OUTPUT
+=======
+ts_valgrind $TESTPROG --parse "$TS_SELF/files/mountinfo" &> $TS_OUTPUT
+>>>>>>> master-vanilla
 sed -i -e 's/fs: 0x.*/fs:/g' $TS_OUTPUT
 ts_finalize_subtest
 
 ts_init_subtest "copy"
+<<<<<<< HEAD
 $TESTPROG --copy-fs "$TS_SELF/files/fstab" &> $TS_OUTPUT
+=======
+ts_valgrind $TESTPROG --copy-fs "$TS_SELF/files/fstab" &> $TS_OUTPUT
+>>>>>>> master-vanilla
 sed -i -e 's/fs: 0x.*/fs:/g' $TS_OUTPUT
 ts_finalize_subtest
 
 ts_init_subtest "find-source"
+<<<<<<< HEAD
 $TESTPROG --find-forward "$TS_SELF/files/fstab" source UUID=fef7ccb3-821c-4de8-88dc-71472be5946f &> $TS_OUTPUT
+=======
+ts_valgrind $TESTPROG --find-forward "$TS_SELF/files/fstab" source UUID=fef7ccb3-821c-4de8-88dc-71472be5946f &> $TS_OUTPUT
+>>>>>>> master-vanilla
 sed -i -e 's/fs: 0x.*/fs:/g' $TS_OUTPUT
 ts_finalize_subtest
 
 ts_init_subtest "find-target"
+<<<<<<< HEAD
 $TESTPROG --find-forward "$TS_SELF/files/fstab" target /home/foo &> $TS_OUTPUT
+=======
+ts_valgrind $TESTPROG --find-forward "$TS_SELF/files/fstab" target /home/foo &> $TS_OUTPUT
+sed -i -e 's/fs: 0x.*/fs:/g' $TS_OUTPUT
+ts_finalize_subtest
+
+ts_init_subtest "find-target2"
+ts_valgrind $TESTPROG --find-forward "$TS_SELF/files/fstab" target /any/foo &> $TS_OUTPUT
+sed -i -e 's/fs: 0x.*/fs:/g' $TS_OUTPUT
+ts_finalize_subtest
+
+ts_init_subtest "find-target3"
+ts_valgrind $TESTPROG --find-forward "$TS_SELF/files/fstab" target /any/foo/ &> $TS_OUTPUT
+>>>>>>> master-vanilla
 sed -i -e 's/fs: 0x.*/fs:/g' $TS_OUTPUT
 ts_finalize_subtest
 
 ts_init_subtest "find-pair"
+<<<<<<< HEAD
 $TESTPROG --find-pair "$TS_SELF/files/mtab" /dev/mapper/kzak-home /home/kzak &> $TS_OUTPUT
+=======
+ts_valgrind $TESTPROG --find-pair "$TS_SELF/files/mtab" /dev/mapper/kzak-home /home/kzak &> $TS_OUTPUT
+>>>>>>> master-vanilla
 sed -i -e 's/fs: 0x.*/fs:/g' $TS_OUTPUT
 ts_finalize_subtest
 

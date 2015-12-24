@@ -10,7 +10,11 @@
  * %End-Header%
  */
 
+<<<<<<< HEAD
 #if HAVE_UNISTD_H
+=======
+#ifdef HAVE_UNISTD_H
+>>>>>>> master-vanilla
 #include <unistd.h>
 #endif
 #ifdef HAVE_ERRNO_H
@@ -24,14 +28,21 @@
 #include "blkidP.h"
 #include "env.h"
 
+<<<<<<< HEAD
 int blkid_debug_mask = 0;
 
+=======
+>>>>>>> master-vanilla
 /**
  * SECTION:cache
  * @title: Cache
  * @short_description: basic routines to work with libblkid cache
  *
+<<<<<<< HEAD
  * Block device information is normally kept in a cache file /etc/blkid.tab and is
+=======
+ * Block device information is normally kept in a cache file blkid.tab and is
+>>>>>>> master-vanilla
  * verified to still be valid before being returned to the user (if the user has
  * read permission on the raw block device, otherwise not).  The cache file also
  * allows unprivileged users (normally anyone other than root, or those not in the
@@ -50,6 +61,7 @@ int blkid_debug_mask = 0;
  * locate these devices without enumerating only visible devices, so the use of
  * the cache file is required in this situation.
  */
+<<<<<<< HEAD
 
 #if 0 /* ifdef CONFIG_BLKID_DEBUG */
 static blkid_debug_dump_cache(int mask, blkid_cache cache)
@@ -94,6 +106,17 @@ void blkid_init_debug(int mask)
 	blkid_debug_mask |= DEBUG_INIT;
 }
 #endif
+=======
+static const char *get_default_cache_filename(void)
+{
+	struct stat st;
+
+	if (stat(BLKID_RUNTIME_TOPDIR, &st) == 0 && S_ISDIR(st.st_mode))
+		return BLKID_CACHE_FILE;	/* cache in /run */
+
+	return BLKID_CACHE_FILE_OLD;	/* cache in /etc */
+}
+>>>>>>> master-vanilla
 
 /* returns allocated path to cache */
 char *blkid_get_cache_filename(struct blkid_config *conf)
@@ -102,6 +125,7 @@ char *blkid_get_cache_filename(struct blkid_config *conf)
 
 	filename = safe_getenv("BLKID_FILE");
 	if (filename)
+<<<<<<< HEAD
 		filename = blkid_strdup(filename);
 	else if (conf)
 		filename = blkid_strdup(conf->cachefile);
@@ -109,6 +133,15 @@ char *blkid_get_cache_filename(struct blkid_config *conf)
 		struct blkid_config *c = blkid_read_config(NULL);
 		if (!c)
 			filename = blkid_strdup(BLKID_CACHE_FILE);
+=======
+		filename = strdup(filename);
+	else if (conf)
+		filename = conf->cachefile ? strdup(conf->cachefile) : NULL;
+	else {
+		struct blkid_config *c = blkid_read_config(NULL);
+		if (!c)
+			filename = strdup(get_default_cache_filename());
+>>>>>>> master-vanilla
 		else {
 			filename = c->cachefile;  /* already allocated */
 			c->cachefile = NULL;
@@ -131,9 +164,18 @@ int blkid_get_cache(blkid_cache *ret_cache, const char *filename)
 {
 	blkid_cache cache;
 
+<<<<<<< HEAD
 	blkid_init_debug(0);
 
 	DBG(DEBUG_CACHE, printf("creating blkid cache (using %s)\n",
+=======
+	if (!ret_cache)
+		return -BLKID_ERR_PARAM;
+
+	blkid_init_debug(0);
+
+	DBG(CACHE, ul_debug("creating blkid cache (using %s)",
+>>>>>>> master-vanilla
 				filename ? filename : "default cache"));
 
 	if (!(cache = (blkid_cache) calloc(1, sizeof(struct blkid_struct_cache))))
@@ -145,7 +187,11 @@ int blkid_get_cache(blkid_cache *ret_cache, const char *filename)
 	if (filename && !*filename)
 		filename = NULL;
 	if (filename)
+<<<<<<< HEAD
 		cache->bic_filename = blkid_strdup(filename);
+=======
+		cache->bic_filename = strdup(filename);
+>>>>>>> master-vanilla
 	else
 		cache->bic_filename = blkid_get_cache_filename(NULL);
 
@@ -167,9 +213,15 @@ void blkid_put_cache(blkid_cache cache)
 
 	(void) blkid_flush_cache(cache);
 
+<<<<<<< HEAD
 	DBG(DEBUG_CACHE, printf("freeing cache struct\n"));
 
 	/* DBG(DEBUG_CACHE, blkid_debug_dump_cache(cache)); */
+=======
+	DBG(CACHE, ul_debug("freeing cache struct"));
+
+	/* DBG(CACHE, ul_debug_dump_cache(cache)); */
+>>>>>>> master-vanilla
 
 	while (!list_empty(&cache->bic_devs)) {
 		blkid_dev dev = list_entry(cache->bic_devs.next,
@@ -188,7 +240,11 @@ void blkid_put_cache(blkid_cache cache)
 						   struct blkid_struct_tag,
 						   bit_names);
 
+<<<<<<< HEAD
 			DBG(DEBUG_CACHE, printf("warning: unfreed tag %s=%s\n",
+=======
+			DBG(CACHE, ul_debug("warning: unfreed tag %s=%s",
+>>>>>>> master-vanilla
 						bad->bit_name, bad->bit_val));
 			blkid_free_tag(bad);
 		}
@@ -217,6 +273,7 @@ void blkid_gc_cache(blkid_cache cache)
 
 	list_for_each_safe(p, pnext, &cache->bic_devs) {
 		blkid_dev dev = list_entry(p, struct blkid_struct_dev, bid_devs);
+<<<<<<< HEAD
 		if (!p)
 			break;
 		if (stat(dev->bid_name, &st) < 0) {
@@ -227,6 +284,14 @@ void blkid_gc_cache(blkid_cache cache)
 		} else {
 			DBG(DEBUG_CACHE,
 			    printf("Device %s exists\n", dev->bid_name));
+=======
+		if (stat(dev->bid_name, &st) < 0) {
+			DBG(CACHE, ul_debug("freeing %s", dev->bid_name));
+			blkid_free_dev(dev);
+			cache->bic_flags |= BLKID_BIC_FL_CHANGED;
+		} else {
+			DBG(CACHE, ul_debug("Device %s exists", dev->bid_name));
+>>>>>>> master-vanilla
 		}
 	}
 }
@@ -237,7 +302,11 @@ int main(int argc, char** argv)
 	blkid_cache cache = NULL;
 	int ret;
 
+<<<<<<< HEAD
 	blkid_init_debug(DEBUG_ALL);
+=======
+	blkid_init_debug(BLKID_DEBUG_ALL);
+>>>>>>> master-vanilla
 
 	if ((argc > 2)) {
 		fprintf(stderr, "Usage: %s [filename] \n", argv[0]);
@@ -246,7 +315,11 @@ int main(int argc, char** argv)
 
 	if ((ret = blkid_get_cache(&cache, argv[1])) < 0) {
 		fprintf(stderr, "error %d parsing cache file %s\n", ret,
+<<<<<<< HEAD
 			argv[1] ? argv[1] : BLKID_CACHE_FILE);
+=======
+			argv[1] ? argv[1] : blkid_get_cache_filename(NULL));
+>>>>>>> master-vanilla
 		exit(1);
 	}
 	if ((ret = blkid_get_cache(&cache, "/dev/null")) != 0) {
@@ -254,7 +327,11 @@ int main(int argc, char** argv)
 			argv[0], ret);
 		exit(1);
 	}
+<<<<<<< HEAD
 	if ((ret = blkid_probe_all(cache) < 0))
+=======
+	if ((ret = blkid_probe_all(cache)) < 0)
+>>>>>>> master-vanilla
 		fprintf(stderr, "error probing devices\n");
 
 	blkid_put_cache(cache);

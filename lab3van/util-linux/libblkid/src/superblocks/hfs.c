@@ -154,7 +154,11 @@ static int probe_hfs(blkid_probe pr, const struct blkid_idmag *mag)
 
 	hfs = blkid_probe_get_sb(pr, mag, struct hfs_mdb);
 	if (!hfs)
+<<<<<<< HEAD
 		return -1;
+=======
+		return errno ? -errno : 1;
+>>>>>>> master-vanilla
 
 	if ((memcmp(hfs->embed_sig, "H+", 2) == 0) ||
 	    (memcmp(hfs->embed_sig, "HX", 2) == 0))
@@ -193,7 +197,11 @@ static int probe_hfsplus(blkid_probe pr, const struct blkid_idmag *mag)
 
 	sbd = blkid_probe_get_sb(pr, mag, struct hfs_mdb);
 	if (!sbd)
+<<<<<<< HEAD
 		return -1;
+=======
+		return errno ? -errno : 1;
+>>>>>>> master-vanilla
 
 	/* Check for a HFS+ volume embedded in a HFS volume */
 	if (memcmp(sbd->signature, "BD", 2) == 0) {
@@ -218,7 +226,11 @@ static int probe_hfsplus(blkid_probe pr, const struct blkid_idmag *mag)
 				struct hfsplus_vol_header);
 
 	if (!hfsplus)
+<<<<<<< HEAD
 		return -1;
+=======
+		return errno ? -errno : 1;
+>>>>>>> master-vanilla
 
 	if ((memcmp(hfsplus->signature, "H+", 2) != 0) &&
 	    (memcmp(hfsplus->signature, "HX", 2) != 0))
@@ -228,7 +240,11 @@ static int probe_hfsplus(blkid_probe pr, const struct blkid_idmag *mag)
 
 	blocksize = be32_to_cpu(hfsplus->blocksize);
 	if (blocksize < HFSPLUS_SECTOR_SIZE)
+<<<<<<< HEAD
 		return -1;
+=======
+		return 1;
+>>>>>>> master-vanilla
 
 	memcpy(extents, hfsplus->cat_file.extents, sizeof(extents));
 	cat_block = be32_to_cpu(extents[0].start_block);
@@ -236,7 +252,11 @@ static int probe_hfsplus(blkid_probe pr, const struct blkid_idmag *mag)
 	buf = blkid_probe_get_buffer(pr,
 			off + ((blkid_loff_t) cat_block * blocksize), 0x2000);
 	if (!buf)
+<<<<<<< HEAD
 		return 0;
+=======
+		return errno ? -errno : 0;
+>>>>>>> master-vanilla
 
 	bnode = (struct hfsplus_bheader_record *)
 		&buf[sizeof(struct hfsplus_bnode_descriptor)];
@@ -265,13 +285,21 @@ static int probe_hfsplus(blkid_probe pr, const struct blkid_idmag *mag)
 	if (ext == HFSPLUS_EXTENT_COUNT)
 		return 0;
 
+<<<<<<< HEAD
 	leaf_off = (ext_block_start + leaf_block) * blocksize;
+=======
+	leaf_off = ((uint64_t) ext_block_start + leaf_block) * blocksize;
+>>>>>>> master-vanilla
 
 	buf = blkid_probe_get_buffer(pr,
 				(blkid_loff_t) off + leaf_off,
 				leaf_node_size);
 	if (!buf)
+<<<<<<< HEAD
 		return 0;
+=======
+		return errno ? -errno : 0;
+>>>>>>> master-vanilla
 
 	descr = (struct hfsplus_bnode_descriptor *) buf;
 	record_count = be16_to_cpu(descr->num_recs);

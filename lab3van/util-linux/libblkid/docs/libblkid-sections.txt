@@ -5,6 +5,14 @@ blkid_evaluate_spec
 </SECTION>
 
 <SECTION>
+<<<<<<< HEAD
+=======
+<FILE>init</FILE>
+blkid_init_debug
+</SECTION>
+
+<SECTION>
+>>>>>>> master-vanilla
 <FILE>cache</FILE>
 blkid_cache
 blkid_gc_cache
@@ -44,6 +52,7 @@ blkid_new_probe
 blkid_new_probe_from_filename
 blkid_probe_get_devno
 blkid_probe_get_fd
+<<<<<<< HEAD
 blkid_probe_get_sectorsize
 blkid_probe_get_sectors
 blkid_probe_get_size
@@ -51,12 +60,26 @@ blkid_probe_get_offset
 blkid_probe_get_wholedisk_devno
 blkid_probe_set_device
 blkid_probe_is_wholedisk
+=======
+blkid_probe_get_offset
+blkid_probe_get_sectors
+blkid_probe_get_sectorsize
+blkid_probe_get_size
+blkid_probe_get_wholedisk_devno
+blkid_probe_is_wholedisk
+blkid_probe_set_device
+blkid_probe_step_back
+>>>>>>> master-vanilla
 blkid_reset_probe
 </SECTION>
 
 <SECTION>
 <FILE>lowprobe-tags</FILE>
 blkid_do_fullprobe
+<<<<<<< HEAD
+=======
+blkid_do_wipe
+>>>>>>> master-vanilla
 blkid_do_probe
 blkid_do_safeprobe
 <SUBSECTION>
@@ -93,10 +116,18 @@ blkid_partition_is_logical
 blkid_partition_is_primary
 <SUBSECTION>
 blkid_partlist_get_partition
+<<<<<<< HEAD
+=======
+blkid_partlist_get_partition_by_partno
+>>>>>>> master-vanilla
 blkid_partlist_numof_partitions
 blkid_partlist_devno_to_partition
 blkid_partlist_get_table
 <SUBSECTION>
+<<<<<<< HEAD
+=======
+blkid_parttable_get_id
+>>>>>>> master-vanilla
 blkid_parttable_get_offset
 blkid_parttable_get_parent
 blkid_parttable_get_type
@@ -163,6 +194,10 @@ BLKID_DEV_NORMAL
 BLKID_DEV_VERIFY
 BLKID_PARTS_ENTRY_DETAILS
 BLKID_PARTS_FORCE_GPT
+<<<<<<< HEAD
+=======
+BLKID_PARTS_MAGIC
+>>>>>>> master-vanilla
 BLKID_PROBREQ_LABEL
 BLKID_PROBREQ_LABELRAW
 BLKID_PROBREQ_SECTYPE
@@ -171,6 +206,10 @@ BLKID_PROBREQ_USAGE
 BLKID_PROBREQ_UUID
 BLKID_PROBREQ_UUIDRAW
 BLKID_PROBREQ_VERSION
+<<<<<<< HEAD
+=======
+BLKID_SUBLKS_BADCSUM
+>>>>>>> master-vanilla
 BLKID_SUBLKS_DEFAULT
 BLKID_SUBLKS_LABEL
 BLKID_SUBLKS_LABELRAW

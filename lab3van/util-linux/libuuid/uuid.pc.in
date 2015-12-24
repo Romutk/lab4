@@ -1,6 +1,9 @@
 prefix=@prefix@
 exec_prefix=@exec_prefix@
+<<<<<<< HEAD
 libexecdir=@libexecdir@
+=======
+>>>>>>> master-vanilla
 libdir=@usrlib_execdir@
 includedir=@includedir@
 

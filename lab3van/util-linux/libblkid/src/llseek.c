@@ -9,6 +9,7 @@
  * %End-Header%
  */
 
+<<<<<<< HEAD
 #define _LARGEFILE_SOURCE
 #define _LARGEFILE64_SOURCE
 
@@ -20,6 +21,24 @@
 #include <errno.h>
 #endif
 #if HAVE_UNISTD_H
+=======
+#ifndef _LARGEFILE_SOURCE
+# define _LARGEFILE_SOURCE
+#endif
+
+#ifndef _LARGEFILE64_SOURCE
+# define _LARGEFILE64_SOURCE
+#endif
+
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+
+#ifdef HAVE_ERRNO_H
+#include <errno.h>
+#endif
+#ifdef HAVE_UNISTD_H
+>>>>>>> master-vanilla
 #include <unistd.h>
 #endif
 #ifdef __MSDOS__

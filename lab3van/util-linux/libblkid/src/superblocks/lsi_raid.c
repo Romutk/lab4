@@ -30,9 +30,15 @@ static int probe_lsiraid(blkid_probe pr,
 	struct lsi_metadata *lsi;
 
 	if (pr->size < 0x10000)
+<<<<<<< HEAD
 		return -1;
 	if (!S_ISREG(pr->mode) && !blkid_probe_is_wholedisk(pr))
 		return -1;
+=======
+		return 1;
+	if (!S_ISREG(pr->mode) && !blkid_probe_is_wholedisk(pr))
+		return 1;
+>>>>>>> master-vanilla
 
 	off = ((pr->size / 0x200) - 1) * 0x200;
 	lsi = (struct lsi_metadata *)
@@ -40,6 +46,7 @@ static int probe_lsiraid(blkid_probe pr,
 				off,
 				sizeof(struct lsi_metadata));
 	if (!lsi)
+<<<<<<< HEAD
 		return -1;
 
 	if (memcmp(lsi->sig, LSI_SIGNATURE, sizeof(LSI_SIGNATURE)-1) != 0)
@@ -47,6 +54,15 @@ static int probe_lsiraid(blkid_probe pr,
 	if (blkid_probe_set_magic(pr, off, sizeof(lsi->sig),
 				(unsigned char *) lsi->sig))
 		return -1;
+=======
+		return errno ? -errno : 1;
+
+	if (memcmp(lsi->sig, LSI_SIGNATURE, sizeof(LSI_SIGNATURE)-1) != 0)
+		return 1;
+	if (blkid_probe_set_magic(pr, off, sizeof(lsi->sig),
+				(unsigned char *) lsi->sig))
+		return 1;
+>>>>>>> master-vanilla
 	return 0;
 }
 

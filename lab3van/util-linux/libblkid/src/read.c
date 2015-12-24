@@ -19,19 +19,28 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+<<<<<<< HEAD
 #if HAVE_ERRNO_H
+=======
+#ifdef HAVE_ERRNO_H
+>>>>>>> master-vanilla
 #include <errno.h>
 #endif
 
 #include "blkidP.h"
 
+<<<<<<< HEAD
 #if HAVE_STDLIB_H
+=======
+#ifdef HAVE_STDLIB_H
+>>>>>>> master-vanilla
 # ifndef _XOPEN_SOURCE
 #  define _XOPEN_SOURCE 600	/* for inclusion of strtoull */
 # endif
 # include <stdlib.h>
 #endif
 
+<<<<<<< HEAD
 #ifdef HAVE_STRTOULL
 #define STRTOULL strtoull /* defined in stdlib.h if you try hard enough */
 #else
@@ -39,6 +48,8 @@
 #define STRTOULL strtoul
 #endif
 
+=======
+>>>>>>> master-vanilla
 #ifdef TEST_PROGRAM
 #define blkid_debug_dump_dev(dev)	(debug_dump_dev(dev))
 static void debug_dump_dev(blkid_dev dev);
@@ -150,7 +161,11 @@ static int parse_start(char **cp)
 		return 0;
 
 	if (!strncmp(p, "<device", 7)) {
+<<<<<<< HEAD
 		DBG(DEBUG_READ, printf("found device header: %8s\n", p));
+=======
+		DBG(READ, ul_debug("found device header: %8s", p));
+>>>>>>> master-vanilla
 		p += 7;
 
 		*cp = p;
@@ -169,7 +184,11 @@ static int parse_end(char **cp)
 	*cp = skip_over_blank(*cp);
 
 	if (!strncmp(*cp, "</device>", 9)) {
+<<<<<<< HEAD
 		DBG(DEBUG_READ, printf("found device trailer %9s\n", *cp));
+=======
+		DBG(READ, ul_debug("found device trailer %9s", *cp));
+>>>>>>> master-vanilla
 		*cp += 9;
 		return 0;
 	}
@@ -193,14 +212,22 @@ static int parse_dev(blkid_cache cache, blkid_dev *dev, char **cp)
 
 	start = tmp = strchr(*cp, '>');
 	if (!start) {
+<<<<<<< HEAD
 		DBG(DEBUG_READ,
 		    printf("blkid: short line parsing dev: %s\n", *cp));
+=======
+		DBG(READ, ul_debug("blkid: short line parsing dev: %s", *cp));
+>>>>>>> master-vanilla
 		return -BLKID_ERR_CACHE;
 	}
 	start = skip_over_blank(start + 1);
 	end = skip_over_word(start);
 
+<<<<<<< HEAD
 	DBG(DEBUG_READ, printf("device should be %*s\n",
+=======
+	DBG(READ, ul_debug("device should be %*s",
+>>>>>>> master-vanilla
 			       (int)(end - start), start));
 
 	if (**cp == '>')
@@ -211,12 +238,17 @@ static int parse_dev(blkid_cache cache, blkid_dev *dev, char **cp)
 	*tmp = '\0';
 
 	if (!(tmp = strrchr(end, '<')) || parse_end(&tmp) < 0) {
+<<<<<<< HEAD
 		DBG(DEBUG_READ,
 		    printf("blkid: missing </device> ending: %s\n", end));
+=======
+		DBG(READ, ul_debug("blkid: missing </device> ending: %s", end));
+>>>>>>> master-vanilla
 	} else if (tmp)
 		*tmp = '\0';
 
 	if (end - start <= 1) {
+<<<<<<< HEAD
 		DBG(DEBUG_READ, printf("blkid: empty device name: %s\n", *cp));
 		return -BLKID_ERR_CACHE;
 	}
@@ -226,6 +258,17 @@ static int parse_dev(blkid_cache cache, blkid_dev *dev, char **cp)
 		return -BLKID_ERR_MEM;
 
 	DBG(DEBUG_READ, printf("found dev %s\n", name));
+=======
+		DBG(READ, ul_debug("blkid: empty device name: %s", *cp));
+		return -BLKID_ERR_CACHE;
+	}
+
+	name = strndup(start, end - start);
+	if (name == NULL)
+		return -BLKID_ERR_MEM;
+
+	DBG(READ, ul_debug("found dev %s", name));
+>>>>>>> master-vanilla
 
 	if (!(*dev = blkid_get_dev(cache, name, BLKID_DEV_CREATE))) {
 		free(name);
@@ -254,16 +297,41 @@ static int parse_token(char **name, char **value, char **cp)
 	*value = skip_over_blank(*value + 1);
 
 	if (**value == '"') {
+<<<<<<< HEAD
 		end = strchr(*value + 1, '"');
 		if (!end) {
 			DBG(DEBUG_READ,
 			    printf("unbalanced quotes at: %s\n", *value));
+=======
+		char *p = end = *value + 1;
+
+		/* convert 'foo\"bar'  to 'foo"bar' */
+		while (*p) {
+			if (*p == '\\') {
+				p++;
+				*end = *p;
+			} else {
+				*end = *p;
+				if (*p == '"')
+					break;
+			}
+			p++;
+			end++;
+		}
+
+		if (*end != '"') {
+			DBG(READ, ul_debug("unbalanced quotes at: %s", *value));
+>>>>>>> master-vanilla
 			*cp = *value;
 			return -BLKID_ERR_CACHE;
 		}
 		(*value)++;
 		*end = '\0';
+<<<<<<< HEAD
 		end++;
+=======
+		end = ++p;
+>>>>>>> master-vanilla
 	} else {
 		end = skip_over_word(*value);
 		if (*end) {
@@ -318,11 +386,16 @@ static int parse_tag(blkid_cache cache, blkid_dev dev, char **cp)
 
 	/* Some tags are stored directly in the device struct */
 	if (!strcmp(name, "DEVNO"))
+<<<<<<< HEAD
 		dev->bid_devno = STRTOULL(value, 0, 0);
+=======
+		dev->bid_devno = strtoull(value, 0, 0);
+>>>>>>> master-vanilla
 	else if (!strcmp(name, "PRI"))
 		dev->bid_pri = strtol(value, 0, 0);
 	else if (!strcmp(name, "TIME")) {
 		char *end = NULL;
+<<<<<<< HEAD
 		dev->bid_time = STRTOULL(value, &end, 0);
 		if (end && *end == '.')
 			dev->bid_utime = STRTOULL(end + 1, 0, 0);
@@ -330,6 +403,15 @@ static int parse_tag(blkid_cache cache, blkid_dev dev, char **cp)
 		ret = blkid_set_tag(dev, name, value, strlen(value));
 
 	DBG(DEBUG_READ, printf("    tag: %s=\"%s\"\n", name, value));
+=======
+		dev->bid_time = strtoull(value, &end, 0);
+		if (end && *end == '.')
+			dev->bid_utime = strtoull(end + 1, 0, 0);
+	} else
+		ret = blkid_set_tag(dev, name, value, strlen(value));
+
+	DBG(READ, ul_debug("    tag: %s=\"%s\"", name, value));
+>>>>>>> master-vanilla
 
 	return ret < 0 ? ret : 1;
 }
@@ -355,7 +437,11 @@ static int blkid_parse_line(blkid_cache cache, blkid_dev *dev_p, char *cp)
 
 	*dev_p = NULL;
 
+<<<<<<< HEAD
 	DBG(DEBUG_READ, printf("line: %s\n", cp));
+=======
+	DBG(READ, ul_debug("line: %s", cp));
+>>>>>>> master-vanilla
 
 	if ((ret = parse_dev(cache, dev_p, &cp)) <= 0)
 		return ret;
@@ -367,6 +453,7 @@ static int blkid_parse_line(blkid_cache cache, blkid_dev *dev_p, char *cp)
 	}
 
 	if (dev->bid_type == NULL) {
+<<<<<<< HEAD
 		DBG(DEBUG_READ,
 		    printf("blkid: device %s has no TYPE\n",dev->bid_name));
 		blkid_free_dev(dev);
@@ -374,6 +461,16 @@ static int blkid_parse_line(blkid_cache cache, blkid_dev *dev_p, char *cp)
 
 	DBG(DEBUG_READ, blkid_debug_dump_dev(dev));
 
+=======
+		DBG(READ, ul_debug("blkid: device %s has no TYPE",dev->bid_name));
+		blkid_free_dev(dev);
+		goto done;
+	}
+
+	DBG(READ, blkid_debug_dump_dev(dev));
+
+done:
+>>>>>>> master-vanilla
 	return ret;
 }
 
@@ -396,21 +493,36 @@ void blkid_read_cache(blkid_cache cache)
 	 * If the file doesn't exist, then we just return an empty
 	 * struct so that the cache can be populated.
 	 */
+<<<<<<< HEAD
 	if ((fd = open(cache->bic_filename, O_RDONLY)) < 0)
+=======
+	if ((fd = open(cache->bic_filename, O_RDONLY|O_CLOEXEC)) < 0)
+>>>>>>> master-vanilla
 		return;
 	if (fstat(fd, &st) < 0)
 		goto errout;
 	if ((st.st_mtime == cache->bic_ftime) ||
 	    (cache->bic_flags & BLKID_BIC_FL_CHANGED)) {
+<<<<<<< HEAD
 		DBG(DEBUG_CACHE, printf("skipping re-read of %s\n",
+=======
+		DBG(CACHE, ul_debug("skipping re-read of %s",
+>>>>>>> master-vanilla
 					cache->bic_filename));
 		goto errout;
 	}
 
+<<<<<<< HEAD
 	DBG(DEBUG_CACHE, printf("reading cache file %s\n",
 				cache->bic_filename));
 
 	file = fdopen(fd, "r");
+=======
+	DBG(CACHE, ul_debug("reading cache file %s",
+				cache->bic_filename));
+
+	file = fdopen(fd, "r" UL_CLOEXECSTR);
+>>>>>>> master-vanilla
 	if (!file)
 		goto errout;
 
@@ -423,15 +535,23 @@ void blkid_read_cache(blkid_cache cache)
 			continue;
 		end = strlen(buf) - 1;
 		/* Continue reading next line if it ends with a backslash */
+<<<<<<< HEAD
 		while (buf[end] == '\\' && end < sizeof(buf) - 2 &&
+=======
+		while (end < (sizeof(buf) - 2) && buf[end] == '\\' &&
+>>>>>>> master-vanilla
 		       fgets(buf + end, sizeof(buf) - end, file)) {
 			end = strlen(buf) - 1;
 			lineno++;
 		}
 
 		if (blkid_parse_line(cache, &dev, buf) < 0) {
+<<<<<<< HEAD
 			DBG(DEBUG_READ,
 			    printf("blkid: bad format on line %d\n", lineno));
+=======
+			DBG(READ, ul_debug("blkid: bad format on line %d", lineno));
+>>>>>>> master-vanilla
 			continue;
 		}
 	}
@@ -481,7 +601,11 @@ int main(int argc, char**argv)
 	blkid_cache cache = NULL;
 	int ret;
 
+<<<<<<< HEAD
 	blkid_init_debug(DEBUG_ALL);
+=======
+	blkid_init_debug(BLKID_DEBUG_ALL);
+>>>>>>> master-vanilla
 	if (argc > 2) {
 		fprintf(stderr, "Usage: %s [filename]\n"
 			"Test parsing of the cache (filename)\n", argv[0]);
@@ -489,7 +613,11 @@ int main(int argc, char**argv)
 	}
 	if ((ret = blkid_get_cache(&cache, argv[1])) < 0)
 		fprintf(stderr, "error %d reading cache file %s\n", ret,
+<<<<<<< HEAD
 			argv[1] ? argv[1] : BLKID_CACHE_FILE);
+=======
+			argv[1] ? argv[1] : blkid_get_cache_filename(NULL));
+>>>>>>> master-vanilla
 
 	blkid_put_cache(cache);
 

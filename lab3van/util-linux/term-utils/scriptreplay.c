@@ -28,19 +28,31 @@
 #include <unistd.h>
 #include <getopt.h>
 
+<<<<<<< HEAD
+=======
+#include "closestream.h"
+>>>>>>> master-vanilla
 #include "nls.h"
 #include "c.h"
 
 #define SCRIPT_MIN_DELAY 0.0001		/* from original sripreplay.pl */
 
+<<<<<<< HEAD
 void __attribute__((__noreturn__))
 usage(FILE *out)
 {
 	fputs(_("\nUsage:\n"), out);
+=======
+static void __attribute__((__noreturn__))
+usage(FILE *out)
+{
+	fputs(USAGE_HEADER, out);
+>>>>>>> master-vanilla
 	fprintf(out,
 	      _(" %s [-t] timingfile [typescript] [divisor]\n"),
 	      program_invocation_short_name);
 
+<<<<<<< HEAD
 	fputs(_("\nOptions:\n"), out);
 	fputs(_(" -t, --timing <file>     script timing output file\n"
 		" -s, --typescript <file> script terminal session output file\n"
@@ -48,6 +60,20 @@ usage(FILE *out)
 		" -V, --version           output version information and exit\n"
 		" -h, --help              display this help and exit\n\n"), out);
 
+=======
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Play back terminal typescripts, using timing information.\n"), out);
+
+	fputs(USAGE_OPTIONS, out);
+	fputs(_(" -t, --timing <file>     script timing output file\n"
+		" -s, --typescript <file> script terminal session output file\n"
+		" -d, --divisor <num>     speed up or slow down execution with time divisor\n"
+		" -m, --maxdelay <num>    wait at most this many seconds between updates\n"
+		" -V, --version           output version information and exit\n"
+		" -h, --help              display this help and exit\n\n"), out);
+
+	fprintf(out, USAGE_MAN_TAIL("scriptreplay(1)"));
+>>>>>>> master-vanilla
 	exit(out == stderr ? EXIT_FAILURE : EXIT_SUCCESS);
 }
 
@@ -129,16 +155,26 @@ main(int argc, char *argv[])
 {
 	FILE *tfile, *sfile;
 	const char *sname = NULL, *tname = NULL;
+<<<<<<< HEAD
 	double divi = 1;
 	int c, diviopt = FALSE, idx;
 	unsigned long line;
 	size_t oldblk = 0;
+=======
+	double divi = 1, maxdelay = 0;
+	int c, diviopt = FALSE, maxdelayopt = FALSE, idx;
+	unsigned long line;
+>>>>>>> master-vanilla
 	char ch;
 
 	static const struct option longopts[] = {
 		{ "timing",	required_argument,	0, 't' },
 		{ "typescript",	required_argument,	0, 's' },
 		{ "divisor",	required_argument,	0, 'd' },
+<<<<<<< HEAD
+=======
+		{ "maxdelay",	required_argument,	0, 'm' },
+>>>>>>> master-vanilla
 		{ "version",	no_argument,		0, 'V' },
 		{ "help",	no_argument,		0, 'h' },
 		{ NULL,		0, 0, 0 }
@@ -153,8 +189,14 @@ main(int argc, char *argv[])
 
 	bindtextdomain(PACKAGE, LOCALEDIR);
 	textdomain(PACKAGE);
+<<<<<<< HEAD
 
 	while ((ch = getopt_long(argc, argv, "t:s:d:Vh", longopts, NULL)) != -1)
+=======
+	atexit(close_stdout);
+
+	while ((ch = getopt_long(argc, argv, "t:s:d:m:Vh", longopts, NULL)) != -1)
+>>>>>>> master-vanilla
 		switch(ch) {
 		case 't':
 			tname = optarg;
@@ -166,9 +208,18 @@ main(int argc, char *argv[])
 			diviopt = TRUE;
 			divi = getnum(optarg);
 			break;
+<<<<<<< HEAD
 		case 'V':
 			printf(_("%s from %s\n"), program_invocation_short_name,
 						  PACKAGE_STRING);
+=======
+		case 'm':
+			maxdelayopt = TRUE;
+			maxdelay = getnum(optarg);
+			break;
+		case 'V':
+			printf(UTIL_LINUX_VERSION);
+>>>>>>> master-vanilla
 			exit(EXIT_SUCCESS);
 		case 'h':
 			usage(stdout);
@@ -189,6 +240,7 @@ main(int argc, char *argv[])
 		sname = idx < argc ? argv[idx++] : "typescript";
 	if (!diviopt)
 		divi = idx < argc ? getnum(argv[idx]) : 1;
+<<<<<<< HEAD
 
 	tfile = fopen(tname, "r");
 	if (!tfile)
@@ -196,6 +248,16 @@ main(int argc, char *argv[])
 	sfile = fopen(sname, "r");
 	if (!sfile)
 		err(EXIT_FAILURE, _("cannot open typescript file %s"), sname);
+=======
+	if (maxdelay < 0)
+		maxdelay = 0;
+	tfile = fopen(tname, "r");
+	if (!tfile)
+		err(EXIT_FAILURE, _("cannot open %s"), tname);
+	sfile = fopen(sname, "r");
+	if (!sfile)
+		err(EXIT_FAILURE, _("cannot open %s"), sname);
+>>>>>>> master-vanilla
 
 	/* ignore the first typescript line */
 	while((c = fgetc(sfile)) != EOF && c != '\n');
@@ -204,8 +266,12 @@ main(int argc, char *argv[])
 		double delay;
 		size_t blk;
 		char nl;
+<<<<<<< HEAD
 
 		if (fscanf(tfile, "%lf %zd%c\n", &delay, &blk, &nl) != 3 ||
+=======
+		if (fscanf(tfile, "%lf %zu%c\n", &delay, &blk, &nl) != 3 ||
+>>>>>>> master-vanilla
 				                                 nl != '\n') {
 			if (feof(tfile))
 				break;
@@ -218,12 +284,22 @@ main(int argc, char *argv[])
 		}
 		delay /= divi;
 
+<<<<<<< HEAD
 		if (delay > SCRIPT_MIN_DELAY)
 			delay_for(delay);
 
 		if (oldblk)
 			emit(sfile, sname, oldblk);
 		oldblk = blk;
+=======
+		if (maxdelayopt && delay > maxdelay)
+			delay = maxdelay;
+
+		if (delay > SCRIPT_MIN_DELAY)
+			delay_for(delay);
+
+		emit(sfile, sname, blk);
+>>>>>>> master-vanilla
 	}
 
 	fclose(sfile);

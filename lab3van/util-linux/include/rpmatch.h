@@ -6,4 +6,11 @@
 	(*r == 'y' || *r == 'Y' ? 1 : *r == 'n' || *r == 'N' ? 0 : -1)
 #endif
 
+<<<<<<< HEAD
+=======
+#define RPMATCH_YES	 1
+#define RPMATCH_NO	 0
+#define RPMATCH_INVALID	-1
+
+>>>>>>> master-vanilla
 #endif /* UTIL_LINUX_RPMATCH_H */

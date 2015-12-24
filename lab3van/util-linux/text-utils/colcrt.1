@@ -31,6 +31,7 @@
 .\"
 .\"     @(#)colcrt.1	8.1 (Berkeley) 6/30/93
 .\"
+<<<<<<< HEAD
 .Dd May 2011 "  "
 .Dt COLCRT(1) "" "User Commands"
 .Os util-linux
@@ -113,3 +114,77 @@ command appeared in
 .Sh AVAILABILITY
 The colcrt command is part of the util-linux package and is available from
 ftp://ftp.kernel.org/pub/linux/utils/util-linux/.
+=======
+.TH COLCRT "1" "September 2011" "util-linux" "User Commands"
+.SH NAME
+colcrt \- filter nroff output for CRT previewing
+.SH SYNOPSIS
+.B colcrt
+[options]
+.RI [ file ...]
+.SH DESCRIPTION
+.B colcrt
+provides virtual half-line and reverse line feed sequences for terminals
+without such capability, and on which overstriking is destructive.
+Half-line characters and underlining (changed to dashing `\-') are placed on
+new lines in between the normal output lines.
+.SH OPTIONS
+.TP
+\fB\-\fR, \fB\-\-no\-underlining\fR
+Suppress all underlining.  This option is especially useful for previewing
+.I allboxed
+tables from
+.BR tbl (1).
+.TP
+\fB\-2\fR, \fB\-\-half\-lines\fR
+Causes all half-lines to be printed, effectively double spacing the output.
+Normally, a minimal space output format is used which will suppress empty
+lines.  The program never suppresses two consecutive empty lines, however.
+The
+.B \-2
+option is useful for sending output to the line printer when the output
+contains superscripts and subscripts which would otherwise be invisible.
+.TP
+\fB\-V\fR, \fB\-\-version\fR
+Display version information and exit.
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Display help text and exit.
+.SH EXAMPLES
+A typical use of
+.B colcrt
+would be:
+.PP
+.RS
+.B tbl exum2.n \&| nroff \-ms \&| colcrt \- \&| more
+.RE
+.SH SEE ALSO
+.BR nroff (1),
+.BR troff (1),
+.BR col (1),
+.BR more (1),
+.BR ul (1)
+.SH BUGS
+Should fold underlines onto blanks even with the
+.B '\-'
+option so that a true underline character would show.
+.PP
+Can't back up more than 102 lines.
+.PP
+General overstriking is lost; as a special case '|' overstruck with '\-' or
+underline becomes '+'.
+.PP
+Lines are trimmed to 132 characters.
+.PP
+Some provision should be made for processing superscripts and subscripts in
+documents which are already double-spaced.
+.SH HISTORY
+The
+.B colcrt
+command appeared in 3.0BSD.
+.SH AVAILABILITY
+The colcrt command is part of the util-linux package and is available from
+.UR ftp://\:ftp.kernel.org\:/pub\:/linux\:/utils\:/util-linux/
+Linux Kernel Archive
+.UE .
+>>>>>>> master-vanilla

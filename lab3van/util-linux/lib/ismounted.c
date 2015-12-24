@@ -11,7 +11,11 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <fcntl.h>
+<<<<<<< HEAD
 #if HAVE_MNTENT_H
+=======
+#ifdef HAVE_MNTENT_H
+>>>>>>> master-vanilla
 #include <mntent.h>
 #endif
 #include <string.h>
@@ -26,6 +30,14 @@
 #include "pathnames.h"
 #include "ismounted.h"
 #include "c.h"
+<<<<<<< HEAD
+=======
+#ifdef __linux__
+# include "loopdev.h"
+#endif
+
+
+>>>>>>> master-vanilla
 
 #ifdef HAVE_MNTENT_H
 /*
@@ -47,6 +59,10 @@ static int check_mntent_file(const char *mtab_file, const char *file,
 	*mount_flags = 0;
 	if ((f = setmntent (mtab_file, "r")) == NULL)
 		return errno;
+<<<<<<< HEAD
+=======
+
+>>>>>>> master-vanilla
 	if (stat(file, &st_buf) == 0) {
 		if (S_ISBLK(st_buf.st_mode)) {
 #ifndef __GNU__ /* The GNU hurd is broken with respect to stat devices */
@@ -57,11 +73,16 @@ static int check_mntent_file(const char *mtab_file, const char *file,
 			file_ino = st_buf.st_ino;
 		}
 	}
+<<<<<<< HEAD
+=======
+
+>>>>>>> master-vanilla
 	while ((mnt = getmntent (f)) != NULL) {
 		if (mnt->mnt_fsname[0] != '/')
 			continue;
 		if (strcmp(file, mnt->mnt_fsname) == 0)
 			break;
+<<<<<<< HEAD
 		if (stat(mnt->mnt_fsname, &st_buf) == 0) {
 			if (S_ISBLK(st_buf.st_mode)) {
 #ifndef __GNU__
@@ -77,6 +98,31 @@ static int check_mntent_file(const char *mtab_file, const char *file,
 	}
 
 	if (mnt == 0) {
+=======
+		if (stat(mnt->mnt_fsname, &st_buf) != 0)
+			continue;
+
+		if (S_ISBLK(st_buf.st_mode)) {
+#ifndef __GNU__
+			if (file_rdev && file_rdev == st_buf.st_rdev)
+				break;
+#ifdef __linux__
+			/* maybe the file is loopdev backing file */
+			if (file_dev
+			    && major(st_buf.st_rdev) == LOOPDEV_MAJOR
+			    && loopdev_is_used(mnt->mnt_fsname, file, 0, 0))
+				break;
+#endif /* __linux__ */
+#endif	/* __GNU__ */
+		} else {
+			if (file_dev && ((file_dev == st_buf.st_dev) &&
+					 (file_ino == st_buf.st_ino)))
+				break;
+		}
+	}
+
+	if (mnt == NULL) {
+>>>>>>> master-vanilla
 #ifndef __GNU__ /* The GNU hurd is broken with respect to stat devices */
 		/*
 		 * Do an extra check to see if this is the root device.  We
@@ -141,7 +187,11 @@ static int check_mntent_file(const char *mtab_file, const char *file,
 is_root:
 #define TEST_FILE "/.ismount-test-file"
 		*mount_flags |= MF_ISROOT;
+<<<<<<< HEAD
 		fd = open(TEST_FILE, O_RDWR|O_CREAT, 0600);
+=======
+		fd = open(TEST_FILE, O_RDWR|O_CREAT|O_CLOEXEC, 0600);
+>>>>>>> master-vanilla
 		if (fd < 0) {
 			if (errno == EROFS)
 				*mount_flags |= MF_READONLY;
@@ -246,7 +296,11 @@ static int is_swap_device(const char *file)
 		file_dev = st_buf.st_rdev;
 #endif	/* __GNU__ */
 
+<<<<<<< HEAD
 	if (!(f = fopen("/proc/swaps", "r")))
+=======
+	if (!(f = fopen("/proc/swaps", "r" UL_CLOEXECSTR)))
+>>>>>>> master-vanilla
 		return 0;
 	/* Skip the first line */
 	if (!fgets(buf, sizeof(buf), f))
@@ -302,7 +356,12 @@ int check_mount_point(const char *device, int *mount_flags,
 
 	if (is_swap_device(device)) {
 		*mount_flags = MF_MOUNTED | MF_SWAP;
+<<<<<<< HEAD
 		strncpy(mtpt, "<swap>", mtlen);
+=======
+		if (mtpt && mtlen)
+			strncpy(mtpt, "[SWAP]", mtlen);
+>>>>>>> master-vanilla
 	} else {
 #ifdef HAVE_MNTENT_H
 		retval = check_mntent(device, mount_flags, mtpt, mtlen);
@@ -324,7 +383,11 @@ int check_mount_point(const char *device, int *mount_flags,
 	if ((stat(device, &st_buf) != 0) ||
 	    !S_ISBLK(st_buf.st_mode))
 		return 0;
+<<<<<<< HEAD
 	fd = open(device, O_RDONLY | O_EXCL);
+=======
+	fd = open(device, O_RDONLY|O_EXCL|O_CLOEXEC);
+>>>>>>> master-vanilla
 	if (fd < 0) {
 		if (errno == EBUSY)
 			*mount_flags |= MF_BUSY;

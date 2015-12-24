@@ -174,6 +174,10 @@ static int probe_ufs(blkid_probe pr,
 	size_t i;
 	uint32_t magic;
 	struct ufs_super_block *ufs;
+<<<<<<< HEAD
+=======
+	int is_be;
+>>>>>>> master-vanilla
 
 	for (i = 0; i < ARRAY_SIZE(offsets); i++) {
 		uint32_t magLE, magBE;
@@ -184,7 +188,11 @@ static int probe_ufs(blkid_probe pr,
 					offsets[i] * 1024,
 					sizeof(struct ufs_super_block));
 		if (!ufs)
+<<<<<<< HEAD
 			return -1;
+=======
+			return errno ? -errno : 1;
+>>>>>>> master-vanilla
 
 		magBE = be32_to_cpu(ufs->fs_magic);
 		magLE = le32_to_cpu(ufs->fs_magic);
@@ -192,6 +200,10 @@ static int probe_ufs(blkid_probe pr,
 		for (y = 0; y < ARRAY_SIZE(mags); y++) {
 			if (magLE == mags[y] || magBE == mags[y]) {
 				magic = mags[y];
+<<<<<<< HEAD
+=======
+				is_be = (magBE == mags[y]);
+>>>>>>> master-vanilla
 				goto found;
 			}
 		}
@@ -206,13 +218,37 @@ found:
 				sizeof(ufs->fs_u11.fs_u2.fs_volname));
 	} else
 		blkid_probe_set_version(pr, "1");
+<<<<<<< HEAD
+=======
+	if (ufs->fs_id[0] || ufs->fs_id[1])
+	{
+		if (is_be)
+			blkid_probe_sprintf_uuid(pr,
+					 (unsigned char *) &ufs->fs_id,
+						 sizeof(ufs->fs_id),
+						 "%08x%08x",
+						 be32_to_cpu(ufs->fs_id[0]),
+						 be32_to_cpu(ufs->fs_id[1]));
+		else
+			blkid_probe_sprintf_uuid(pr,
+					 (unsigned char *) &ufs->fs_id,
+						 sizeof(ufs->fs_id),
+						 "%08x%08x",
+						 le32_to_cpu(ufs->fs_id[0]),
+						 le32_to_cpu(ufs->fs_id[1]));
+	}
+>>>>>>> master-vanilla
 
 	if (blkid_probe_set_magic(pr,
 			(offsets[i] * 1024) +
 				offsetof(struct ufs_super_block, fs_magic),
 			sizeof(ufs->fs_magic),
 			(unsigned char *) &ufs->fs_magic))
+<<<<<<< HEAD
 		return -1;
+=======
+		return 1;
+>>>>>>> master-vanilla
 
 	return 0;
 }

@@ -1,14 +1,27 @@
+<<<<<<< HEAD
 .\" -*- nroff -*-
+=======
+>>>>>>> master-vanilla
 .TH MKFS 8 "June 2011" "util-linux" "System Administration"
 .SH NAME
 mkfs \- build a Linux filesystem
 .SH SYNOPSIS
+<<<<<<< HEAD
 .SH SYNOPSIS
 .B mkfs
 .RI [ options ]
 .RB [ \-t
 .IR "type fs-options" ] " device " [ size ]
 .SH DESCRIPTION
+=======
+.B mkfs
+[options]
+.RB [ \-t
+.IR type "] [" fs-options ] " device " [ size ]
+.SH DESCRIPTION
+.B This mkfs frontend is deprecated in favour of filesystem specific mkfs.<type> utils.
+.PP
+>>>>>>> master-vanilla
 .B mkfs
 is used to build a Linux filesystem on a device, usually
 a hard disk partition.  The
@@ -29,6 +42,7 @@ In actuality,
 is simply a front-end for the various filesystem builders
 (\fBmkfs.\fIfstype\fR)
 available under Linux.
+<<<<<<< HEAD
 The filesystem-specific builder is searched for in a number
 of directories, like perhaps
 .IR /sbin ,
@@ -43,6 +57,10 @@ and
 .IR /sbin/fs ),
 and finally in the directories
 listed in the PATH environment variable.
+=======
+The filesystem-specific builder is searched for via your PATH
+environment setting only.
+>>>>>>> master-vanilla
 Please see the filesystem-specific builder manual pages for
 further details.
 .SH OPTIONS
@@ -54,8 +72,11 @@ If not specified, the default filesystem type
 .TP
 .I fs-options
 Filesystem-specific options to be passed to the real filesystem builder.
+<<<<<<< HEAD
 Although not guaranteed, the following options are supported
 by most filesystem builders.
+=======
+>>>>>>> master-vanilla
 .TP
 .BR \-V , " \-\-verbose"
 Produce verbose output, including all filesystem-specific commands
@@ -70,6 +91,7 @@ version information only when it is the only parameter, otherwise it
 will work as \fB\-\-verbose\fR.)
 .TP
 .BR \-h , " \-\-help"
+<<<<<<< HEAD
 Display help and exit.
 .SH BUGS
 All generic options must precede and not be combined with
@@ -78,19 +100,34 @@ Some filesystem-specific programs do not support the
 .B -V
 (verbose) option, nor return meaningful exit codes.
 Also, some filesystem-specific programs do not automatically
+=======
+Display help text and exit.
+.SH BUGS
+All generic options must precede and not be combined with
+filesystem-specific options.
+Some filesystem-specific programs do not automatically
+>>>>>>> master-vanilla
 detect the device size and require the
 .I size
 parameter to be specified.
 .SH AUTHORS
 David Engel (david@ods.com)
 .br
+<<<<<<< HEAD
 Fred N. van Kempen (waltje@uwalt.nl.mugnet.org)
+=======
+Fred N.\& van Kempen (waltje@uwalt.nl.mugnet.org)
+>>>>>>> master-vanilla
 .br
 Ron Sommeling (sommel@sci.kun.nl)
 .br
 The manual page was shamelessly adapted from Remy Card's version
 for the ext2 filesystem.
 .SH SEE ALSO
+<<<<<<< HEAD
+=======
+.na
+>>>>>>> master-vanilla
 .BR fs (5),
 .BR badblocks (8),
 .BR fsck (8),
@@ -103,8 +140,13 @@ for the ext2 filesystem.
 .BR mkfs.minix (8),
 .BR mkfs.msdos (8),
 .BR mkfs.vfat (8),
+<<<<<<< HEAD
 .BR mkfs.xfs (8),
 .BR mkfs.xiafs (8)
+=======
+.BR mkfs.xfs (8)
+.ad
+>>>>>>> master-vanilla
 .SH AVAILABILITY
 The mkfs command is part of the util-linux package and is available from
 ftp://ftp.kernel.org/pub/linux/utils/util-linux/.

@@ -34,7 +34,11 @@
 uuid_copy \- copy a UUID value
 .SH SYNOPSIS
 .nf
+<<<<<<< HEAD
 .B #include <uuid/uuid.h>
+=======
+.B #include <uuid.h>
+>>>>>>> master-vanilla
 .sp
 .BI "void uuid_copy(uuid_t " dst ", uuid_t " src);
 .fi
@@ -47,11 +51,19 @@ function copies the UUID variable
 The copied UUID is returned in the location pointed to by
 .IR dst .
 .SH AUTHOR
+<<<<<<< HEAD
 Theodore Y. Ts'o
+=======
+Theodore Y.\& Ts'o
+>>>>>>> master-vanilla
 .SH AVAILABILITY
 .B libuuid
 is part of the util-linux package since version 2.15.1 and is available from
 ftp://ftp.kernel.org/pub/linux/utils/util-linux/.
+<<<<<<< HEAD
+=======
+.na
+>>>>>>> master-vanilla
 .SH "SEE ALSO"
 .BR uuid (3),
 .BR uuid_clear (3),
@@ -60,3 +72,7 @@ ftp://ftp.kernel.org/pub/linux/utils/util-linux/.
 .BR uuid_is_null (3),
 .BR uuid_parse (3),
 .BR uuid_unparse (3)
+<<<<<<< HEAD
+=======
+.ad
+>>>>>>> master-vanilla

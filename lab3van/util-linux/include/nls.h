@@ -12,6 +12,15 @@ int main(int argc, char *argv[]);
 #else
 # undef setlocale
 # define setlocale(Category, Locale) /* empty */
+<<<<<<< HEAD
+=======
+struct lconv
+{
+	char *decimal_point;
+};
+# undef localeconv
+# define localeconv() NULL
+>>>>>>> master-vanilla
 #endif
 
 #ifdef ENABLE_NLS

@@ -5,11 +5,14 @@
 
      Note that in years 2006-2010 this project used the name "util-linux-ng".
 
+<<<<<<< HEAD
 WEB PAGE:
 
      http://kernel.org/~kzak/util-linux/
 
 
+=======
+>>>>>>> master-vanilla
 MAILING LIST:
 
       E-MAIL: util-linux@vger.kernel.org
@@ -24,6 +27,7 @@ DOWNLOAD:
 SOURCE CODE:
 
       Web interface:
+<<<<<<< HEAD
           http://git.kernel.org/?p=utils/util-linux/util-linux.git
       Checkout:
           git clone git://git.kernel.org/pub/scm/utils/util-linux/util-linux.git util-linux
@@ -37,6 +41,18 @@ NEUTRALITY:
 
       The stuff in util-linux should be rather distribution-neutral.
       No RPMs/DEBs/... are provided - get yours from your distributor.
+=======
+          http://git.kernel.org/cgit/utils/util-linux/util-linux.git
+          https://github.com/karelzak/util-linux
+      Checkout:
+          git clone git://git.kernel.org/pub/scm/utils/util-linux/util-linux.git util-linux
+
+
+NLS (PO TRANSLATIONS):
+
+      PO files are maintained by:
+          http://translationproject.org/domain/util-linux.html
+>>>>>>> master-vanilla
 
 
 VERSION SCHEMA:
@@ -53,6 +69,7 @@ VERSION SCHEMA:
       Development releases:
 
          <major>.<minor>-rc<N>
+<<<<<<< HEAD
 
 
 COMPILATION:
@@ -96,3 +113,5 @@ STATIC LINKING:
                                                        ^^^^^^^^
 
 
+=======
+>>>>>>> master-vanilla

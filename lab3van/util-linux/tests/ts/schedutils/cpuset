@@ -14,12 +14,21 @@
 # GNU General Public License for more details.
 #
 
+<<<<<<< HEAD
 TS_TOPDIR="$(dirname $0)/../.."
+=======
+TS_TOPDIR="${0%/*}/../.."
+>>>>>>> master-vanilla
 TS_DESC="cpuset"
 
 . $TS_TOPDIR/functions.sh
 ts_init "$*"
 
+<<<<<<< HEAD
+=======
+ts_check_test_command "$TS_HELPER_CPUSET"
+
+>>>>>>> master-vanilla
 MASKS=" 0x00000001 \
 	0x00000002 \
 	0x00000003 \

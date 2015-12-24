@@ -13,10 +13,17 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
+<<<<<<< HEAD
  * The original namei(1) was writtent by:
  *	Roger S. Southwick (May 2, 1990)
  *	Steve Tell (March 28, 1991)
  *	Arkadiusz Mikiewicz (1999-02-22)
+=======
+ * The original namei(1) was written by:
+ *	Roger S. Southwick (May 2, 1990)
+ *	Steve Tell (March 28, 1991)
+ *	Arkadiusz Miśkiewicz (1999-02-22)
+>>>>>>> master-vanilla
  *	Li Zefan (2007-09-10).
  */
 
@@ -24,7 +31,10 @@
 #include <unistd.h>
 #include <getopt.h>
 #include <string.h>
+<<<<<<< HEAD
 #include <strings.h>
+=======
+>>>>>>> master-vanilla
 #include <stdlib.h>
 #include <errno.h>
 #include <sys/types.h>
@@ -38,6 +48,11 @@
 #include "nls.h"
 #include "widechar.h"
 #include "strutils.h"
+<<<<<<< HEAD
+=======
+#include "closestream.h"
+#include "idcache.h"
+>>>>>>> master-vanilla
 
 #ifndef MAXSYMLINKS
 #define MAXSYMLINKS 256
@@ -65,6 +80,7 @@ struct namei {
 	int		noent;		/* is this item not existing */
 };
 
+<<<<<<< HEAD
 struct idcache {
 	unsigned long int	id;
 	char			*name;
@@ -162,6 +178,12 @@ add_gid(unsigned long int id)
 	}
 }
 
+=======
+static int flags;
+static struct idcache *gcache;	/* groupnames */
+static struct idcache *ucache;	/* usernames */
+
+>>>>>>> master-vanilla
 static void
 free_namei(struct namei *nm)
 {
@@ -179,6 +201,10 @@ readlink_to_namei(struct namei *nm, const char *path)
 {
 	char sym[PATH_MAX];
 	ssize_t sz;
+<<<<<<< HEAD
+=======
+	int isrel = 0;
+>>>>>>> master-vanilla
 
 	sz = readlink(path, sym, sizeof(sym));
 	if (sz < 1)
@@ -186,6 +212,7 @@ readlink_to_namei(struct namei *nm, const char *path)
 	if (*sym != '/') {
 		char *p = strrchr(path, '/');
 
+<<<<<<< HEAD
 		nm->relstart = p ? p - path : 0;
 		if (nm->relstart)
 			sz += nm->relstart + 1;
@@ -193,13 +220,32 @@ readlink_to_namei(struct namei *nm, const char *path)
 	nm->abslink = xmalloc(sz + 1);
 
 	if (*sym != '/' && nm->relstart) {
+=======
+		if (p) {
+			isrel = 1;
+			nm->relstart = p - path;
+			sz += nm->relstart + 1;
+		}
+	}
+	nm->abslink = xmalloc(sz + 1);
+
+	if (*sym != '/' && isrel) {
+>>>>>>> master-vanilla
 		/* create the absolute path from the relative symlink */
 		memcpy(nm->abslink, path, nm->relstart);
 		*(nm->abslink + nm->relstart) = '/';
 		nm->relstart++;
 		memcpy(nm->abslink + nm->relstart, sym, sz - nm->relstart);
 	} else
+<<<<<<< HEAD
 		memcpy(nm->abslink, sym, sz);
+=======
+		/* - absolute link (foo -> /path/bar)
+		 * - or link without any subdir (foo -> bar)
+		 */
+		memcpy(nm->abslink, sym, sz);
+
+>>>>>>> master-vanilla
 	nm->abslink[sz] = '\0';
 }
 
@@ -221,7 +267,11 @@ dotdot_stat(const char *dirname, struct stat *st)
 	memcpy(path + len, DOTDOTDIR, sizeof(DOTDOTDIR));
 
 	if (stat(path, st))
+<<<<<<< HEAD
 		err(EXIT_FAILURE, _("could not stat '%s'"), path);
+=======
+		err(EXIT_FAILURE, _("stat of %s failed"), path);
+>>>>>>> master-vanilla
 	free(path);
 	return st;
 }
@@ -247,8 +297,13 @@ new_namei(struct namei *parent, const char *path, const char *fname, int lev)
 	if (S_ISLNK(nm->st.st_mode))
 		readlink_to_namei(nm, path);
 	if (flags & NAMEI_OWNERS) {
+<<<<<<< HEAD
 		add_uid(nm->st.st_uid);
 		add_gid(nm->st.st_gid);
+=======
+		add_uid(ucache, nm->st.st_uid);
+		add_gid(gcache, nm->st.st_gid);
+>>>>>>> master-vanilla
 	}
 
 	if ((flags & NAMEI_MNTS) && S_ISDIR(nm->st.st_mode)) {
@@ -360,6 +415,18 @@ print_namei(struct namei *nm, char *path)
 		char md[11];
 
 		if (nm->noent) {
+<<<<<<< HEAD
+=======
+			int blanks = 1;
+			if (flags & NAMEI_MODES)
+				blanks += 9;
+			if (flags & NAMEI_OWNERS)
+				blanks += ucache->width + gcache->width + 2;
+			if (!(flags & NAMEI_VERTICAL))
+				blanks += 1;
+			blanks += nm->level * 2;
+			printf("%*s ", blanks, "");
+>>>>>>> master-vanilla
 			printf(_("%s - No such file or directory\n"), nm->name);
 			return -1;
 		}
@@ -381,9 +448,15 @@ print_namei(struct namei *nm, char *path)
 			printf("%c", md[0]);
 
 		if (flags & NAMEI_OWNERS) {
+<<<<<<< HEAD
 			printf(" %-*s", uwidth,
 				get_id(ucache, nm->st.st_uid)->name);
 			printf(" %-*s", gwidth,
+=======
+			printf(" %-*s", ucache->width,
+				get_id(ucache, nm->st.st_uid)->name);
+			printf(" %-*s", gcache->width,
+>>>>>>> master-vanilla
 				get_id(gcache, nm->st.st_gid)->name);
 		}
 
@@ -408,11 +481,22 @@ static void usage(int rc)
 	if (!*p)
 		p = "namei";
 
+<<<<<<< HEAD
 	fputs(_("\nUsage:\n"), out);
 	fprintf(out,
 	      _(" %s [options] pathname [pathname ...]\n"), p);
 
 	fputs(_("\nOptions:\n"), out);
+=======
+	fputs(USAGE_HEADER, out);
+	fprintf(out,
+	      _(" %s [options] <pathname>...\n"), p);
+
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Follow a pathname until a terminal point is found.\n"), out);
+
+	fputs(USAGE_OPTIONS, out);
+>>>>>>> master-vanilla
 	fputs(_(" -h, --help          displays this help text\n"
 		" -V, --version       output version information and exit\n"
 		" -x, --mountpoints   show mount point directories with a 'D'\n"
@@ -422,7 +506,11 @@ static void usage(int rc)
 		" -n, --nosymlinks    don't follow symlinks\n"
 		" -v, --vertical      vertical align of modes and owners\n"), out);
 
+<<<<<<< HEAD
 	fputs(_("\nFor more information see namei(1).\n"), out);
+=======
+	fprintf(out, USAGE_MAN_TAIL("namei(1)"));
+>>>>>>> master-vanilla
 	exit(rc);
 }
 
@@ -448,6 +536,10 @@ main(int argc, char **argv)
 	setlocale(LC_ALL, "");
 	bindtextdomain(PACKAGE, LOCALEDIR);
 	textdomain(PACKAGE);
+<<<<<<< HEAD
+=======
+	atexit(close_stdout);
+>>>>>>> master-vanilla
 
 	while ((c = getopt_long(argc, argv, "hVlmnovx", longopts, NULL)) != -1) {
 		switch(c) {
@@ -455,8 +547,12 @@ main(int argc, char **argv)
 			usage(EXIT_SUCCESS);
 			break;
 		case 'V':
+<<<<<<< HEAD
 			printf(_("%s from %s\n"), program_invocation_short_name,
 						  PACKAGE_STRING);
+=======
+			printf(UTIL_LINUX_VERSION);
+>>>>>>> master-vanilla
 			return EXIT_SUCCESS;
 		case 'l':
 			flags |= (NAMEI_OWNERS | NAMEI_MODES | NAMEI_VERTICAL);
@@ -486,6 +582,16 @@ main(int argc, char **argv)
 		usage(EXIT_FAILURE);
 	}
 
+<<<<<<< HEAD
+=======
+	ucache = new_idcache();
+	if (!ucache)
+		err(EXIT_FAILURE, _("failed to allocate UID cache"));
+	gcache = new_idcache();
+	if (!gcache)
+		err(EXIT_FAILURE, _("failed to allocate GID cache"));
+
+>>>>>>> master-vanilla
 	for(; optind < argc; optind++) {
 		char *path = argv[optind];
 		struct namei *nm = NULL;

@@ -1,7 +1,11 @@
 /*
  * Security checks of environment
  * Added from shadow-utils package
+<<<<<<< HEAD
  * by Arkadiusz Mi∂kiewicz <misiek@pld.ORG.PL>
+=======
+ * by Arkadiusz Mi≈õkiewicz <misiek@pld.ORG.PL>
+>>>>>>> master-vanilla
  *
  */
 
@@ -21,7 +25,13 @@
 
 #include "env.h"
 
+<<<<<<< HEAD
 extern char **environ;
+=======
+#ifndef HAVE_ENVIRON_DECL
+extern char **environ;
+#endif
+>>>>>>> master-vanilla
 
 static char * const forbid[] = {
         "_RLD_=",
@@ -89,7 +99,11 @@ char *safe_getenv(const char *arg)
 
 	if (ruid != 0 || (ruid != geteuid()) || (getgid() != getegid()))
 		return NULL;
+<<<<<<< HEAD
 #if HAVE_PRCTL
+=======
+#ifdef HAVE_PRCTL
+>>>>>>> master-vanilla
 	if (prctl(PR_GET_DUMPABLE, 0, 0, 0, 0) == 0)
 		return NULL;
 #else
@@ -98,8 +112,14 @@ char *safe_getenv(const char *arg)
 		return NULL;
 #endif
 #endif
+<<<<<<< HEAD
 
 #ifdef HAVE___SECURE_GETENV
+=======
+#ifdef HAVE_SECURE_GETENV
+return secure_getenv(arg);
+#elif HAVE___SECURE_GETENV
+>>>>>>> master-vanilla
 	return __secure_getenv(arg);
 #else
 	return getenv(arg);

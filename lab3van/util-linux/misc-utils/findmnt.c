@@ -1,7 +1,11 @@
 /*
  * findmnt(8)
  *
+<<<<<<< HEAD
  * Copyright (C) 2010,2011 Red Hat, Inc. All rights reserved.
+=======
+ * Copyright (C) 2010-2015 Red Hat, Inc. All rights reserved.
+>>>>>>> master-vanilla
  * Written by Karel Zak <kzak@redhat.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -14,9 +18,15 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
+<<<<<<< HEAD
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+=======
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+>>>>>>> master-vanilla
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,6 +36,7 @@
 #include <string.h>
 #include <termios.h>
 #ifdef HAVE_SYS_IOCTL_H
+<<<<<<< HEAD
 #include <sys/ioctl.h>
 #endif
 #include <assert.h>
@@ -38,6 +49,28 @@
 #include "c.h"
 #include "tt.h"
 #include "strutils.h"
+=======
+# include <sys/ioctl.h>
+#endif
+#include <assert.h>
+#include <poll.h>
+#include <sys/statvfs.h>
+#include <sys/types.h>
+#ifdef HAVE_LIBUDEV
+# include <libudev.h>
+#endif
+#include <libmount.h>
+#include <libsmartcols.h>
+
+#include "pathnames.h"
+#include "nls.h"
+#include "closestream.h"
+#include "c.h"
+#include "strutils.h"
+#include "xalloc.h"
+#include "optutils.h"
+#include "mangle.h"
+>>>>>>> master-vanilla
 
 /* flags */
 enum {
@@ -48,7 +81,25 @@ enum {
 	FL_NOSWAPMATCH	= (1 << 6),
 	FL_NOFSROOT	= (1 << 7),
 	FL_SUBMOUNTS	= (1 << 8),
+<<<<<<< HEAD
 	FL_POLL		= (1 << 9)
+=======
+	FL_POLL		= (1 << 9),
+	FL_DF		= (1 << 10),
+	FL_ALL		= (1 << 11),
+	FL_UNIQ		= (1 << 12),
+	FL_BYTES	= (1 << 13),
+	FL_NOCACHE	= (1 << 14),
+	FL_STRICTTARGET = (1 << 15),
+
+	/* basic table settings */
+	FL_ASCII	= (1 << 20),
+	FL_RAW		= (1 << 21),
+	FL_NOHEADINGS	= (1 << 22),
+	FL_EXPORT	= (1 << 23),
+	FL_TREE		= (1 << 24),
+	FL_JSON		= (1 << 25),
+>>>>>>> master-vanilla
 };
 
 /* column IDs */
@@ -61,18 +112,44 @@ enum {
 	COL_FS_OPTIONS,
 	COL_LABEL,
 	COL_UUID,
+<<<<<<< HEAD
+=======
+	COL_PARTLABEL,
+	COL_PARTUUID,
+>>>>>>> master-vanilla
 	COL_MAJMIN,
 	COL_ACTION,
 	COL_OLD_TARGET,
 	COL_OLD_OPTIONS,
+<<<<<<< HEAD
 
 	FINDMNT_NCOLUMNS
+=======
+	COL_SIZE,
+	COL_AVAIL,
+	COL_USED,
+	COL_USEPERC,
+	COL_FSROOT,
+	COL_TID,
+	COL_ID,
+	COL_OPT_FIELDS,
+	COL_PROPAGATION,
+	COL_FREQ,
+	COL_PASSNO
+};
+
+enum {
+	TABTYPE_FSTAB = 1,
+	TABTYPE_MTAB,
+	TABTYPE_KERNEL
+>>>>>>> master-vanilla
 };
 
 /* column names */
 struct colinfo {
 	const char	*name;		/* header */
 	double		whint;		/* width hint (N < 1 is in percent of termwidth) */
+<<<<<<< HEAD
 	int		flags;		/* tt flags */
 	const char      *help;		/* column description */
 	const char	*match;		/* pattern for match_func() */
@@ -101,6 +178,65 @@ static int tt_flags;
 /* array with IDs of enabled columns */
 static int columns[FINDMNT_NCOLUMNS];
 static int ncolumns;
+=======
+	int		flags;		/* libsmartcols flags */
+	const char      *help;		/* column description */
+	const char	*match;		/* pattern for match_func() */
+	void		*match_data;	/* match specific data */
+};
+
+/* columns descriptions (don't use const, this is writable) */
+static struct colinfo infos[] = {
+	[COL_SOURCE]       = { "SOURCE",       0.25, SCOLS_FL_NOEXTREMES, N_("source device") },
+	[COL_TARGET]       = { "TARGET",       0.30, SCOLS_FL_TREE| SCOLS_FL_NOEXTREMES, N_("mountpoint") },
+	[COL_FSTYPE]       = { "FSTYPE",       0.10, SCOLS_FL_TRUNC, N_("filesystem type") },
+	[COL_OPTIONS]      = { "OPTIONS",      0.10, SCOLS_FL_TRUNC, N_("all mount options") },
+	[COL_VFS_OPTIONS]  = { "VFS-OPTIONS",  0.20, SCOLS_FL_TRUNC, N_("VFS specific mount options") },
+	[COL_FS_OPTIONS]   = { "FS-OPTIONS",   0.10, SCOLS_FL_TRUNC, N_("FS specific mount options") },
+	[COL_LABEL]        = { "LABEL",        0.10, 0, N_("filesystem label") },
+	[COL_UUID]         = { "UUID",           36, 0, N_("filesystem UUID") },
+	[COL_PARTLABEL]    = { "PARTLABEL",    0.10, 0, N_("partition label") },
+	[COL_PARTUUID]     = { "PARTUUID",       36, 0, N_("partition UUID") },
+	[COL_MAJMIN]       = { "MAJ:MIN",         6, 0, N_("major:minor device number") },
+	[COL_ACTION]       = { "ACTION",         10, SCOLS_FL_STRICTWIDTH, N_("action detected by --poll") },
+	[COL_OLD_OPTIONS]  = { "OLD-OPTIONS",  0.10, SCOLS_FL_TRUNC, N_("old mount options saved by --poll") },
+	[COL_OLD_TARGET]   = { "OLD-TARGET",   0.30, 0, N_("old mountpoint saved by --poll") },
+	[COL_SIZE]         = { "SIZE",            5, SCOLS_FL_RIGHT, N_("filesystem size") },
+	[COL_AVAIL]        = { "AVAIL",           5, SCOLS_FL_RIGHT, N_("filesystem size available") },
+	[COL_USED]         = { "USED",            5, SCOLS_FL_RIGHT, N_("filesystem size used") },
+	[COL_USEPERC]      = { "USE%",            3, SCOLS_FL_RIGHT, N_("filesystem use percentage") },
+	[COL_FSROOT]       = { "FSROOT",       0.25, SCOLS_FL_NOEXTREMES, N_("filesystem root") },
+	[COL_TID]          = { "TID",             4, SCOLS_FL_RIGHT, N_("task ID") },
+	[COL_ID]           = { "ID",              2, SCOLS_FL_RIGHT, N_("mount ID") },
+	[COL_OPT_FIELDS]   = { "OPT-FIELDS",   0.10, SCOLS_FL_TRUNC, N_("optional mount fields") },
+	[COL_PROPAGATION]  = { "PROPAGATION",  0.10, 0, N_("VFS propagation flags") },
+	[COL_FREQ]         = { "FREQ",            1, SCOLS_FL_RIGHT, N_("dump(8) period in days [fstab only]") },
+	[COL_PASSNO]       = { "PASSNO",          1, SCOLS_FL_RIGHT, N_("pass number on parallel fsck(8) [fstab only]") }
+};
+
+/* columns[] array specifies all currently wanted output column. The columns
+ * are defined by infos[] array and you can specify (on command line) each
+ * column twice. That's enough, dynamically allocated array of the columns is
+ * unnecessary overkill and over-engineering in this case */
+static int columns[ARRAY_SIZE(infos) * 2];
+static size_t ncolumns;
+
+static inline size_t err_columns_index(size_t arysz, size_t idx)
+{
+	if (idx >= arysz)
+		errx(EXIT_FAILURE, _("too many columns specified, "
+				     "the limit is %zu columns"),
+				arysz - 1);
+	return idx;
+}
+
+#define add_column(ary, n, id)	\
+		((ary)[ err_columns_index(ARRAY_SIZE(ary), (n)) ] = (id))
+
+/* global flags */
+static int flags;
+
+>>>>>>> master-vanilla
 
 /* poll actions (parsed --poll=<list> */
 #define FINDMNT_NACTIONS	4		/* mount, umount, move, remount */
@@ -110,10 +246,25 @@ static int nactions;
 /* libmount cache */
 static struct libmnt_cache *cache;
 
+<<<<<<< HEAD
 static int get_column_id(int num)
 {
 	assert(num < ncolumns);
 	assert(columns[num] < FINDMNT_NCOLUMNS);
+=======
+#ifdef HAVE_LIBUDEV
+struct udev *udev;
+#endif
+
+static int match_func(struct libmnt_fs *fs, void *data __attribute__ ((__unused__)));
+
+
+static int get_column_id(int num)
+{
+	assert(num >= 0);
+	assert((size_t) num < ncolumns);
+	assert((size_t) columns[num] < ARRAY_SIZE(infos));
+>>>>>>> master-vanilla
 	return columns[num];
 }
 
@@ -124,7 +275,11 @@ static struct colinfo *get_column_info(int num)
 
 static const char *column_id_to_name(int id)
 {
+<<<<<<< HEAD
 	assert(id < FINDMNT_NCOLUMNS);
+=======
+	assert((size_t) id < ARRAY_SIZE(infos));
+>>>>>>> master-vanilla
 	return infos[id].name;
 }
 
@@ -145,6 +300,7 @@ static int get_column_flags(int num)
 
 static const char *get_match(int id)
 {
+<<<<<<< HEAD
 	assert(id < FINDMNT_NCOLUMNS);
 	return infos[id].match;
 }
@@ -158,6 +314,87 @@ static void set_match(int id, const char *match)
 static int is_tabdiff_column(int id)
 {
 	assert(id < FINDMNT_NCOLUMNS);
+=======
+	assert((size_t) id < ARRAY_SIZE(infos));
+	return infos[id].match;
+}
+
+static void *get_match_data(int id)
+{
+	assert((size_t) id < ARRAY_SIZE(infos));
+	return infos[id].match_data;
+}
+
+static void set_match(int id, const char *match)
+{
+	assert((size_t) id < ARRAY_SIZE(infos));
+	infos[id].match = match;
+}
+
+static void set_match_data(int id, void *data)
+{
+	assert((size_t) id < ARRAY_SIZE(infos));
+	infos[id].match_data = data;
+}
+
+/*
+ * source match means COL_SOURCE *or* COL_MAJMIN, depends on
+ * data format.
+ */
+static void set_source_match(const char *data)
+{
+	int maj, min;
+
+	if (sscanf(data, "%d:%d", &maj, &min) == 2) {
+		dev_t *devno = xmalloc(sizeof(dev_t));
+
+		*devno = makedev(maj, min);
+		set_match(COL_MAJMIN, data);
+		set_match_data(COL_MAJMIN, (void *) devno);
+		flags |= FL_NOSWAPMATCH;
+	} else
+		set_match(COL_SOURCE, data);
+}
+
+/*
+ * Extra functionality for --target <path>. The function mnt_table_find_mountpoint()
+ * also checks parents (path elements in reverse order) to get mountpoint.
+ *
+ * @tb has to be from kernel (so no fstab or so)!
+ */
+static void enable_extra_target_match(struct libmnt_table *tb)
+{
+	char *cn = NULL;
+	const char *tgt = NULL, *mnt = NULL;
+	struct libmnt_fs *fs;
+
+	/*
+	 * Check if match pattern is mountpoint, if not use the
+	 * real mountpoint.
+	 */
+	if (flags & FL_NOCACHE)
+		tgt = get_match(COL_TARGET);
+	else {
+		tgt = cn = mnt_resolve_path(get_match(COL_TARGET), cache);
+		if (!cn)
+			return;
+	}
+
+	fs = mnt_table_find_mountpoint(tb, tgt, MNT_ITER_BACKWARD);
+	if (fs)
+		mnt = mnt_fs_get_target(fs);
+	if (mnt && strcmp(mnt, tgt) != 0)
+		set_match(COL_TARGET, xstrdup(mnt));	/* replace the current setting */
+
+	if (!cache)
+		free(cn);
+}
+
+
+static int is_tabdiff_column(int id)
+{
+	assert((size_t) id < ARRAY_SIZE(infos));
+>>>>>>> master-vanilla
 
 	switch(id) {
 	case COL_ACTION:
@@ -175,10 +412,21 @@ static int is_tabdiff_column(int id)
  */
 static int is_listall_mode(void)
 {
+<<<<<<< HEAD
 	return (!get_match(COL_SOURCE) &&
 		!get_match(COL_TARGET) &&
 		!get_match(COL_FSTYPE) &&
 		!get_match(COL_OPTIONS));
+=======
+	if ((flags & FL_DF) && !(flags & FL_ALL))
+		return 0;
+
+	return (!get_match(COL_SOURCE) &&
+		!get_match(COL_TARGET) &&
+		!get_match(COL_FSTYPE) &&
+		!get_match(COL_OPTIONS) &&
+		!get_match(COL_MAJMIN));
+>>>>>>> master-vanilla
 }
 
 /*
@@ -233,10 +481,17 @@ static int is_mount_compatible_mode(void)
 
 static void disable_columns_truncate(void)
 {
+<<<<<<< HEAD
 	int i;
 
 	for (i = 0; i < FINDMNT_NCOLUMNS; i++)
 		infos[i].flags &= ~TT_FL_TRUNC;
+=======
+	size_t i;
+
+	for (i = 0; i < ARRAY_SIZE(infos); i++)
+		infos[i].flags &= ~SCOLS_FL_TRUNC;
+>>>>>>> master-vanilla
 }
 
 /*
@@ -244,9 +499,15 @@ static void disable_columns_truncate(void)
  */
 static int column_name_to_id(const char *name, size_t namesz)
 {
+<<<<<<< HEAD
 	int i;
 
 	for (i = 0; i < FINDMNT_NCOLUMNS; i++) {
+=======
+	size_t i;
+
+	for (i = 0; i < ARRAY_SIZE(infos); i++) {
+>>>>>>> master-vanilla
 		const char *cn = column_id_to_name(i);
 
 		if (!strncasecmp(name, cn, namesz) && !*(cn + namesz))
@@ -256,6 +517,7 @@ static int column_name_to_id(const char *name, size_t namesz)
 	return -1;
 }
 
+<<<<<<< HEAD
 /* Returns LABEL or UUID */
 static const char *get_tag(struct libmnt_fs *fs, const char *tagname)
 {
@@ -269,11 +531,95 @@ static const char *get_tag(struct libmnt_fs *fs, const char *tagname)
 			res = mnt_resolve_spec(res, cache);
 		if (res)
 			res = mnt_cache_find_tag_value(cache, res, tagname);
+=======
+
+#ifdef HAVE_LIBUDEV
+static char *get_tag_from_udev(const char *devname, int col)
+{
+	struct udev_device *dev;
+	const char *data = NULL;
+	char *res = NULL, *path;
+
+	if (!udev)
+		udev = udev_new();
+	if (!udev)
+		return NULL;
+
+	/* libudev don't like /dev/mapper/ symlinks */
+	path = realpath(devname, NULL);
+	if (path)
+		devname = path;
+
+	if (strncmp(devname, "/dev/", 5) == 0)
+		devname += 5;
+
+	dev = udev_device_new_from_subsystem_sysname(udev, "block", devname);
+	free(path);
+
+	if (!dev)
+		return NULL;
+
+	switch(col) {
+	case COL_LABEL:
+		data = udev_device_get_property_value(dev, "ID_FS_LABEL_ENC");
+		break;
+	case COL_UUID:
+		data = udev_device_get_property_value(dev, "ID_FS_UUID_ENC");
+		break;
+	case COL_PARTUUID:
+		data = udev_device_get_property_value(dev, "ID_PART_ENTRY_UUID");
+		break;
+	case COL_PARTLABEL:
+		data = udev_device_get_property_value(dev, "ID_PART_ENTRY_NAME");
+		break;
+	default:
+		break;
+	}
+
+	if (data) {
+		res = xstrdup(data);
+		unhexmangle_string(res);
+	}
+
+	udev_device_unref(dev);
+	return res;
+}
+#endif /* HAVE_LIBUDEV */
+
+/* Returns LABEL or UUID */
+static char *get_tag(struct libmnt_fs *fs, const char *tagname, int col
+#ifndef HAVE_LIBUDEV
+		__attribute__((__unused__))
+#endif
+		)
+{
+	const char *t, *v;
+	char *res = NULL;
+
+	if (!mnt_fs_get_tag(fs, &t, &v) && !strcmp(t, tagname))
+		res = xstrdup(v);
+	else {
+		const char *dev = mnt_fs_get_source(fs);
+
+		if (dev && !(flags & FL_NOCACHE))
+			dev = mnt_resolve_spec(dev, cache);
+#ifdef HAVE_LIBUDEV
+		if (dev)
+			res = get_tag_from_udev(dev, col);
+#endif
+		if (!res) {
+			res = mnt_cache_find_tag_value(cache, dev, tagname);
+			if (res && cache)
+				/* don't return pointer to cache */
+				res = xstrdup(res);
+		}
+>>>>>>> master-vanilla
 	}
 
 	return res;
 }
 
+<<<<<<< HEAD
 /* reads FS data from libmount
  * TODO: add function that will deallocate data allocated by get_data()
  */
@@ -341,18 +687,188 @@ static const char *get_data(struct libmnt_fs *fs, int num)
 				str = tmp;
 		}
 	}
+=======
+static char *get_vfs_attr(struct libmnt_fs *fs, int sizetype)
+{
+	struct statvfs buf;
+	uint64_t vfs_attr = 0;
+	char *sizestr;
+
+	if (statvfs(mnt_fs_get_target(fs), &buf) != 0)
+		return NULL;
+
+	switch(sizetype) {
+	case COL_SIZE:
+		vfs_attr = buf.f_frsize * buf.f_blocks;
+		break;
+	case COL_AVAIL:
+		vfs_attr = buf.f_frsize * buf.f_bavail;
+		break;
+	case COL_USED:
+		vfs_attr = buf.f_frsize * (buf.f_blocks - buf.f_bfree);
+		break;
+	case COL_USEPERC:
+		if (buf.f_blocks == 0)
+			return xstrdup("-");
+
+		xasprintf(&sizestr, "%.0f%%",
+				(double)(buf.f_blocks - buf.f_bfree) /
+				buf.f_blocks * 100);
+		return sizestr;
+	}
+
+	if (!vfs_attr)
+		sizestr = xstrdup("0");
+	else if (flags & FL_BYTES)
+		xasprintf(&sizestr, "%ju", vfs_attr);
+	else
+		sizestr = size_to_human_string(SIZE_SUFFIX_1LETTER, vfs_attr);
+
+	return sizestr;
+}
+
+/* reads FS data from libmount
+ */
+static char *get_data(struct libmnt_fs *fs, int num)
+{
+	char *str = NULL;
+	int col_id = get_column_id(num);
+
+	switch (col_id) {
+	case COL_SOURCE:
+	{
+		const char *root = mnt_fs_get_root(fs);
+		const char *spec = mnt_fs_get_srcpath(fs);
+		char *cn = NULL;
+
+		if (spec && (flags & FL_CANONICALIZE))
+			spec = cn = mnt_resolve_path(spec, cache);
+		if (!spec) {
+			spec = mnt_fs_get_source(fs);
+
+			if (spec && (flags & FL_EVALUATE))
+				spec = cn = mnt_resolve_spec(spec, cache);
+		}
+		if (root && spec && !(flags & FL_NOFSROOT) && strcmp(root, "/"))
+			xasprintf(&str, "%s[%s]", spec, root);
+		else if (spec)
+			str = xstrdup(spec);
+		if (!cache)
+			free(cn);
+		break;
+	}
+	case COL_TARGET:
+		str = xstrdup(mnt_fs_get_target(fs));
+		break;
+	case COL_FSTYPE:
+		str = xstrdup(mnt_fs_get_fstype(fs));
+		break;
+	case COL_OPTIONS:
+		str = xstrdup(mnt_fs_get_options(fs));
+		break;
+	case COL_VFS_OPTIONS:
+		str = xstrdup(mnt_fs_get_vfs_options(fs));
+		break;
+	case COL_FS_OPTIONS:
+		str = xstrdup(mnt_fs_get_fs_options(fs));
+		break;
+	case COL_OPT_FIELDS:
+		str = xstrdup(mnt_fs_get_optional_fields(fs));
+		break;
+	case COL_UUID:
+		str = get_tag(fs, "UUID", col_id);
+		break;
+	case COL_PARTUUID:
+		str = get_tag(fs, "PARTUUID", col_id);
+		break;
+	case COL_LABEL:
+		str = get_tag(fs, "LABEL", col_id);
+		break;
+	case COL_PARTLABEL:
+		str = get_tag(fs, "PARTLABEL", col_id);
+		break;
+
+	case COL_MAJMIN:
+	{
+		dev_t devno = mnt_fs_get_devno(fs);
+		if (!devno)
+			break;
+
+		if ((flags & FL_RAW) || (flags & FL_EXPORT) || (flags & FL_JSON))
+			xasprintf(&str, "%u:%u", major(devno), minor(devno));
+		else
+			xasprintf(&str, "%3u:%-3u", major(devno), minor(devno));
+		break;
+	}
+	case COL_SIZE:
+	case COL_AVAIL:
+	case COL_USED:
+	case COL_USEPERC:
+		str = get_vfs_attr(fs, col_id);
+		break;
+	case COL_FSROOT:
+		str = xstrdup(mnt_fs_get_root(fs));
+		break;
+	case COL_TID:
+		if (mnt_fs_get_tid(fs))
+			xasprintf(&str, "%d", mnt_fs_get_tid(fs));
+		break;
+	case COL_ID:
+		if (mnt_fs_get_id(fs))
+			xasprintf(&str, "%d", mnt_fs_get_id(fs));
+		break;
+	case COL_PROPAGATION:
+		if (mnt_fs_is_kernel(fs)) {
+			unsigned long fl = 0;
+			char *n = NULL;
+
+			if (mnt_fs_get_propagation(fs, &fl) != 0)
+				break;
+
+			n = xstrdup((fl & MS_SHARED) ? "shared" : "private");
+
+			if (fl & MS_SLAVE) {
+				xasprintf(&str, "%s,slave", n);
+				free(n);
+				n = str;
+			}
+			if (fl & MS_UNBINDABLE) {
+				xasprintf(&str, "%s,unbindable", n);
+				free(n);
+				n = str;
+			}
+			str = n;
+		}
+		break;
+	case COL_FREQ:
+		if (!mnt_fs_is_kernel(fs))
+			xasprintf(&str, "%d", mnt_fs_get_freq(fs));
+		break;
+	case COL_PASSNO:
+		if (!mnt_fs_is_kernel(fs))
+			xasprintf(&str, "%d", mnt_fs_get_passno(fs));
+		break;
+>>>>>>> master-vanilla
 	default:
 		break;
 	}
 	return str;
 }
 
+<<<<<<< HEAD
 static const char *get_tabdiff_data(struct libmnt_fs *old_fs,
+=======
+static char *get_tabdiff_data(struct libmnt_fs *old_fs,
+>>>>>>> master-vanilla
 				    struct libmnt_fs *new_fs,
 				    int change,
 				    int num)
 {
+<<<<<<< HEAD
 	const char *str = NULL;
+=======
+	char *str = NULL;
+>>>>>>> master-vanilla
 
 	switch (get_column_id(num)) {
 	case COL_ACTION:
@@ -373,16 +889,28 @@ static const char *get_tabdiff_data(struct libmnt_fs *old_fs,
 			str = _("unknown");
 			break;
 		}
+<<<<<<< HEAD
+=======
+		str = xstrdup(str);
+>>>>>>> master-vanilla
 		break;
 	case COL_OLD_OPTIONS:
 		if (old_fs && (change == MNT_TABDIFF_REMOUNT ||
 			       change == MNT_TABDIFF_UMOUNT))
+<<<<<<< HEAD
 			str = mnt_fs_get_options(old_fs);
+=======
+			str = xstrdup(mnt_fs_get_options(old_fs));
+>>>>>>> master-vanilla
 		break;
 	case COL_OLD_TARGET:
 		if (old_fs && (change == MNT_TABDIFF_MOVE ||
 			       change == MNT_TABDIFF_UMOUNT))
+<<<<<<< HEAD
 			str = mnt_fs_get_target(old_fs);
+=======
+			str = xstrdup(mnt_fs_get_target(old_fs));
+>>>>>>> master-vanilla
 		break;
 	default:
 		if (new_fs)
@@ -395,17 +923,26 @@ static const char *get_tabdiff_data(struct libmnt_fs *old_fs,
 }
 
 /* adds one line to the output @tab */
+<<<<<<< HEAD
 static struct tt_line *add_line(struct tt *tt, struct libmnt_fs *fs,
 					struct tt_line *parent)
 {
 	int i;
 	struct tt_line *line = tt_add_line(tt, parent);
+=======
+static struct libscols_line *add_line(struct libscols_table *table, struct libmnt_fs *fs,
+					struct libscols_line *parent)
+{
+	size_t i;
+	struct libscols_line *line = scols_table_new_line(table, parent);
+>>>>>>> master-vanilla
 
 	if (!line) {
 		warn(_("failed to add line to output"));
 		return NULL;
 	}
 	for (i = 0; i < ncolumns; i++)
+<<<<<<< HEAD
 		tt_line_set_data(line, i, get_data(fs, i));
 
 	tt_line_set_userdata(line, fs);
@@ -417,18 +954,36 @@ static struct tt_line *add_tabdiff_line(struct tt *tt, struct libmnt_fs *new_fs,
 {
 	int i;
 	struct tt_line *line = tt_add_line(tt, NULL);
+=======
+		scols_line_refer_data(line, i, get_data(fs, i));
+
+	scols_line_set_userdata(line, fs);
+	return line;
+}
+
+static struct libscols_line *add_tabdiff_line(struct libscols_table *table, struct libmnt_fs *new_fs,
+			struct libmnt_fs *old_fs, int change)
+{
+	size_t i;
+	struct libscols_line *line = scols_table_new_line(table, NULL);
+>>>>>>> master-vanilla
 
 	if (!line) {
 		warn(_("failed to add line to output"));
 		return NULL;
 	}
 	for (i = 0; i < ncolumns; i++)
+<<<<<<< HEAD
 		tt_line_set_data(line, i,
+=======
+		scols_line_refer_data(line, i,
+>>>>>>> master-vanilla
 				get_tabdiff_data(old_fs, new_fs, change, i));
 
 	return line;
 }
 
+<<<<<<< HEAD
 static int has_line(struct tt *tt, struct libmnt_fs *fs)
 {
 	struct list_head *p;
@@ -448,6 +1003,36 @@ static int create_treenode(struct tt *tt, struct libmnt_table *tb,
 	struct libmnt_fs *chld = NULL;
 	struct libmnt_iter *itr = NULL;
 	struct tt_line *line;
+=======
+static int has_line(struct libscols_table *table, struct libmnt_fs *fs)
+{
+	struct libscols_line *ln;
+	struct libscols_iter *itr;
+	int rc = 0;
+
+	itr = scols_new_iter(SCOLS_ITER_FORWARD);
+	if (!itr)
+		return 0;
+
+	while (scols_table_next_line(table, itr, &ln) == 0) {
+		if ((struct libmnt_fs *) scols_line_get_userdata(ln) == fs) {
+			rc = 1;
+			break;
+		}
+	}
+
+	scols_free_iter(itr);
+	return rc;
+}
+
+/* reads filesystems from @tb (libmount) and fillin @table (output table) */
+static int create_treenode(struct libscols_table *table, struct libmnt_table *tb,
+			   struct libmnt_fs *fs, struct libscols_line *parent_line)
+{
+	struct libmnt_fs *chld = NULL;
+	struct libmnt_iter *itr = NULL;
+	struct libscols_line *line;
+>>>>>>> master-vanilla
 	int rc = -1;
 
 	if (!fs) {
@@ -456,22 +1041,39 @@ static int create_treenode(struct tt *tt, struct libmnt_table *tb,
 			goto leave;
 		parent_line = NULL;
 
+<<<<<<< HEAD
 	} else if ((flags & FL_SUBMOUNTS) && has_line(tt, fs))
+=======
+	} else if ((flags & FL_SUBMOUNTS) && has_line(table, fs))
+>>>>>>> master-vanilla
 		return 0;
 
 	itr = mnt_new_iter(MNT_ITER_FORWARD);
 	if (!itr)
 		goto leave;
 
+<<<<<<< HEAD
 	line = add_line(tt, fs, parent_line);
 	if (!line)
 		goto leave;
+=======
+	if ((flags & FL_SUBMOUNTS) || match_func(fs, NULL)) {
+		line = add_line(table, fs, parent_line);
+		if (!line)
+			goto leave;
+	} else
+		line = parent_line;
+>>>>>>> master-vanilla
 
 	/*
 	 * add all children to the output table
 	 */
 	while(mnt_table_next_child_fs(tb, itr, fs, &chld) == 0) {
+<<<<<<< HEAD
 		if (create_treenode(tt, tb, chld, line))
+=======
+		if (create_treenode(table, tb, chld, line))
+>>>>>>> master-vanilla
 			goto leave;
 	}
 	rc = 0;
@@ -484,6 +1086,7 @@ leave:
 static int parser_errcb(struct libmnt_table *tb __attribute__ ((__unused__)),
 			const char *filename, int line)
 {
+<<<<<<< HEAD
 	warn(_("%s: parse error at line %d"), filename, line);
 	return 0;
 }
@@ -494,10 +1097,41 @@ static struct libmnt_table *parse_tabfile(const char *path)
 	int rc;
 	struct libmnt_table *tb = mnt_new_table();
 
+=======
+	warnx(_("%s: parse error at line %d"), filename, line);
+	return 1;
+}
+
+static char **append_tabfile(char **files, int *nfiles, char *filename)
+{
+	files = xrealloc(files, sizeof(char *) * (*nfiles + 1));
+	files[(*nfiles)++] = filename;
+	return files;
+}
+
+static char **append_pid_tabfile(char **files, int *nfiles, pid_t pid)
+{
+	char *path = NULL;
+
+	xasprintf(&path, "/proc/%d/mountinfo", (int) pid);
+	return append_tabfile(files, nfiles, path);
+}
+
+/* calls libmount fstab/mtab/mountinfo parser */
+static struct libmnt_table *parse_tabfiles(char **files,
+					   int nfiles,
+					   int tabtype)
+{
+	struct libmnt_table *tb;
+	int rc = 0;
+
+	tb = mnt_new_table();
+>>>>>>> master-vanilla
 	if (!tb) {
 		warn(_("failed to initialize libmount table"));
 		return NULL;
 	}
+<<<<<<< HEAD
 
 	mnt_table_set_parser_errcb(tb, parser_errcb);
 
@@ -516,12 +1150,125 @@ static struct libmnt_table *parse_tabfile(const char *path)
 	return tb;
 }
 
+=======
+	mnt_table_set_parser_errcb(tb, parser_errcb);
+
+	do {
+		/* NULL means that libmount will use default paths */
+		const char *path = nfiles ? *files++ : NULL;
+
+		switch (tabtype) {
+		case TABTYPE_FSTAB:
+			rc = mnt_table_parse_fstab(tb, path);
+			break;
+		case TABTYPE_MTAB:
+			rc = mnt_table_parse_mtab(tb, path);
+			break;
+		case TABTYPE_KERNEL:
+			if (!path)
+				path = access(_PATH_PROC_MOUNTINFO, R_OK) == 0 ?
+					      _PATH_PROC_MOUNTINFO :
+					      _PATH_PROC_MOUNTS;
+
+			rc = mnt_table_parse_file(tb, path);
+			break;
+		}
+		if (rc) {
+			mnt_unref_table(tb);
+			warn(_("can't read %s"), path);
+			return NULL;
+		}
+	} while (--nfiles > 0);
+
+	return tb;
+}
+
+/*
+ * Parses mountinfo and calls mnt_cache_set_targets(cache, mtab). Only
+ * necessary if @tb in main() was read from a non-kernel source.
+ */
+static void cache_set_targets(struct libmnt_cache *tmp)
+{
+	struct libmnt_table *tb;
+	const char *path;
+
+	tb = mnt_new_table();
+	if (!tb)
+		return;
+
+	path = access(_PATH_PROC_MOUNTINFO, R_OK) == 0 ?
+		_PATH_PROC_MOUNTINFO :
+		_PATH_PROC_MOUNTS;
+
+	if (mnt_table_parse_file(tb, path) == 0)
+		mnt_cache_set_targets(tmp, tb);
+
+	mnt_unref_table(tb);
+}
+
+/* checks if @tb contains parent->child relations */
+static int tab_is_tree(struct libmnt_table *tb)
+{
+	struct libmnt_fs *fs = NULL;
+	struct libmnt_iter *itr = NULL;
+	int rc = 0;
+
+	itr = mnt_new_iter(MNT_ITER_BACKWARD);
+	if (!itr)
+		return 0;
+
+	rc = (mnt_table_next_fs(tb, itr, &fs) == 0 &&
+	      mnt_fs_is_kernel(fs) &&
+	      mnt_fs_get_root(fs));
+
+	mnt_free_iter(itr);
+	return rc;
+}
+
+/* checks if all fs in @tb are from kernel */
+static int tab_is_kernel(struct libmnt_table *tb)
+{
+	struct libmnt_fs *fs = NULL;
+	struct libmnt_iter *itr = NULL;
+
+	itr = mnt_new_iter(MNT_ITER_BACKWARD);
+	if (!itr)
+		return 0;
+
+	while (mnt_table_next_fs(tb, itr, &fs) == 0) {
+		if (!mnt_fs_is_kernel(fs)) {
+			mnt_free_iter(itr);
+			return 0;
+		}
+	}
+
+	mnt_free_iter(itr);
+	return 1;
+}
+
+>>>>>>> master-vanilla
 /* filter function for libmount (mnt_table_find_next_fs()) */
 static int match_func(struct libmnt_fs *fs,
 		      void *data __attribute__ ((__unused__)))
 {
 	int rc = flags & FL_INVERT ? 1 : 0;
 	const char *m;
+<<<<<<< HEAD
+=======
+	void *md;
+
+	m = get_match(COL_FSTYPE);
+	if (m && !mnt_fs_match_fstype(fs, m))
+		return rc;
+
+	m = get_match(COL_OPTIONS);
+	if (m && !mnt_fs_match_options(fs, m))
+		return rc;
+
+	md = get_match_data(COL_MAJMIN);
+	if (md && mnt_fs_get_devno(fs) != *((dev_t *) md))
+		return rc;
+>>>>>>> master-vanilla
 
 	m = get_match(COL_TARGET);
 	if (m && !mnt_fs_match_target(fs, m, cache))
@@ -531,6 +1278,7 @@ static int match_func(struct libmnt_fs *fs,
 	if (m && !mnt_fs_match_source(fs, m, cache))
 		return rc;
 
+<<<<<<< HEAD
 	m = get_match(COL_FSTYPE);
 	if (m && !mnt_fs_match_fstype(fs, m))
 		return rc;
@@ -538,6 +1286,17 @@ static int match_func(struct libmnt_fs *fs,
 	m = get_match(COL_OPTIONS);
 	if (m && !mnt_fs_match_options(fs, m))
 		return rc;
+=======
+	if ((flags & FL_DF) && !(flags & FL_ALL)) {
+		const char *type = mnt_fs_get_fstype(fs);
+
+		if (type && strstr(type, "tmpfs"))	/* tmpfs is wanted */
+			return !rc;
+
+		if (mnt_fs_is_pseudofs(fs))
+			return rc;
+	}
+>>>>>>> master-vanilla
 
 	return !rc;
 }
@@ -593,8 +1352,17 @@ again:
 	return fs;
 }
 
+<<<<<<< HEAD
 static int add_matching_lines(struct libmnt_table *tb,
 			      struct tt *tt, int direction)
+=======
+/*
+ * Filter out unwanted lines for --list output or top level lines for
+ * --submounts tree output.
+ */
+static int add_matching_lines(struct libmnt_table *tb,
+			      struct libscols_table *table, int direction)
+>>>>>>> master-vanilla
 {
 	struct libmnt_iter *itr = NULL;
 	struct libmnt_fs *fs;
@@ -607,10 +1375,17 @@ static int add_matching_lines(struct libmnt_table *tb,
 	}
 
 	while((fs = get_next_fs(tb, itr))) {
+<<<<<<< HEAD
 		if ((tt_flags & TT_FL_TREE) || (flags & FL_SUBMOUNTS))
 			rc = create_treenode(tt, tb, fs, NULL);
 		else
 			rc = !add_line(tt, fs, NULL);
+=======
+		if ((flags & FL_TREE) || (flags & FL_SUBMOUNTS))
+			rc = create_treenode(table, tb, fs, NULL);
+		else
+			rc = !add_line(table, fs, NULL);
+>>>>>>> master-vanilla
 		if (rc)
 			goto done;
 		nlines++;
@@ -634,7 +1409,11 @@ static int poll_match(struct libmnt_fs *fs)
 	    get_match(COL_SOURCE) && !get_match(COL_TARGET)) {
 		/*
 		 * findmnt --poll /foo
+<<<<<<< HEAD
 		 * The '/foo' source as well as target.
+=======
+		 * The '/foo' maybe source as well as target.
+>>>>>>> master-vanilla
 		 */
 		const char *str = get_match(COL_SOURCE);
 
@@ -651,9 +1430,15 @@ static int poll_match(struct libmnt_fs *fs)
 }
 
 static int poll_table(struct libmnt_table *tb, const char *tabfile,
+<<<<<<< HEAD
 		  int timeout, struct tt *tt, int direction)
 {
 	FILE *f;
+=======
+		  int timeout, struct libscols_table *table, int direction)
+{
+	FILE *f = NULL;
+>>>>>>> master-vanilla
 	int rc = -1;
 	struct libmnt_iter *itr = NULL;
 	struct libmnt_table *tb_new = NULL;
@@ -684,7 +1469,11 @@ static int poll_table(struct libmnt_table *tb, const char *tabfile,
 
 	f = fopen(tabfile, "r");
 	if (!f) {
+<<<<<<< HEAD
 		warn(_("%s: open failed"), tabfile);
+=======
+		warn(_("cannot open %s"), tabfile);
+>>>>>>> master-vanilla
 		goto done;
 	}
 
@@ -723,7 +1512,11 @@ static int poll_table(struct libmnt_table *tb, const char *tabfile,
 			if (!poll_match(new ? new : old))
 				continue;
 			count++;
+<<<<<<< HEAD
 			rc = !add_tabdiff_line(tt, new, old, change);
+=======
+			rc = !add_tabdiff_line(table, new, old, change);
+>>>>>>> master-vanilla
 			if (rc)
 				goto done;
 			if (flags & FL_FIRSTONLY)
@@ -731,7 +1524,11 @@ static int poll_table(struct libmnt_table *tb, const char *tabfile,
 		}
 
 		if (count) {
+<<<<<<< HEAD
 			rc = tt_print_table(tt);
+=======
+			rc = scols_print_table(table);
+>>>>>>> master-vanilla
 			if (rc)
 				goto done;
 		}
@@ -741,7 +1538,11 @@ static int poll_table(struct libmnt_table *tb, const char *tabfile,
 		tb = tb_new;
 		tb_new = tmp;
 
+<<<<<<< HEAD
 		tt_remove_lines(tt);
+=======
+		scols_table_remove_lines(table);
+>>>>>>> master-vanilla
 		mnt_reset_table(tb_new);
 
 		if (count && (flags & FL_FIRSTONLY))
@@ -750,6 +1551,7 @@ static int poll_table(struct libmnt_table *tb, const char *tabfile,
 
 	rc = 0;
 done:
+<<<<<<< HEAD
 	mnt_free_table(tb_new);
 	mnt_free_tabdiff(diff);
 	mnt_free_iter(itr);
@@ -812,10 +1614,94 @@ static void __attribute__((__noreturn__)) usage(FILE *out)
 
 
 	fprintf(out, _("\nFor more information see findmnt(1).\n"));
+=======
+	mnt_unref_table(tb_new);
+	mnt_free_tabdiff(diff);
+	mnt_free_iter(itr);
+	if (f)
+		fclose(f);
+	return rc;
+}
+
+static int uniq_fs_target_cmp(
+		struct libmnt_table *tb __attribute__((__unused__)),
+		struct libmnt_fs *a,
+		struct libmnt_fs *b)
+{
+	return !mnt_fs_match_target(a, mnt_fs_get_target(b), cache);
+}
+
+static void __attribute__((__noreturn__)) usage(FILE *out)
+{
+	size_t i;
+
+	fputs(USAGE_HEADER, out);
+	fprintf(out, _(
+	" %1$s [options]\n"
+	" %1$s [options] <device> | <mountpoint>\n"
+	" %1$s [options] <device> <mountpoint>\n"
+	" %1$s [options] [--source <device>] [--target <path> | --mountpoint <dir>]\n"),
+		program_invocation_short_name);
+
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Find a (mounted) filesystem.\n"), out);
+
+	fputs(USAGE_OPTIONS, out);
+	fputs(_(" -s, --fstab            search in static table of filesystems\n"), out);
+	fputs(_(" -m, --mtab             search in table of mounted filesystems\n"), out);
+	fputs(_(" -k, --kernel           search in kernel table of mounted\n"
+		"                          filesystems (default)\n"), out);
+	fputc('\n', out);
+	fputs(_(" -p, --poll[=<list>]    monitor changes in table of mounted filesystems\n"), out);
+	fputs(_(" -w, --timeout <num>    upper limit in milliseconds that --poll will block\n"), out);
+	fputc('\n', out);
+
+	fputs(_(" -A, --all              disable all built-in filters, print all filesystems\n"), out);
+	fputs(_(" -a, --ascii            use ASCII chars for tree formatting\n"), out);
+	fputs(_(" -b, --bytes            print sizes in bytes rather than in human readable format\n"), out);
+	fputs(_(" -C, --nocanonicalize   don't canonicalize when comparing paths\n"), out);
+	fputs(_(" -c, --canonicalize     canonicalize printed paths\n"), out);
+	fputs(_(" -D, --df               imitate the output of df(1)\n"), out);
+	fputs(_(" -d, --direction <word> direction of search, 'forward' or 'backward'\n"), out);
+	fputs(_(" -e, --evaluate         convert tags (LABEL,UUID,PARTUUID,PARTLABEL) \n"
+	        "                          to device names\n"), out);
+	fputs(_(" -F, --tab-file <path>  alternative file for -s, -m or -k options\n"), out);
+	fputs(_(" -f, --first-only       print the first found filesystem only\n"), out);
+	fputs(_(" -i, --invert           invert the sense of matching\n"), out);
+	fputs(_(" -J, --json             use JSON output format\n"), out);
+	fputs(_(" -l, --list             use list format output\n"), out);
+	fputs(_(" -N, --task <tid>       use alternative namespace (/proc/<tid>/mountinfo file)\n"), out);
+	fputs(_(" -n, --noheadings       don't print column headings\n"), out);
+	fputs(_(" -O, --options <list>   limit the set of filesystems by mount options\n"), out);
+	fputs(_(" -o, --output <list>    the output columns to be shown\n"), out);
+	fputs(_(" -P, --pairs            use key=\"value\" output format\n"), out);
+	fputs(_(" -R, --submounts        print all submounts for the matching filesystems\n"), out);
+	fputs(_(" -r, --raw              use raw output format\n"), out);
+	fputs(_(" -S, --source <string>  the device to mount (by name, maj:min, \n"
+	        "                          LABEL=, UUID=, PARTUUID=, PARTLABEL=)\n"), out);
+	fputs(_(" -T, --target <path>    the path to the filesystem to use\n"), out);
+	fputs(_(" -M, --mountpoint <dir> the mountpoint directory\n"), out);
+	fputs(_(" -t, --types <list>     limit the set of filesystems by FS types\n"), out);
+	fputs(_(" -U, --uniq             ignore filesystems with duplicate target\n"), out);
+	fputs(_(" -u, --notruncate       don't truncate text in columns\n"), out);
+	fputs(_(" -v, --nofsroot         don't print [/dir] for bind or btrfs mounts\n"), out);
+
+	fputs(USAGE_SEPARATOR, out);
+	fputs(USAGE_HELP, out);
+	fputs(USAGE_VERSION, out);
+
+	fprintf(out, _("\nAvailable columns:\n"));
+
+	for (i = 0; i < ARRAY_SIZE(infos); i++)
+		fprintf(out, " %11s  %s\n", infos[i].name, _(infos[i].help));
+
+	fprintf(out, USAGE_MAN_TAIL("findmnt(8)"));
+>>>>>>> master-vanilla
 
 	exit(out == stderr ? EXIT_FAILURE : EXIT_SUCCESS);
 }
 
+<<<<<<< HEAD
 static void __attribute__((__noreturn__))
 errx_mutually_exclusive(const char *opts)
 {
@@ -837,13 +1723,41 @@ int main(int argc, char *argv[])
 	    { "ascii",        0, 0, 'a' },
 	    { "canonicalize", 0, 0, 'c' },
 	    { "direction",    1, 0, 'd' },
+=======
+int main(int argc, char *argv[])
+{
+	struct libmnt_table *tb = NULL;
+	char **tabfiles = NULL;
+	int direction = MNT_ITER_FORWARD;
+	int c, rc = -1, timeout = -1;
+	int ntabfiles = 0, tabtype = 0;
+	char *outarg = NULL;
+	size_t i;
+
+	struct libscols_table *table = NULL;
+
+	static const struct option longopts[] = {
+	    { "all",          0, 0, 'A' },
+	    { "ascii",        0, 0, 'a' },
+	    { "bytes",        0, 0, 'b' },
+	    { "canonicalize", 0, 0, 'c' },
+	    { "direction",    1, 0, 'd' },
+	    { "df",           0, 0, 'D' },
+>>>>>>> master-vanilla
 	    { "evaluate",     0, 0, 'e' },
 	    { "first-only",   0, 0, 'f' },
 	    { "fstab",        0, 0, 's' },
 	    { "help",         0, 0, 'h' },
 	    { "invert",       0, 0, 'i' },
+<<<<<<< HEAD
 	    { "kernel",       0, 0, 'k' },
 	    { "list",         0, 0, 'l' },
+=======
+	    { "json",         0, 0, 'J' },
+	    { "kernel",       0, 0, 'k' },
+	    { "list",         0, 0, 'l' },
+	    { "mountpoint",   1, 0, 'M' },
+>>>>>>> master-vanilla
 	    { "mtab",         0, 0, 'm' },
 	    { "noheadings",   0, 0, 'n' },
 	    { "notruncate",   0, 0, 'u' },
@@ -853,20 +1767,48 @@ int main(int argc, char *argv[])
 	    { "pairs",        0, 0, 'P' },
 	    { "raw",          0, 0, 'r' },
 	    { "types",        1, 0, 't' },
+<<<<<<< HEAD
 	    { "fsroot",       0, 0, 'v' },
 	    { "submounts",    0, 0, 'R' },
 	    { "source",       1, 0, 'S' },
 	    { "target",       1, 0, 'T' },
 	    { "timeout",      1, 0, 'w' },
+=======
+	    { "nocanonicalize", 0, 0, 'C' },
+	    { "nofsroot",     0, 0, 'v' },
+	    { "submounts",    0, 0, 'R' },
+	    { "source",       1, 0, 'S' },
+	    { "tab-file",     1, 0, 'F' },
+	    { "task",         1, 0, 'N' },
+	    { "target",       1, 0, 'T' },
+	    { "timeout",      1, 0, 'w' },
+	    { "uniq",         0, 0, 'U' },
+	    { "version",      0, 0, 'V' },
+>>>>>>> master-vanilla
 
 	    { NULL,           0, 0, 0 }
 	};
 
+<<<<<<< HEAD
 	assert(ARRAY_SIZE(columns) == FINDMNT_NCOLUMNS);
+=======
+	static const ul_excl_t excl[] = {	/* rows and cols in in ASCII order */
+		{ 'C', 'c'},                    /* [no]canonicalize */
+		{ 'C', 'e' },			/* nocanonicalize, evaluate */
+		{ 'J', 'P', 'r' },		/* json,pairs,raw */
+		{ 'M', 'T' },			/* mountpoint, target */
+		{ 'N','k','m','s' },		/* task,kernel,mtab,fstab */
+		{ 'P','l','r' },		/* pairs,list,raw */
+		{ 'm','p','s' },		/* mtab,poll,fstab */
+		{ 0 }
+	};
+	int excl_st[ARRAY_SIZE(excl)] = UL_EXCL_STATUS_INIT;
+>>>>>>> master-vanilla
 
 	setlocale(LC_ALL, "");
 	bindtextdomain(PACKAGE, LOCALEDIR);
 	textdomain(PACKAGE);
+<<<<<<< HEAD
 
 	/* default output format */
 	tt_flags |= TT_FL_TREE;
@@ -876,10 +1818,42 @@ int main(int argc, char *argv[])
 		switch(c) {
 		case 'a':
 			tt_flags |= TT_FL_ASCII;
+=======
+	atexit(close_stdout);
+
+	/* default output format */
+	flags |= FL_TREE;
+
+	while ((c = getopt_long(argc, argv,
+				"AabCcDd:ehiJfF:o:O:p::PklmM:nN:rst:uvRS:T:Uw:V",
+				longopts, NULL)) != -1) {
+
+		err_exclusive_options(c, longopts, excl, excl_st);
+
+		switch(c) {
+		case 'A':
+			flags |= FL_ALL;
+			break;
+		case 'a':
+			flags |= FL_ASCII;
+			break;
+		case 'b':
+			flags |= FL_BYTES;
+			break;
+		case 'C':
+			flags |= FL_NOCACHE;
+>>>>>>> master-vanilla
 			break;
 		case 'c':
 			flags |= FL_CANONICALIZE;
 			break;
+<<<<<<< HEAD
+=======
+		case 'D':
+			flags &= ~FL_TREE;
+			flags |= FL_DF;
+			break;
+>>>>>>> master-vanilla
 		case 'd':
 			if (!strcmp(optarg, "forward"))
 				direction = MNT_ITER_FORWARD;
@@ -898,18 +1872,34 @@ int main(int argc, char *argv[])
 		case 'i':
 			flags |= FL_INVERT;
 			break;
+<<<<<<< HEAD
 		case 'f':
 			flags |= FL_FIRSTONLY;
 			break;
+=======
+		case 'J':
+			flags |= FL_JSON;
+			break;
+		case 'f':
+			flags |= FL_FIRSTONLY;
+			break;
+		case 'F':
+			tabfiles = append_tabfile(tabfiles, &ntabfiles, optarg);
+			break;
+>>>>>>> master-vanilla
 		case 'u':
 			disable_columns_truncate();
 			break;
 		case 'o':
+<<<<<<< HEAD
 			ncolumns = string_to_idarray(optarg,
 						columns, ARRAY_SIZE(columns),
 						column_name_to_id);
 			if (ncolumns < 0)
 				exit(EXIT_FAILURE);
+=======
+			outarg = optarg;
+>>>>>>> master-vanilla
 			break;
 		case 'O':
 			set_match(COL_OPTIONS, optarg);
@@ -923,6 +1913,7 @@ int main(int argc, char *argv[])
 					exit(EXIT_FAILURE);
 			}
 			flags |= FL_POLL;
+<<<<<<< HEAD
 			tt_flags &= ~TT_FL_TREE;
 			break;
 		case 'P':
@@ -945,11 +1936,30 @@ int main(int argc, char *argv[])
 			if (tabfile)
 				 errx_mutually_exclusive("--{fstab,mtab,kernel}");
 			tabfile = _PATH_PROC_MOUNTINFO;
+=======
+			flags &= ~FL_TREE;
+			break;
+		case 'P':
+			flags |= FL_EXPORT;
+			flags &= ~FL_TREE;
+			break;
+		case 'm':		/* mtab */
+			tabtype = TABTYPE_MTAB;
+			flags &= ~FL_TREE;
+			break;
+		case 's':		/* fstab */
+			tabtype = TABTYPE_FSTAB;
+			flags &= ~FL_TREE;
+			break;
+		case 'k':		/* kernel (mountinfo) */
+			tabtype = TABTYPE_KERNEL;
+>>>>>>> master-vanilla
 			break;
 		case 't':
 			set_match(COL_FSTYPE, optarg);
 			break;
 		case 'r':
+<<<<<<< HEAD
 			tt_flags &= ~TT_FL_TREE;	/* disable the default */
 			tt_flags |= TT_FL_RAW;		/* enable raw */
 			break;
@@ -961,6 +1971,22 @@ int main(int argc, char *argv[])
 			break;
 		case 'n':
 			tt_flags |= TT_FL_NOHEADINGS;
+=======
+			flags &= ~FL_TREE;	/* disable the default */
+			flags |= FL_RAW;	/* enable raw */
+			break;
+		case 'l':
+			flags &= ~FL_TREE;	/* disable the default */
+			break;
+		case 'n':
+			flags |= FL_NOHEADINGS;
+			break;
+		case 'N':
+			tabtype = TABTYPE_KERNEL;
+			tabfiles = append_pid_tabfile(tabfiles, &ntabfiles,
+					strtou32_or_err(optarg,
+						_("invalid TID argument")));
+>>>>>>> master-vanilla
 			break;
 		case 'v':
 			flags |= FL_NOFSROOT;
@@ -969,23 +1995,45 @@ int main(int argc, char *argv[])
 			flags |= FL_SUBMOUNTS;
 			break;
 		case 'S':
+<<<<<<< HEAD
 			set_match(COL_SOURCE, optarg);
 			flags |= FL_NOSWAPMATCH;
 			break;
+=======
+			set_source_match(optarg);
+			flags |= FL_NOSWAPMATCH;
+			break;
+		case 'M':
+			flags |= FL_STRICTTARGET;
+			/* fallthrough */
+>>>>>>> master-vanilla
 		case 'T':
 			set_match(COL_TARGET, optarg);
 			flags |= FL_NOSWAPMATCH;
 			break;
+<<<<<<< HEAD
 		case 'w':
 			timeout = strtol_or_err(optarg,
 					_("failed to parse timeout"));
 			break;
+=======
+		case 'U':
+			flags |= FL_UNIQ;
+			break;
+		case 'w':
+			timeout = strtos32_or_err(optarg, _("invalid timeout argument"));
+			break;
+		case 'V':
+			printf(UTIL_LINUX_VERSION);
+			return EXIT_SUCCESS;
+>>>>>>> master-vanilla
 		default:
 			usage(stderr);
 			break;
 		}
 	}
 
+<<<<<<< HEAD
 	/* default columns */
 	if (!ncolumns) {
 		if (flags & FL_POLL)
@@ -1005,6 +2053,38 @@ int main(int argc, char *argv[])
 			tt_flags &= ~TT_FL_TREE;
 		}
 	}
+=======
+	if (!ncolumns && (flags & FL_DF)) {
+		add_column(columns, ncolumns++, COL_SOURCE);
+		add_column(columns, ncolumns++, COL_FSTYPE);
+		add_column(columns, ncolumns++, COL_SIZE);
+		add_column(columns, ncolumns++, COL_USED);
+		add_column(columns, ncolumns++, COL_AVAIL);
+		add_column(columns, ncolumns++, COL_USEPERC);
+		add_column(columns, ncolumns++, COL_TARGET);
+	}
+
+	/* default columns */
+	if (!ncolumns) {
+		if (flags & FL_POLL)
+			add_column(columns, ncolumns++, COL_ACTION);
+
+		add_column(columns, ncolumns++, COL_TARGET);
+		add_column(columns, ncolumns++, COL_SOURCE);
+		add_column(columns, ncolumns++, COL_FSTYPE);
+		add_column(columns, ncolumns++, COL_OPTIONS);
+	}
+
+	if (outarg && string_add_to_idarray(outarg, columns, ARRAY_SIZE(columns),
+					 &ncolumns, column_name_to_id) < 0)
+		return EXIT_FAILURE;
+
+	if (!tabtype)
+		tabtype = TABTYPE_KERNEL;
+
+	if ((flags & FL_POLL) && ntabfiles > 1)
+		errx(EXIT_FAILURE, _("--poll accepts only one file, but more specified by --tab-file"));
+>>>>>>> master-vanilla
 
 	if (optind < argc && (get_match(COL_SOURCE) || get_match(COL_TARGET)))
 		errx(EXIT_FAILURE, _(
@@ -1012,7 +2092,11 @@ int main(int argc, char *argv[])
 			"with command line element that is not an option"));
 
 	if (optind < argc)
+<<<<<<< HEAD
 		set_match(COL_SOURCE, argv[optind++]);	/* dev/tag/mountpoint */
+=======
+		set_source_match(argv[optind++]);	/* dev/tag/mountpoint/maj:min */
+>>>>>>> master-vanilla
 	if (optind < argc)
 		set_match(COL_TARGET, argv[optind++]);	/* mountpoint */
 
@@ -1020,9 +2104,17 @@ int main(int argc, char *argv[])
 		/* don't care about submounts if list all mounts */
 		flags &= ~FL_SUBMOUNTS;
 
+<<<<<<< HEAD
 	if (!(flags & FL_SUBMOUNTS) &&
 	    (!is_listall_mode() || (flags & FL_FIRSTONLY)))
 		tt_flags &= ~TT_FL_TREE;
+=======
+	if (!(flags & FL_SUBMOUNTS) && ((flags & FL_FIRSTONLY)
+	    || get_match(COL_TARGET)
+	    || get_match(COL_SOURCE)
+	    || get_match(COL_MAJMIN)))
+		flags &= ~FL_TREE;
+>>>>>>> master-vanilla
 
 	if (!(flags & FL_NOSWAPMATCH) &&
 	    !get_match(COL_TARGET) && get_match(COL_SOURCE)) {
@@ -1032,7 +2124,12 @@ int main(int argc, char *argv[])
 		 */
 		const char *x = get_match(COL_SOURCE);
 
+<<<<<<< HEAD
 		if (!strncmp(x, "LABEL=", 6) || !strncmp(x, "UUID=", 5))
+=======
+		if (!strncmp(x, "LABEL=", 6) || !strncmp(x, "UUID=", 5) ||
+		    !strncmp(x, "PARTLABEL=", 10) || !strncmp(x, "PARTUUID=", 9))
+>>>>>>> master-vanilla
 			flags |= FL_NOSWAPMATCH;
 	}
 
@@ -1040,6 +2137,7 @@ int main(int argc, char *argv[])
 	 * initialize libmount
 	 */
 	mnt_init_debug(0);
+<<<<<<< HEAD
 
 	tb = parse_tabfile(tabfile);
 	if (!tb)
@@ -1060,20 +2158,74 @@ int main(int argc, char *argv[])
 		warn(_("failed to initialize output table"));
 		goto leave;
 	}
+=======
+	scols_init_debug(0);
+
+	tb = parse_tabfiles(tabfiles, ntabfiles, tabtype);
+	if (!tb)
+		goto leave;
+
+	if (tabtype == TABTYPE_MTAB && tab_is_kernel(tb))
+		tabtype = TABTYPE_KERNEL;
+
+	if ((flags & FL_TREE) && (ntabfiles > 1 || !tab_is_tree(tb)))
+		flags &= ~FL_TREE;
+
+	if (!(flags & FL_NOCACHE)) {
+		cache = mnt_new_cache();
+		if (!cache) {
+			warn(_("failed to initialize libmount cache"));
+			goto leave;
+		}
+		mnt_table_set_cache(tb, cache);
+
+		if (tabtype != TABTYPE_KERNEL)
+			cache_set_targets(cache);
+	}
+
+	if (flags & FL_UNIQ)
+		mnt_table_uniq_fs(tb, MNT_UNIQ_KEEPTREE, uniq_fs_target_cmp);
+
+	/*
+	 * initialize output formatting (libsmartcols.h)
+	 */
+	table = scols_new_table();
+	if (!table) {
+		warn(_("failed to initialize output table"));
+		goto leave;
+	}
+	scols_table_enable_raw(table,        !!(flags & FL_RAW));
+	scols_table_enable_export(table,     !!(flags & FL_EXPORT));
+	scols_table_enable_json(table,       !!(flags & FL_JSON));
+	scols_table_enable_ascii(table,      !!(flags & FL_ASCII));
+	scols_table_enable_noheadings(table, !!(flags & FL_NOHEADINGS));
+
+	if (flags & FL_JSON)
+		scols_table_set_name(table, "filesystems");
+>>>>>>> master-vanilla
 
 	for (i = 0; i < ncolumns; i++) {
 		int fl = get_column_flags(i);
 		int id = get_column_id(i);
 
+<<<<<<< HEAD
 		if (!(tt_flags & TT_FL_TREE))
 			fl &= ~TT_FL_TREE;
+=======
+		if (!(flags & FL_TREE))
+			fl &= ~SCOLS_FL_TREE;
+>>>>>>> master-vanilla
 
 		if (!(flags & FL_POLL) && is_tabdiff_column(id)) {
 			warnx(_("%s column is requested, but --poll "
 			       "is not enabled"), get_column_name(i));
 			goto leave;
 		}
+<<<<<<< HEAD
 		if (!tt_define_column(tt, get_column_name(i),
+=======
+		if (!scols_table_new_column(table, get_column_name(i),
+>>>>>>> master-vanilla
 					get_column_whint(i), fl)) {
 			warn(_("failed to initialize output column"));
 			goto leave;
@@ -1083,6 +2235,7 @@ int main(int argc, char *argv[])
 	/*
 	 * Fill in data to the output table
 	 */
+<<<<<<< HEAD
 	if (flags & FL_POLL)
 		/* poll mode */
 		rc = poll_table(tb, tabfile, timeout, tt, direction);
@@ -1093,11 +2246,39 @@ int main(int argc, char *argv[])
 	else
 		/* whole lits of sub-tree */
 		rc = add_matching_lines(tb, tt, direction);
+=======
+	if (flags & FL_POLL) {
+		/* poll mode (accept the first tabfile only) */
+		rc = poll_table(tb, tabfiles ? *tabfiles : _PATH_PROC_MOUNTINFO, timeout, table, direction);
+
+	} else if ((flags & FL_TREE) && !(flags & FL_SUBMOUNTS)) {
+		/* whole tree */
+		rc = create_treenode(table, tb, NULL, NULL);
+	} else {
+		/* whole lits of sub-tree */
+		rc = add_matching_lines(tb, table, direction);
+
+		if (rc != 0
+		    && tabtype == TABTYPE_KERNEL
+		    && (flags & FL_NOSWAPMATCH)
+		    && !(flags & FL_STRICTTARGET)
+		    && get_match(COL_TARGET)) {
+			/*
+			 * Found nothing, maybe the --target is regular file,
+			 * try it again with extra functionality for target
+			 * match
+			 */
+			enable_extra_target_match(tb);
+			rc = add_matching_lines(tb, table, direction);
+		}
+	}
+>>>>>>> master-vanilla
 
 	/*
 	 * Print the output table for non-poll modes
 	 */
 	if (!rc && !(flags & FL_POLL))
+<<<<<<< HEAD
 		tt_print_table(tt);
 leave:
 	tt_free_table(tt);
@@ -1105,5 +2286,18 @@ leave:
 	mnt_free_table(tb);
 	mnt_free_cache(cache);
 
+=======
+		scols_print_table(table);
+leave:
+	scols_unref_table(table);
+
+	mnt_unref_table(tb);
+	mnt_unref_cache(cache);
+
+	free(tabfiles);
+#ifdef HAVE_LIBUDEV
+	udev_unref(udev);
+#endif
+>>>>>>> master-vanilla
 	return rc ? EXIT_FAILURE : EXIT_SUCCESS;
 }

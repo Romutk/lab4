@@ -1,14 +1,21 @@
 .\" Copyright 1998 Andries E. Brouwer (aeb@cwi.nl)
 .\"
 .\" May be distributed under the GNU General Public License
+<<<<<<< HEAD
 .\" Rewritten for 2.1.117, aeb, 981010.
+=======
+>>>>>>> master-vanilla
 .\"
 .TH MKSWAP 8 "March 2009" "util-linux" "System Administration"
 .SH NAME
 mkswap \- set up a Linux swap area
 .SH SYNOPSIS
 .B mkswap
+<<<<<<< HEAD
 .RI [ options ]
+=======
+[options]
+>>>>>>> master-vanilla
 .I device
 .RI [ size ]
 .SH DESCRIPTION
@@ -32,14 +39,22 @@ parameter is superfluous but retained for backwards compatibility.
 (It specifies the desired size of the swap area in 1024-byte blocks.
 .B mkswap
 will use the entire partition or file if it is omitted.
+<<<<<<< HEAD
 Specifying it is unwise -- a typo may destroy your disk.)
+=======
+Specifying it is unwise \(en a typo may destroy your disk.)
+>>>>>>> master-vanilla
 
 After creating the swap area, you need the
 .B swapon
 command to start using it.  Usually swap areas are listed in
 .I /etc/fstab
 so that they can be taken into use at boot time by a
+<<<<<<< HEAD
 .B swapon -a
+=======
+.B swapon \-a
+>>>>>>> master-vanilla
 command in some boot script.
 
 .SH WARNING
@@ -54,7 +69,11 @@ like many others mkfs-like utils,
 However,
 .B mkswap
 refuses to erase the first block on a device with a disk
+<<<<<<< HEAD
 label (SUN, BSD, ...) and on a whole disk (e.g. /dev/sda).
+=======
+label (SUN, BSD, \&...\&).
+>>>>>>> master-vanilla
 
 .SH OPTIONS
 .TP
@@ -70,8 +89,12 @@ or partition it resides on.
 
 Also, without this option,
 .B mkswap
+<<<<<<< HEAD
 will refuse to erase the first block on a device with a partition table and on
 a whole disk (e.g. /dev/sda).
+=======
+will refuse to erase the first block on a device with a partition table.
+>>>>>>> master-vanilla
 .TP
 .BR \-L , " \-\-label " \fIlabel\fR
 Specify a \fIlabel\fR for the device, to allow
@@ -104,6 +127,7 @@ Display version information and exit.
 .SH NOTES
 The maximum useful size of a swap area depends on the architecture and
 the kernel version.
+<<<<<<< HEAD
 It is roughly 2GiB on i386, PPC, m68k and ARM, 1GiB on sparc, 512MiB on mips,
 128GiB on alpha, and 3TiB on sparc64.  For kernels after 2.3.3 (May 1999) there is no
 such limitation.
@@ -116,17 +140,31 @@ Presently, Linux allows 32 swap areas (this was 8 before Linux 2.4.10 (Sep 2001)
 The areas in use can be seen in the file
 .I /proc/swaps
 (since 2.1.25 (Sep 1997)).
+=======
+
+The maximum number of the pages that is possible to address by swap area header
+is 4294967295 (UINT_MAX).  The remaining space on the swap device is ignored.
+
+Presently, Linux allows 32 swap areas.
+The areas in use can be seen in the file
+.I /proc/swaps
+>>>>>>> master-vanilla
 
 .B mkswap
 refuses areas smaller than 10 pages.
 
 If you don't know the page size that your machine uses, you may be
+<<<<<<< HEAD
 able to look it up with "cat /proc/cpuinfo" (or you may not --
+=======
+able to look it up with "cat /proc/cpuinfo" (or you may not \(en
+>>>>>>> master-vanilla
 the contents of this file depend on architecture and kernel version).
 
 To set up a swap file, it is necessary to create that file before
 initializing it with
 .BR mkswap ,
+<<<<<<< HEAD
 e.g. using a command like
 
 .nf
@@ -139,6 +177,33 @@ Note that a swap file must not contain any holes (so, using
 .BR cp (1)
 to create the file is not acceptable).
 
+=======
+e.g.\& using a command like
+
+.nf
+.RS
+# fallocate \-\-length 8GiB swapfile
+.RE
+.fi
+
+Note that a swap file must not contain any holes.  Using
+.BR cp (1)
+to create the file is not acceptable.  Neither is use of
+.BR fallocate (1)
+on file systems that support preallocated files, such as
+.BR XFS " or " ext4 ,
+or on copy-on-write filesystems like
+.BR btrfs .
+It is recommended to use
+.BR dd (1)
+and /dev/zero in these cases.  Please read notes from
+.BR swapon (8)
+before adding a swap file to copy-on-write filesystems.
+
+.SH ENVIRONMENT
+.IP LIBBLKID_DEBUG=all
+enables libblkid debug output.
+>>>>>>> master-vanilla
 
 .SH "SEE ALSO"
 .BR fdisk (8),

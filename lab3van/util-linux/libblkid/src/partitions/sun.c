@@ -12,6 +12,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
+<<<<<<< HEAD
 #include "partitions.h"
 
 /* Supported VTOC setting */
@@ -80,6 +81,11 @@ uint16_t count_checksum(struct sun_disklabel *label)
 	return sum;
 }
 
+=======
+#include "pt-sun.h"
+#include "partitions.h"
+
+>>>>>>> master-vanilla
 static int probe_sun_pt(blkid_probe pr,
 		const struct blkid_idmag *mag __attribute__((__unused__)))
 {
@@ -92,32 +98,58 @@ static int probe_sun_pt(blkid_probe pr,
 	int i, use_vtoc;
 
 	l = (struct sun_disklabel *) blkid_probe_get_sector(pr, 0);
+<<<<<<< HEAD
 	if (!l)
 		goto nothing;
 
 	if (count_checksum(l)) {
 		DBG(DEBUG_LOWPROBE, printf(
 			"detected corrupted sun disk label -- ignore\n"));
+=======
+	if (!l) {
+		if (errno)
+			return -errno;
+		goto nothing;
+	}
+
+	if (sun_pt_checksum(l)) {
+		DBG(LOWPROBE, ul_debug(
+			"detected corrupted sun disk label -- ignore"));
+>>>>>>> master-vanilla
 		goto nothing;
 	}
 
 	if (blkid_partitions_need_typeonly(pr))
 		/* caller does not ask for details about partitions */
+<<<<<<< HEAD
 		return 0;
 
 	ls = blkid_probe_get_partlist(pr);
 	if (!ls)
 		goto err;
+=======
+		return BLKID_PROBE_OK;
+
+	ls = blkid_probe_get_partlist(pr);
+	if (!ls)
+		goto nothing;
+>>>>>>> master-vanilla
 
 	tab = blkid_partlist_new_parttable(ls, "sun", 0);
 	if (!tab)
 		goto err;
 
 	/* sectors per cylinder (partition offset is in cylinders...) */
+<<<<<<< HEAD
 	spc = be16_to_cpu(l->ntrks) * be16_to_cpu(l->nsect);
 
 	DBG(DEBUG_LOWPROBE,
 		printf("Sun VTOC sanity=%u version=%u nparts=%u\n",
+=======
+	spc = be16_to_cpu(l->nhead) * be16_to_cpu(l->nsect);
+
+	DBG(LOWPROBE, ul_debug("Sun VTOC sanity=%u version=%u nparts=%u",
+>>>>>>> master-vanilla
 			be32_to_cpu(l->vtoc.sanity),
 			be32_to_cpu(l->vtoc.version),
 			be16_to_cpu(l->vtoc.nparts)));
@@ -142,7 +174,11 @@ static int probe_sun_pt(blkid_probe pr,
 		uint16_t type = 0, flags = 0;
 		blkid_partition par;
 
+<<<<<<< HEAD
                 start = be32_to_cpu(p->start_cylinder) * spc;
+=======
+		start = be32_to_cpu(p->start_cylinder) * spc;
+>>>>>>> master-vanilla
 		size = be32_to_cpu(p->num_sectors);
 		if (use_vtoc) {
 			type = be16_to_cpu(l->vtoc.infos[i].id);
@@ -162,12 +198,21 @@ static int probe_sun_pt(blkid_probe pr,
 		if (flags)
 			blkid_partition_set_flags(par, flags);
 	}
+<<<<<<< HEAD
 	return 0;
 
 nothing:
 	return 1;
 err:
 	return -1;
+=======
+	return BLKID_PROBE_OK;
+
+nothing:
+	return BLKID_PROBE_NONE;
+err:
+	return -ENOMEM;
+>>>>>>> master-vanilla
 }
 
 

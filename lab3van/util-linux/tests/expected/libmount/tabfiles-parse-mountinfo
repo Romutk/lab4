@@ -296,7 +296,11 @@ id:     41
 parent: 20
 devno:  253:0
 ------ fs:
+<<<<<<< HEAD
 source: (null)
+=======
+source: none
+>>>>>>> master-vanilla
 target: /proc/sys/fs/binfmt_misc
 fstype: binfmt_misc
 optstr: rw,relatime
@@ -350,3 +354,17 @@ root:   /
 id:     47
 parent: 20
 devno:  0:38
+<<<<<<< HEAD
+=======
+------ fs:
+source: /fooooo
+target: /mnt/foo
+fstype: bar
+optstr: rw,relatime
+VFS-optstr: rw,relatime
+FS-opstr: rw
+root:   /
+id:     48
+parent: 20
+devno:  0:39
+>>>>>>> master-vanilla

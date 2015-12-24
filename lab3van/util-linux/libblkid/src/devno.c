@@ -12,6 +12,7 @@
 
 #include <stdio.h>
 #include <string.h>
+<<<<<<< HEAD
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -27,6 +28,23 @@
 #include <errno.h>
 #endif
 #if HAVE_SYS_MKDEV_H
+=======
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#include <stdlib.h>
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+#include <dirent.h>
+#ifdef HAVE_ERRNO_H
+#include <errno.h>
+#endif
+#ifdef HAVE_SYS_MKDEV_H
+>>>>>>> master-vanilla
 #include <sys/mkdev.h>
 #endif
 #include <fcntl.h>
@@ -37,6 +55,7 @@
 #include "at.h"
 #include "sysfs.h"
 
+<<<<<<< HEAD
 char *blkid_strndup(const char *s, int length)
 {
 	char *ret;
@@ -61,6 +80,9 @@ char *blkid_strdup(const char *s)
 }
 
 char *blkid_strconcat(const char *a, const char *b, const char *c)
+=======
+static char *blkid_strconcat(const char *a, const char *b, const char *c)
+>>>>>>> master-vanilla
 {
 	char *res, *p;
 	size_t len, al, bl, cl;
@@ -103,7 +125,12 @@ static void add_to_dirlist(const char *dir, const char *subdir,
 	if (!dp)
 		return;
 	dp->name = subdir ? blkid_strconcat(dir, "/", subdir) :
+<<<<<<< HEAD
 			    blkid_strdup(dir);
+=======
+		   dir ? strdup(dir) : NULL;
+
+>>>>>>> master-vanilla
 	if (!dp->name) {
 		free(dp);
 		return;
@@ -137,7 +164,11 @@ void blkid__scan_dir(char *dirname, dev_t devno, struct dir_list **list,
 	if ((dir = opendir(dirname)) == NULL)
 		return;
 
+<<<<<<< HEAD
 	while ((dp = readdir(dir)) != 0) {
+=======
+	while ((dp = readdir(dir)) != NULL) {
+>>>>>>> master-vanilla
 #ifdef _DIRENT_HAVE_D_TYPE
 		if (dp->d_type != DT_UNKNOWN && dp->d_type != DT_BLK &&
 		    dp->d_type != DT_LNK && dp->d_type != DT_DIR)
@@ -153,8 +184,12 @@ void blkid__scan_dir(char *dirname, dev_t devno, struct dir_list **list,
 
 		if (S_ISBLK(st.st_mode) && st.st_rdev == devno) {
 			*devname = blkid_strconcat(dirname, "/", dp->d_name);
+<<<<<<< HEAD
 			DBG(DEBUG_DEVNO,
 			    printf("found 0x%llx at %s\n", (long long)devno,
+=======
+			DBG(DEVNO, ul_debug("found 0x%llx at %s", (long long)devno,
+>>>>>>> master-vanilla
 				   *devname));
 			break;
 		}
@@ -197,6 +232,7 @@ static const char *devdirs[] = { "/devices", "/devfs", "/dev", NULL };
  * @short_description: mix of various utils for low-level and high-level API
  */
 
+<<<<<<< HEAD
 /* returns basename and keeps dirname in the @path */
 static char *stripoff_last_component(char *path)
 {
@@ -207,6 +243,9 @@ static char *stripoff_last_component(char *path)
 	*p = '\0';
 	return ++p;
 }
+=======
+
+>>>>>>> master-vanilla
 
 static char *scandev_devno_to_devpath(dev_t devno)
 {
@@ -225,7 +264,11 @@ static char *scandev_devno_to_devpath(dev_t devno)
 		struct dir_list *current = list;
 
 		list = list->next;
+<<<<<<< HEAD
 		DBG(DEBUG_DEVNO, printf("directory %s\n", current->name));
+=======
+		DBG(DEVNO, ul_debug("directory %s", current->name));
+>>>>>>> master-vanilla
 		blkid__scan_dir(current->name, devno, &new_list, &devname);
 		free(current->name);
 		free(current);
@@ -268,17 +311,25 @@ char *blkid_devno_to_devname(dev_t devno)
 		path = scandev_devno_to_devpath(devno);
 
 	if (!path) {
+<<<<<<< HEAD
 		DBG(DEBUG_DEVNO,
 		    printf("blkid: couldn't find devno 0x%04lx\n",
 			   (unsigned long) devno));
 	} else {
 		DBG(DEBUG_DEVNO,
 		    printf("found devno 0x%04llx as %s\n", (long long)devno, path));
+=======
+		DBG(DEVNO, ul_debug("blkid: couldn't find devno 0x%04lx",
+			   (unsigned long) devno));
+	} else {
+		DBG(DEVNO, ul_debug("found devno 0x%04llx as %s", (long long)devno, path));
+>>>>>>> master-vanilla
 	}
 
 	return path;
 }
 
+<<<<<<< HEAD
 static int get_dm_wholedisk(struct sysfs_cxt *cxt, char *diskname,
 			    size_t len, dev_t *diskdevno)
 {
@@ -306,6 +357,8 @@ static int get_dm_wholedisk(struct sysfs_cxt *cxt, char *diskname,
 	free(name);
 	return rc;
 }
+=======
+>>>>>>> master-vanilla
 
 /**
  * blkid_devno_to_wholedisk:
@@ -346,6 +399,7 @@ static int get_dm_wholedisk(struct sysfs_cxt *cxt, char *diskname,
 int blkid_devno_to_wholedisk(dev_t dev, char *diskname,
 			size_t len, dev_t *diskdevno)
 {
+<<<<<<< HEAD
 	struct sysfs_cxt cxt;
 	int is_part = 0;
 
@@ -439,6 +493,9 @@ err:
 	    printf("failed to convert 0x%04llx to wholedisk name, errno=%d\n",
 	    (long long) dev, errno));
 	return -1;
+=======
+	return sysfs_devno_to_wholedisk( dev, diskname, len, diskdevno);
+>>>>>>> master-vanilla
 }
 
 /*
@@ -450,7 +507,11 @@ int blkid_driver_has_major(const char *drvname, int major)
 	char buf[128];
 	int match = 0;
 
+<<<<<<< HEAD
 	f = fopen(_PATH_PROC_DEVICES, "r");
+=======
+	f = fopen(_PATH_PROC_DEVICES, "r" UL_CLOEXECSTR);
+>>>>>>> master-vanilla
 	if (!f)
 		return 0;
 
@@ -461,7 +522,11 @@ int blkid_driver_has_major(const char *drvname, int major)
 
 	while (fgets(buf, sizeof(buf), f)) {
 		int maj;
+<<<<<<< HEAD
 		char name[64];
+=======
+		char name[64 + 1];
+>>>>>>> master-vanilla
 
 		if (sscanf(buf, "%d %64[^\n ]", &maj, name) != 2)
 			continue;
@@ -474,12 +539,19 @@ int blkid_driver_has_major(const char *drvname, int major)
 
 	fclose(f);
 
+<<<<<<< HEAD
 	DBG(DEBUG_DEVNO, printf("major %d %s associated with '%s' driver\n",
+=======
+	DBG(DEVNO, ul_debug("major %d %s associated with '%s' driver",
+>>>>>>> master-vanilla
 			major, match ? "is" : "is NOT", drvname));
 	return match;
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> master-vanilla
 #ifdef TEST_PROGRAM
 int main(int argc, char** argv)
 {
@@ -489,7 +561,11 @@ int main(int argc, char** argv)
 	dev_t	devno, disk_devno;
 	const char *errmsg = "Couldn't parse %s: %s\n";
 
+<<<<<<< HEAD
 	blkid_init_debug(DEBUG_ALL);
+=======
+	blkid_init_debug(BLKID_DEBUG_ALL);
+>>>>>>> master-vanilla
 	if ((argc != 2) && (argc != 3)) {
 		fprintf(stderr, "Usage:\t%s device_number\n\t%s major minor\n"
 			"Resolve a device number to a device name\n",
@@ -520,7 +596,13 @@ int main(int argc, char** argv)
 	free(devname);
 
 	printf("Looking for whole-device for 0x%04llx\n", (long long)devno);
+<<<<<<< HEAD
 	blkid_devno_to_wholedisk(devno, diskname, sizeof(diskname), &disk_devno);
+=======
+	if (blkid_devno_to_wholedisk(devno, diskname,
+				sizeof(diskname), &disk_devno) == 0)
+		printf("found devno 0x%04llx as /dev/%s\n", (long long) disk_devno, diskname);
+>>>>>>> master-vanilla
 
 	return 0;
 }

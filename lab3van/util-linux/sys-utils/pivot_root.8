@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 .TH PIVOT_ROOT 8 "February 2000" "util-linux" "System Administration"
+=======
+.TH PIVOT_ROOT 8 "August 2011" "util-linux" "System Administration"
+>>>>>>> master-vanilla
 .SH NAME
 pivot_root \- change the root filesystem
 .SH SYNOPSIS
@@ -32,6 +36,16 @@ device on the old root file system, keeping it busy. They can easily be
 changed when invoking \fBchroot\fP (see below; note the absence of
 leading slashes to make it work whether \fBpivot_root\fP has changed the
 shell's root or not).
+<<<<<<< HEAD
+=======
+.SH OPTIONS
+.TP
+\fB\-V\fR, \fB\-\-version\fR
+Display version information and exit.
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Display help text and exit.
+>>>>>>> master-vanilla
 .SH EXAMPLES
 Change the root file system to /dev/hda1 from an interactive shell:
 .sp
@@ -61,6 +75,10 @@ exec chroot . sh -c 'umount /old_root; exec /sbin/init' \\
 .BR chroot (1),
 .BR mount (8),
 .BR pivot_root (2),
+<<<<<<< HEAD
+=======
+.BR switch_root (8),
+>>>>>>> master-vanilla
 .BR umount (8)
 .SH AVAILABILITY
 The pivot_root command is part of the util-linux package and is available from

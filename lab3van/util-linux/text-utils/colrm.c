@@ -32,7 +32,11 @@
  */
 
 /*
+<<<<<<< HEAD
  * 1999-02-22 Arkadiusz Mi∂kiewicz <misiek@pld.ORG.PL>
+=======
+ * 1999-02-22 Arkadiusz Mi≈õkiewicz <misiek@pld.ORG.PL>
+>>>>>>> master-vanilla
  * 	added Native Language Support
  * 1999-09-19 Bruno Haible <haible@clisp.cons.org>
  * 	modified to work correctly in multi-byte locales
@@ -41,11 +45,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <getopt.h>
+<<<<<<< HEAD
+=======
+#include <unistd.h>
+>>>>>>> master-vanilla
 
 #include "nls.h"
 #include "widechar.h"
 #include "strutils.h"
 #include "c.h"
+<<<<<<< HEAD
+=======
+#include "closestream.h"
+>>>>>>> master-vanilla
 
 /*
 COLRM removes unwanted columns from a file
@@ -58,6 +70,7 @@ static void __attribute__ ((__noreturn__)) usage(FILE * out)
 		       " %s [startcol [endcol]]\n"),
 		       program_invocation_short_name);
 
+<<<<<<< HEAD
 	fprintf(out, _("\nOptions:\n"
 		       " -V, --version   output version information and exit\n"
 		       " -h, --help      display this help and exit\n\n"));
@@ -69,6 +82,21 @@ static void __attribute__ ((__noreturn__)) usage(FILE * out)
 }
 
 int process_input(unsigned long first, unsigned long last)
+=======
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Filter out the specified columns.\n"), out);
+
+	fputs(USAGE_OPTIONS, out);
+	fputs(USAGE_HELP, out);
+	fputs(USAGE_VERSION, out);
+	fprintf(out, _("%s reads from standard input and writes to standard output\n\n"),
+		       program_invocation_short_name);
+	fprintf(out, USAGE_MAN_TAIL("colrm(1)"));
+	exit(out == stderr ? EXIT_FAILURE : EXIT_SUCCESS);
+}
+
+static int process_input(unsigned long first, unsigned long last)
+>>>>>>> master-vanilla
 {
 	unsigned long ct = 0;
 	wint_t c;
@@ -162,15 +190,23 @@ int main(int argc, char **argv)
 	setlocale(LC_ALL, "");
 	bindtextdomain(PACKAGE, LOCALEDIR);
 	textdomain(PACKAGE);
+<<<<<<< HEAD
+=======
+	atexit(close_stdout);
+>>>>>>> master-vanilla
 
 	while ((opt =
 		getopt_long(argc, argv, "bfhl:pxVH", longopts,
 			    NULL)) != -1)
 		switch (opt) {
 		case 'V':
+<<<<<<< HEAD
 			printf(_("%s from %s\n"),
 			       program_invocation_short_name,
 			       PACKAGE_STRING);
+=======
+			printf(UTIL_LINUX_VERSION);
+>>>>>>> master-vanilla
 			return EXIT_SUCCESS;
 		case 'h':
 			usage(stdout);
@@ -187,7 +223,10 @@ int main(int argc, char **argv)
 		;
 
 	fflush(stdout);
+<<<<<<< HEAD
 	if (ferror(stdout) || fclose(stdout))
 		return EXIT_FAILURE;
+=======
+>>>>>>> master-vanilla
 	return EXIT_SUCCESS;
 }

@@ -2,11 +2,16 @@
 
 # Copyright (C) 2010 Karel Zak <kzak@redhat.com>
 
+<<<<<<< HEAD
 TS_TOPDIR="$(dirname $0)/../.."
+=======
+TS_TOPDIR="${0%/*}/../.."
+>>>>>>> master-vanilla
 TS_DESC="context"
 
 . $TS_TOPDIR/functions.sh
 ts_init "$*"
+<<<<<<< HEAD
 ts_skip_nonroot
 
 TESTPROG="$TS_HELPER_LIBMOUNT_CONTEXT"
@@ -36,6 +41,43 @@ DEVICE="/dev/${DEVNAME}"
 
 ts_log "Create partitions"
 $TS_CMD_FDISK ${DEVICE} >> /dev/null 2>&1 <<EOF
+=======
+
+ts_check_test_command "$TS_CMD_FDISK"
+ts_check_test_command "$TS_CMD_FINDMNT"
+ts_check_test_command "$TS_CMD_MOUNT"
+ts_check_test_command "$TS_CMD_UMOUNT"
+ts_check_test_command "$TS_CMD_UUIDGEN"
+
+ts_skip_nonroot
+ts_check_prog "mkfs.ext3"
+ts_check_prog "mkfs.ext4"
+
+TESTPROG="$TS_HELPER_LIBMOUNT_CONTEXT"
+LABEL=libmount-test
+UUID=$($TS_CMD_UUIDGEN)
+
+MOUNTPOINT="$TS_MOUNTPOINT"
+TS_NOEXIST="$TS_OUTDIR/${TS_TESTNAME}-${TS_SUBNAME}-noex"
+[ -d $TS_NOEXIST ] && rmdir $TS_NOEXIST
+
+[ -x $TESTPROG ] || ts_skip "test not compiled"
+
+ts_log "Init device"
+umount $MOUNTPOINT &> /dev/null
+
+# set global variable TS_DEVICE
+ts_scsi_debug_init dev_size_mb=100
+DEVNAME=$(basename $TS_DEVICE)
+
+grep -q '#define USE_LIBMOUNT_FORCE_MOUNTINFO' ${top_builddir}/config.h
+if [ $? == 0 ]; then
+	MOUNTINFO_ONLY=yes
+fi
+
+ts_log "Create partitions"
+$TS_CMD_FDISK ${TS_DEVICE} &> /dev/null <<EOF
+>>>>>>> master-vanilla
 n
 p
 1
@@ -45,9 +87,22 @@ w
 q
 EOF
 
+<<<<<<< HEAD
 DEVICE="/dev/${DEVNAME}1"
 
 sleep 3
+=======
+DEVICE="${TS_DEVICE}1"
+
+sleep 1
+udevadm settle
+
+grep -q $DEVNAME /proc/partitions
+if [ $? -ne 0 ]; then
+	rmmod scsi_debug
+	ts_skip "no partition!"
+fi
+>>>>>>> master-vanilla
 
 ts_log "Create filesystem"
 mkfs.ext4 -L "$LABEL" -U "$UUID" $DEVICE &> /dev/null
@@ -57,6 +112,7 @@ ts_log "Do tests..."
 export LIBMOUNT_MTAB=$TS_OUTPUT.mtab
 > $LIBMOUNT_MTAB
 
+<<<<<<< HEAD
 
 ts_init_subtest "mount-by-devname"
 mkdir -p $MOUNTPOINT &>  /dev/null
@@ -79,29 +135,76 @@ mkdir -p $MOUNTPOINT &>  /dev/null
 $TESTPROG --mount LABEL="$LABEL" $MOUNTPOINT >> $TS_OUTPUT 2>&1
 grep -q $DEVICE $LIBMOUNT_MTAB || \
 	echo "(by label) cannot find $DEVICE in $LIBMOUNT_MTAB" >> $TS_OUTPUT 2>&1
+=======
+# check local mtab of system mountinfo
+function is_mounted {
+	if [ "$MOUNTINFO_ONLY" = "yes" ]; then
+		ts_is_mounted "$1"
+		return $?
+	fi
+	grep -q "$1" $LIBMOUNT_MTAB && return 0
+	return 1
+}
+
+
+udevadm settle
+ts_device_has "TYPE" "ext4" $DEVICE || ts_die "Cannot find ext3 on $DEVICE"
+
+
+ts_init_subtest "mount-by-devname"
+mkdir -p $MOUNTPOINT &>  /dev/null
+ts_valgrind $TESTPROG --mount $DEVICE $MOUNTPOINT >> $TS_OUTPUT 2>&1
+is_mounted $DEVICE || echo "$DEVICE not mounted" >> $TS_OUTPUT 2>&1
+ts_finalize_subtest
+
+
+ts_init_subtest "umount-by-devname"
+ts_valgrind $TESTPROG --umount $DEVICE >> $TS_OUTPUT 2>&1
+is_mounted $DEVICE && echo "$DEVICE still mounted" >> $TS_OUTPUT 2>&1
+ts_finalize_subtest
+
+
+ts_init_subtest "mount-by-label"
+mkdir -p $MOUNTPOINT &>  /dev/null
+ts_valgrind $TESTPROG --mount LABEL="$LABEL" $MOUNTPOINT >> $TS_OUTPUT 2>&1
+is_mounted $DEVICE || echo "$DEVICE not mounted" >> $TS_OUTPUT 2>&1
+>>>>>>> master-vanilla
 ts_finalize_subtest
 
 
 ts_init_subtest "umount-by-mountpoint"
+<<<<<<< HEAD
 $TESTPROG --umount $MOUNTPOINT >> $TS_OUTPUT 2>&1
 grep -q $DEVICE $LIBMOUNT_MTAB && \
 	echo "umount (mountpoint) failed: found $DEVICE in $LIBMOUNT_MTAB" >> $TS_OUTPUT 2>&1
+=======
+ts_valgrind $TESTPROG --umount $MOUNTPOINT >> $TS_OUTPUT 2>&1
+is_mounted $DEVICE  && echo "$DEVICE still mounted" >> $TS_OUTPUT 2>&1
+>>>>>>> master-vanilla
 ts_finalize_subtest
 
 
 ts_init_subtest "mount-by-uuid"
 mkdir -p $MOUNTPOINT &> /dev/null
+<<<<<<< HEAD
 $TESTPROG --mount UUID="$UUID" $MOUNTPOINT >> $TS_OUTPUT 2>&1
 grep -q $DEVICE $LIBMOUNT_MTAB || \
 	echo "(by uuid) cannot find $DEVICE in $LIBMOUNT_MTAB" >> $TS_OUTPUT 2>&1
 $TESTPROG --umount $MOUNTPOINT >> $TS_OUTPUT 2>&1
 grep -q $DEVICE $LIBMOUNT_MTAB &&
 	echo "umount failed: found $DEVICE in $LIBMOUNT_MTAB" >> $TS_OUTPUT 2>&1
+=======
+ts_valgrind $TESTPROG --mount UUID="$UUID" $MOUNTPOINT >> $TS_OUTPUT 2>&1
+is_mounted $DEVICE  || echo "$DEVICE not mounted" >> $TS_OUTPUT 2>&1
+ts_valgrind $TESTPROG --umount $MOUNTPOINT >> $TS_OUTPUT 2>&1
+is_mounted $DEVICE && echo "$DEVICE still mounted" >> $TS_OUTPUT 2>&1
+>>>>>>> master-vanilla
 ts_finalize_subtest
 
 
 ts_init_subtest "mount-flags"
 mkdir -p $MOUNTPOINT &> /dev/null
+<<<<<<< HEAD
 $TESTPROG --mount -o ro,noexec,nosuid,strictatime $DEVICE $MOUNTPOINT >> $TS_OUTPUT 2>&1
 $TS_CMD_FINDMNT --kernel $MOUNTPOINT -o VFS-OPTIONS -n >> $TS_OUTPUT 2>&1
 grep -q $DEVICE $LIBMOUNT_MTAB || \
@@ -115,6 +218,41 @@ grep -q $DEVICE $LIBMOUNT_MTAB &&
 	echo "umount failed: found $DEVICE in $LIBMOUNT_MTAB" >> $TS_OUTPUT 2>&1
 ts_finalize_subtest
 
+=======
+ts_valgrind $TESTPROG --mount -o ro,noexec,nosuid,strictatime $DEVICE $MOUNTPOINT >> $TS_OUTPUT 2>&1
+$TS_CMD_FINDMNT --kernel $MOUNTPOINT -o VFS-OPTIONS -n >> $TS_OUTPUT 2>&1
+is_mounted $DEVICE || echo "$DEVICE not mounted" >> $TS_OUTPUT 2>&1
+
+ts_valgrind $TESTPROG --mount -o remount,rw $MOUNTPOINT >> $TS_OUTPUT 2>&1
+$TS_CMD_FINDMNT --kernel $MOUNTPOINT -o VFS-OPTIONS -n >> $TS_OUTPUT 2>&1
+
+ts_valgrind $TESTPROG --umount $MOUNTPOINT >> $TS_OUTPUT 2>&1
+is_mounted $DEVICE && echo "$DEVICE still mounted" >> $TS_OUTPUT 2>&1
+ts_finalize_subtest
+
+
+ts_init_subtest "mount-loopdev"
+mkdir -p $MOUNTPOINT &> /dev/null
+img=$(ts_image_init)
+mkfs.ext3 -F $img &> /dev/null
+udevadm settle
+
+ts_valgrind $TESTPROG --mount -o loop $img $MOUNTPOINT >> $TS_OUTPUT 2>&1
+is_mounted $MOUNTPOINT || echo "$MOUNTPOINT not mounted" >> $TS_OUTPUT 2>&1
+udevadm settle
+ts_valgrind $TESTPROG --umount $MOUNTPOINT >> $TS_OUTPUT 2>&1
+is_mounted $MOUNTPOINT && echo "$MOUNTPOINT still mounted" >> $TS_OUTPUT 2>&1
+ts_finalize_subtest
+
+
+ts_init_subtest "x-mount.mkdir"
+$TS_CMD_MOUNT -o x-mount.mkdir --bind $MOUNTPOINT $TS_NOEXIST >> $TS_OUTPUT 2>&1 &&
+  echo "successfully mounted" >> $TS_OUTPUT
+ts_finalize_subtest
+
+$TS_CMD_UMOUNT $TS_NOEXIST
+rmdir $TS_NOEXIST
+>>>>>>> master-vanilla
 
 ts_log "...done."
 rmmod scsi_debug

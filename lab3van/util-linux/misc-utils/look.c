@@ -34,7 +34,11 @@
  * SUCH DAMAGE.
  */
 
+<<<<<<< HEAD
  /* 1999-02-22 Arkadiusz Mi∂kiewicz <misiek@pld.ORG.PL>
+=======
+ /* 1999-02-22 Arkadiusz Mi≈õkiewicz <misiek@pld.ORG.PL>
+>>>>>>> master-vanilla
   * - added Native Language Support
   */
 
@@ -60,6 +64,10 @@
 #include "nls.h"
 #include "xalloc.h"
 #include "pathnames.h"
+<<<<<<< HEAD
+=======
+#include "closestream.h"
+>>>>>>> master-vanilla
 
 #define	EQUAL		0
 #define	GREATER		1
@@ -99,6 +107,10 @@ main(int argc, char *argv[])
 	setlocale(LC_ALL, "");
 	bindtextdomain(PACKAGE, LOCALEDIR);
 	textdomain(PACKAGE);
+<<<<<<< HEAD
+=======
+	atexit(close_stdout);
+>>>>>>> master-vanilla
 
 	setlocale(LC_ALL, "");
 
@@ -121,9 +133,13 @@ main(int argc, char *argv[])
 			termchar = *optarg;
 			break;
 		case 'V':
+<<<<<<< HEAD
 			printf(_("%s from %s\n"),
 				program_invocation_short_name,
 				PACKAGE_STRING);
+=======
+			printf(UTIL_LINUX_VERSION);
+>>>>>>> master-vanilla
 			return EXIT_SUCCESS;
 		case 'h':
 			usage(stdout);
@@ -153,9 +169,12 @@ main(int argc, char *argv[])
 	if ((fd = open(file, O_RDONLY, 0)) < 0 || fstat(fd, &sb))
 		err(EXIT_FAILURE, "%s", file);
 	front = mmap(NULL, (size_t) sb.st_size, PROT_READ,
+<<<<<<< HEAD
 #ifdef MAP_FILE
 		     MAP_FILE |
 #endif
+=======
+>>>>>>> master-vanilla
 		     MAP_SHARED, fd, (off_t) 0);
 	if
 #ifdef MAP_FAILED
@@ -164,6 +183,7 @@ main(int argc, char *argv[])
 		((void *)(front) <= (void *)0)
 #endif
 			err(EXIT_FAILURE, "%s", file);
+<<<<<<< HEAD
 
 #if 0
 	/* workaround for mmap problem (rmiller@duskglow.com) */
@@ -171,6 +191,8 @@ main(int argc, char *argv[])
 		return 1;
 #endif
 
+=======
+>>>>>>> master-vanilla
 	back = front + sb.st_size;
 	return look(front, back);
 }
@@ -241,7 +263,11 @@ look(char *front, char *back)
  *	more trouble than it's worth.
  */
 #define	SKIP_PAST_NEWLINE(p, back) \
+<<<<<<< HEAD
 	while (p < back && *p++ != '\n');
+=======
+	while (p < back && *p++ != '\n')
+>>>>>>> master-vanilla
 
 char *
 binary_search(char *front, char *back)
@@ -363,6 +389,7 @@ compare(char *s2, char *s2end) {
 
 static void __attribute__ ((__noreturn__)) usage(FILE * out)
 {
+<<<<<<< HEAD
 	fputs(_("\nUsage:\n"), out),
 	fprintf(out,
 	      _(" %s [options] string [file]\n"), program_invocation_short_name);
@@ -374,6 +401,24 @@ static void __attribute__ ((__noreturn__)) usage(FILE * out)
 		" -t, --terminate <char> define string termination character\n"
 		" -V, --version          output version information and exit\n"
 		" -h, --help             display this help and exit\n\n"), out);
+=======
+	fputs(USAGE_HEADER, out);
+	fprintf(out, _(" %s [options] <string> [<file>...]\n"), program_invocation_short_name);
+
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Display lines beginning with a specified string.\n"), out);
+
+	fputs(USAGE_OPTIONS, out);
+	fputs(_(" -a, --alternative        use the alternative dictionary\n"), out);
+	fputs(_(" -d, --alphanum           compare only alphanumeric characters\n"), out);
+	fputs(_(" -f, --ignore-case        ignore case differences when comparing\n"), out);
+	fputs(_(" -t, --terminate <char>   define the string-termination character\n"), out);
+
+	fputs(USAGE_SEPARATOR, out);
+	fputs(USAGE_HELP, out);
+	fputs(USAGE_VERSION, out);
+	fprintf(out, USAGE_MAN_TAIL("look(1)"));
+>>>>>>> master-vanilla
 
 	exit(out == stderr ? EXIT_FAILURE : EXIT_SUCCESS);
 }

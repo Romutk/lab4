@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 mount: fstab path: "/etc/fstab"
 mount: mtab path:  "/etc/mtab"
 mount: lock path:  "/etc/mtab~"
@@ -15,3 +16,6 @@ mount: external mount: argv[3] = "-v"
 mount: external mount: argv[4] = "-o"
 mount: external mount: argv[5] = "rw"
 /sbin/mount.mytest called with "/foo /bar -v -o rw"
+=======
+/sbin/mount.mytest called with "/foo /bar -o rw"
+>>>>>>> master-vanilla

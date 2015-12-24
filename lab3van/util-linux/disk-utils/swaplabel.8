@@ -15,6 +15,7 @@ swaplabel \- print or change the label or UUID of a swap area
 .SH DESCRIPTION
 .B swaplabel
 will display or change the label or UUID of a swap partition located on
+<<<<<<< HEAD
 .IR device 
 (or regular file).
 .PP
@@ -22,6 +23,15 @@ If the optional arguments
 .B \-L 
 and
 .B \-U 
+=======
+.I device
+(or regular file).
+.PP
+If the optional arguments
+.B \-L
+and
+.B \-U
+>>>>>>> master-vanilla
 are not given,
 .B swaplabel
 will simply display the current swap-area label and UUID of
@@ -58,6 +68,12 @@ must be in the standard 8-4-4-4-12 character format, such as is output by
 .SH AUTHOR
 .B swaplabel
 was written by Jason Borden <jborden@bluehost.com> and Karel Zak <kzak@redhat.com>.
+<<<<<<< HEAD
+=======
+.SH ENVIRONMENT
+.IP LIBBLKID_DEBUG=all
+enables libblkid debug output.
+>>>>>>> master-vanilla
 .SH AVAILABILITY
 The swaplabel command is part of the util-linux package and is available from
 ftp://ftp.kernel.org/pub/linux/utils/util-linux/.

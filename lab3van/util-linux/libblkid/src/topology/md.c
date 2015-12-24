@@ -97,7 +97,11 @@ static int probe_md_tp(blkid_probe pr,
 		if (!diskpath)
 			goto nothing;
 
+<<<<<<< HEAD
 		fd = open(diskpath, O_RDONLY);
+=======
+		fd = open(diskpath, O_RDONLY|O_CLOEXEC);
+>>>>>>> master-vanilla
 		free(diskpath);
 
                 if (fd == -1)
@@ -109,8 +113,15 @@ static int probe_md_tp(blkid_probe pr,
 	if (ioctl(fd, GET_ARRAY_INFO, &md))
 		goto nothing;
 
+<<<<<<< HEAD
 	if (fd != pr->fd)
 		close(fd);
+=======
+	if (fd >= 0 && fd != pr->fd) {
+		close(fd);
+		fd = -1;
+	}
+>>>>>>> master-vanilla
 
 	/*
 	 * Ignore levels we don't want aligned (e.g. linear)
@@ -138,7 +149,11 @@ static int probe_md_tp(blkid_probe pr,
 	return 0;
 
 nothing:
+<<<<<<< HEAD
 	if (fd != -1 && fd != pr->fd)
+=======
+	if (fd >= 0 && fd != pr->fd)
+>>>>>>> master-vanilla
 		close(fd);
 	return 1;
 }

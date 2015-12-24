@@ -15,14 +15,27 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
+<<<<<<< HEAD
 TS_TOPDIR="$(dirname $0)/../.."
+=======
+TS_TOPDIR="${0%/*}/../.."
+>>>>>>> master-vanilla
 TS_DESC="broken fstab"
 
 . $TS_TOPDIR/functions.sh
 ts_init "$*"
+<<<<<<< HEAD
 ts_skip_nonroot
 
 set -o pipefail
+=======
+
+ts_check_test_command "$TS_CMD_MOUNT"
+ts_check_test_command "$TS_CMD_UMOUNT"
+ts_check_test_command "$TS_CMD_FINDMNT"
+
+ts_skip_nonroot
+>>>>>>> master-vanilla
 
 # Let's use the same mountpoint for all subtests
 MNT=$TS_MOUNTPOINT
@@ -32,28 +45,48 @@ ts_fstab_open
 echo "tmpd $MNT tmpfs" >> /etc/fstab
 ts_fstab_close
 
+<<<<<<< HEAD
 
 ts_init_subtest "mount"
 $TS_CMD_MOUNT $MNT &> /dev/null
 $TS_CMD_FINDMNT --kernel --target "$MNT" &> /dev/null
+=======
+ts_init_subtest "mount"
+$TS_CMD_MOUNT $MNT &> /dev/null
+[ "$?" = "0" ] || ts_log "error: mount $MNT"
+$TS_CMD_FINDMNT --kernel --mountpoint "$MNT" &> /dev/null
+>>>>>>> master-vanilla
 if [ "$?" != "0" ]; then
 	ts_log "Cannot find $MNT in /proc/self/mountinfo"
 else
 	ts_log "OK"
 fi
 $TS_CMD_UMOUNT $MNT &> /dev/null
+<<<<<<< HEAD
+=======
+[ "$?" = "0" ] || ts_log "error: umount $MNT"
+>>>>>>> master-vanilla
 ts_finalize_subtest
 
 
 ts_init_subtest "mount-all"
 $TS_CMD_MOUNT -a &> /dev/null
+<<<<<<< HEAD
 $TS_CMD_FINDMNT --kernel --target "$MNT" &> /dev/null
+=======
+[ "$?" = "0" ] || ts_log "error: mount -a"
+$TS_CMD_FINDMNT --kernel --mountpoint "$MNT" &> /dev/null
+>>>>>>> master-vanilla
 if [ "$?" != "0" ]; then
 	ts_log "Cannot find $MNT in /proc/self/mountinfo"
 else
 	ts_log "OK"
 fi
 $TS_CMD_UMOUNT $MNT &> /dev/null
+<<<<<<< HEAD
+=======
+[ "$?" = "0" ] || ts_log "error: umount $MNT"
+>>>>>>> master-vanilla
 ts_finalize_subtest
 
 ts_fstab_clean

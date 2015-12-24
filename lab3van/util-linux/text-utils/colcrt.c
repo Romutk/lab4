@@ -32,7 +32,11 @@
  */
 
 /*
+<<<<<<< HEAD
  * 1999-02-22 Arkadiusz Mi∂kiewicz <misiek@pld.ORG.PL>
+=======
+ * 1999-02-22 Arkadiusz Mi≈õkiewicz <misiek@pld.ORG.PL>
+>>>>>>> master-vanilla
  * 	added Native Language Support
  * 1999-09-19 Bruno Haible <haible@clisp.cons.org>
  * 	modified to work correctly in multi-byte locales
@@ -47,6 +51,10 @@
 
 #include "widechar.h"
 #include "c.h"
+<<<<<<< HEAD
+=======
+#include "closestream.h"
+>>>>>>> master-vanilla
 
 int plus(wchar_t c, wchar_t d);
 void move(int l, int m);
@@ -67,7 +75,14 @@ static void __attribute__ ((__noreturn__)) usage(FILE * out);
  * Option -2 forces printing of all half lines.
  */
 
+<<<<<<< HEAD
 wchar_t	page[267][132];
+=======
+#define FLUSH_SIZE 62
+#define PAGE_ARRAY_ROWS 267
+#define PAGE_ARRAY_COLS 132
+wchar_t	page[PAGE_ARRAY_ROWS + 1][PAGE_ARRAY_COLS + 1];
+>>>>>>> master-vanilla
 
 int	outline = 1;
 int	outcol;
@@ -93,6 +108,10 @@ int main(int argc, char **argv) {
 	setlocale(LC_ALL, "");
 	bindtextdomain(PACKAGE, LOCALEDIR);
 	textdomain(PACKAGE);
+<<<<<<< HEAD
+=======
+	atexit(close_stdout);
+>>>>>>> master-vanilla
 
 	/* Take care of lonely hyphen option. */
 	for (i = 0; i < argc; i++)
@@ -113,9 +132,13 @@ int main(int argc, char **argv) {
 				printall = 1;
 				break;
 			case 'V':
+<<<<<<< HEAD
 				printf(_("%s from %s\n"),
 					program_invocation_short_name,
 					PACKAGE_STRING);
+=======
+				printf(UTIL_LINUX_VERSION);
+>>>>>>> master-vanilla
 				return EXIT_SUCCESS;
 			case 'h':
 				usage(stdout);
@@ -141,8 +164,11 @@ int main(int argc, char **argv) {
 			fclose(f);
 	} while (argc > 0);
 	fflush(stdout);
+<<<<<<< HEAD
 	if (ferror(stdout) || fclose(stdout))
 		return EXIT_FAILURE;
+=======
+>>>>>>> master-vanilla
 	return EXIT_SUCCESS;
 }
 
@@ -160,8 +186,13 @@ void colcrt(FILE *f) {
 		}
 		switch (c) {
 		case '\n':
+<<<<<<< HEAD
 			if (outline >= 265)
 				pflush(62);
+=======
+			if (outline >= (PAGE_ARRAY_ROWS - 2))
+				pflush(FLUSH_SIZE);
+>>>>>>> master-vanilla
 			outline += 2;
 			outcol = 0;
 			continue;
@@ -172,8 +203,13 @@ void colcrt(FILE *f) {
 			c = getwc(f);
 			switch (c) {
 			case '9':
+<<<<<<< HEAD
 				if (outline >= 266)
 					pflush(62);
+=======
+				if (outline >= (PAGE_ARRAY_ROWS - 1))
+					pflush(FLUSH_SIZE);
+>>>>>>> master-vanilla
 				outline++;
 				continue;
 			case '8':
@@ -197,9 +233,18 @@ void colcrt(FILE *f) {
 			outcol &= ~7;
 			outcol--;
 			c = ' ';
+<<<<<<< HEAD
 		default:
 			w = wcwidth(c);
 			if (outcol + w > 132) {
+=======
+			/* fallthrough */
+		default:
+			w = wcwidth(c);
+			if (w < 0)
+				continue;
+			if (outcol + w > PAGE_ARRAY_COLS) {
+>>>>>>> master-vanilla
 				outcol++;
 				continue;
 			}
@@ -208,7 +253,11 @@ void colcrt(FILE *f) {
 			if (c == '_') {
 				if (suppresul)
 					continue;
+<<<<<<< HEAD
 				cp += 132;
+=======
+				cp += PAGE_ARRAY_COLS;
+>>>>>>> master-vanilla
 				c = '-';
 			}
 			if (*cp == 0) {
@@ -251,8 +300,13 @@ void pflush(int ol)
 
 	l = ol;
 	lastomit = 0;
+<<<<<<< HEAD
 	if (l > 266)
 		l = 266;
+=======
+	if (l > (PAGE_ARRAY_ROWS - 1))
+		l = PAGE_ARRAY_ROWS - 1;
+>>>>>>> master-vanilla
 	else
 		l |= 1;
 	for (i = first | 1; i < l; i++) {
@@ -275,8 +329,13 @@ void pflush(int ol)
 		}
 		putwchar('\n');
 	}
+<<<<<<< HEAD
 	memmove(page, page[ol], (267 - ol) * 132 * sizeof(wchar_t));
 	memset(page[267 - ol], '\0', ol * 132 * sizeof(wchar_t));
+=======
+	memmove(page, page[ol], (PAGE_ARRAY_ROWS - ol) * PAGE_ARRAY_COLS * sizeof(wchar_t));
+	memset(page[PAGE_ARRAY_ROWS - ol], '\0', ol * PAGE_ARRAY_COLS * sizeof(wchar_t));
+>>>>>>> master-vanilla
 	outline -= ol;
 	outcol = 0;
 	first = 1;
@@ -310,6 +369,7 @@ void move(int l, int m)
 
 static void __attribute__ ((__noreturn__)) usage(FILE * out)
 {
+<<<<<<< HEAD
 	fprintf(out,
 		_("\nUsage:\n"
 		  " %s [options] [file ...]\n"), program_invocation_short_name);
@@ -319,6 +379,22 @@ static void __attribute__ ((__noreturn__)) usage(FILE * out)
 		  " -2, --half-lines      print all half-lines\n"
 		  " -V, --version         output version information and exit\n"
 		  " -h, --help            display this help and exit\n\n"));
+=======
+	fputs(USAGE_HEADER, out);
+	fprintf(out, _(" %s [options] [<file>...]\n"), program_invocation_short_name);
+
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Filter nroff output for CRT previewing.\n"), out);
+
+	fputs(USAGE_OPTIONS, out);
+	fputs(_(" -,  --no-underlining    suppress all underlining\n"), out);
+	fputs(_(" -2, --half-lines        print all half-lines\n"), out);
+
+	fputs(USAGE_SEPARATOR, out);
+	fputs(USAGE_HELP, out);
+	fputs(USAGE_VERSION, out);
+	fprintf(out, USAGE_MAN_TAIL("colcrt(1)"));
+>>>>>>> master-vanilla
 
 	exit(out == stderr ? EXIT_FAILURE : EXIT_SUCCESS);
 }

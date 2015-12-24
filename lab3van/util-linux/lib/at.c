@@ -1,7 +1,14 @@
 /*
  * Portable xxxat() functions.
  *
+<<<<<<< HEAD
  * Copyright (C) 2010 Karel Zak <kzak@redhat.com>
+=======
+ * No copyright is claimed.  This code is in the public domain; do with
+ * it what you wish.
+ *
+ * Written by Karel Zak <kzak@redhat.com>
+>>>>>>> master-vanilla
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -116,7 +123,11 @@ int main(int argc, char *argv[])
 
 	dir = opendir(dirname);
 	if (!dir)
+<<<<<<< HEAD
 		err(EXIT_FAILURE, "%s: open failed", dirname);
+=======
+		err(EXIT_FAILURE, "cannot open %s", dirname);
+>>>>>>> master-vanilla
 
 	while ((d = readdir(dir))) {
 		struct stat st;

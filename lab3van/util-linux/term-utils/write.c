@@ -40,7 +40,11 @@
  *      - Added fix from David.Chapell@mail.trincoll.edu enabeling daemons
  *	  to use write.
  *      - ANSIed it since I was working on it anyway.
+<<<<<<< HEAD
  * 1999-02-22 Arkadiusz Mi∂kiewicz <misiek@pld.ORG.PL>
+=======
+ * 1999-02-22 Arkadiusz Mi≈õkiewicz <misiek@pld.ORG.PL>
+>>>>>>> master-vanilla
  * - added Native Language Support
  *
  */
@@ -57,11 +61,21 @@
 #include <sys/param.h>
 #include <sys/stat.h>
 #include <paths.h>
+<<<<<<< HEAD
 #include <asm/param.h>
 #include <getopt.h>
 #include "c.h"
 #include "carefulputc.h"
 #include "nls.h"
+=======
+#include <getopt.h>
+
+#include "c.h"
+#include "carefulputc.h"
+#include "closestream.h"
+#include "nls.h"
+#include "xalloc.h"
+>>>>>>> master-vanilla
 
 static void __attribute__ ((__noreturn__)) usage(FILE * out);
 void search_utmp(char *, char *, char *, uid_t);
@@ -71,19 +85,38 @@ static void __attribute__ ((__noreturn__)) done(int);
 int term_chk(char *, int *, time_t *, int);
 int utmp_chk(char *, char *);
 
+<<<<<<< HEAD
 static gid_t myegid;
 
 static void __attribute__ ((__noreturn__)) usage(FILE * out)
 {
 	fputs(_("\nUsage:\n"), out);
+=======
+static gid_t root_access;
+
+static void __attribute__ ((__noreturn__)) usage(FILE * out)
+{
+	fputs(USAGE_HEADER, out);
+>>>>>>> master-vanilla
 	fprintf(out,
 	      _(" %s [options] <user> [<ttyname>]\n"),
 	      program_invocation_short_name);
 
+<<<<<<< HEAD
 	fputs(_("\nOptions:\n"), out);
 	fputs(_(" -V, --version    output version information and exit\n"
 		" -h, --help       display this help and exit\n\n"), out);
 
+=======
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Send a message to another user.\n"), out);
+
+	fputs(USAGE_OPTIONS, out);
+	fputs(USAGE_HELP, out);
+	fputs(USAGE_VERSION, out);
+
+	fprintf(out, USAGE_MAN_TAIL("write(1)"));
+>>>>>>> master-vanilla
 	exit(out == stderr ? EXIT_FAILURE : EXIT_SUCCESS);
 }
 
@@ -92,7 +125,11 @@ int main(int argc, char **argv)
 	time_t atime;
 	uid_t myuid;
 	int msgsok, myttyfd, c;
+<<<<<<< HEAD
 	char tty[MAXPATHLEN], *mytty;
+=======
+	char tty[PATH_MAX], *mytty;
+>>>>>>> master-vanilla
 
 	static const struct option longopts[] = {
 		{"version", no_argument, NULL, 'V'},
@@ -103,13 +140,21 @@ int main(int argc, char **argv)
 	setlocale(LC_ALL, "");
 	bindtextdomain(PACKAGE, LOCALEDIR);
 	textdomain(PACKAGE);
+<<<<<<< HEAD
+=======
+	atexit(close_stdout);
+>>>>>>> master-vanilla
 
 	while ((c = getopt_long(argc, argv, "Vh", longopts, NULL)) != -1)
 		switch (c) {
 		case 'V':
+<<<<<<< HEAD
 			printf(_("%s from %s\n"),
 			       program_invocation_short_name,
 			       PACKAGE_STRING);
+=======
+			printf(UTIL_LINUX_VERSION);
+>>>>>>> master-vanilla
 			return EXIT_SUCCESS;
 		case 'h':
 			usage(stdout);
@@ -117,7 +162,11 @@ int main(int argc, char **argv)
 			usage(stderr);
 		}
 
+<<<<<<< HEAD
 	myegid = getegid();
+=======
+	root_access = !getegid();
+>>>>>>> master-vanilla
 
 	/* check that sender has write enabled */
 	if (isatty(fileno(stdin)))
@@ -198,7 +247,11 @@ int utmp_chk(char *user, char *tty)
 
 	while ((uptr = getutent())) {
 		memcpy(&u, uptr, sizeof(u));
+<<<<<<< HEAD
 		if (strncmp(user, u.ut_name, sizeof(u.ut_name)) == 0 &&
+=======
+		if (strncmp(user, u.ut_user, sizeof(u.ut_user)) == 0 &&
+>>>>>>> master-vanilla
 		    strncmp(tty, u.ut_line, sizeof(u.ut_line)) == 0) {
 			res = 0;
 			break;
@@ -236,7 +289,11 @@ void search_utmp(char *user, char *tty, char *mytty, uid_t myuid)
 	user_is_me = 0;
 	while ((uptr = getutent())) {
 		memcpy(&u, uptr, sizeof(u));
+<<<<<<< HEAD
 		if (strncmp(user, u.ut_name, sizeof(u.ut_name)) == 0) {
+=======
+		if (strncmp(user, u.ut_user, sizeof(u.ut_user)) == 0) {
+>>>>>>> master-vanilla
 			++nloggedttys;
 			strncpy(atty, u.ut_line, sizeof(u.ut_line));
 			atty[sizeof(u.ut_line)] = '\0';
@@ -285,7 +342,11 @@ void search_utmp(char *user, char *tty, char *mytty, uid_t myuid)
 int term_chk(char *tty, int *msgsokP, time_t * atimeP, int showerror)
 {
 	struct stat s;
+<<<<<<< HEAD
 	char path[MAXPATHLEN];
+=======
+	char path[PATH_MAX];
+>>>>>>> master-vanilla
 
 	if (strlen(tty) + 6 > sizeof(path))
 		return 1;
@@ -296,8 +357,14 @@ int term_chk(char *tty, int *msgsokP, time_t * atimeP, int showerror)
 		return 1;
 	}
 
+<<<<<<< HEAD
 	/* group write bit and group ownership */
 	*msgsokP = (s.st_mode & (S_IWRITE >> 3)) && myegid == s.st_gid;
+=======
+	*msgsokP = !access(path, W_OK);
+	if (!root_access && *msgsokP)
+		*msgsokP = s.st_mode & S_IWGRP;
+>>>>>>> master-vanilla
 	*atimeP = s.st_atime;
 	return 0;
 }
@@ -310,7 +377,11 @@ void do_write(char *tty, char *mytty, uid_t myuid)
 	char *login, *pwuid, *nows;
 	struct passwd *pwd;
 	time_t now;
+<<<<<<< HEAD
 	char path[MAXPATHLEN], host[MAXHOSTNAMELEN], line[512];
+=======
+	char path[PATH_MAX], *host, line[512];
+>>>>>>> master-vanilla
 
 	/* Determine our login name(s) before the we reopen() stdout */
 	if ((pwd = getpwuid(myuid)) != NULL)
@@ -330,8 +401,15 @@ void do_write(char *tty, char *mytty, uid_t myuid)
 	signal(SIGHUP, done);
 
 	/* print greeting */
+<<<<<<< HEAD
 	if (gethostname(host, sizeof(host)) < 0)
 		strcpy(host, "???");
+=======
+	host = xgethostname();
+	if (!host)
+		host = xstrdup("???");
+
+>>>>>>> master-vanilla
 	now = time((time_t *) NULL);
 	nows = ctime(&now);
 	nows[16] = '\0';
@@ -342,6 +420,10 @@ void do_write(char *tty, char *mytty, uid_t myuid)
 	else
 		printf(_("Message from %s@%s on %s at %s ..."),
 		       login, host, mytty, nows + 11);
+<<<<<<< HEAD
+=======
+	free(host);
+>>>>>>> master-vanilla
 	printf("\r\n");
 
 	while (fgets(line, sizeof(line), stdin) != NULL)
@@ -366,7 +448,11 @@ void wr_fputs(char *s)
 {
 	char c;
 
+<<<<<<< HEAD
 #define	PUTC(c)	if (carefulputc(c, stdout) == EOF) \
+=======
+#define	PUTC(c)	if (fputc_careful(c, stdout, '^') == EOF) \
+>>>>>>> master-vanilla
     err(EXIT_FAILURE, _("carefulputc failed"));
 	while (*s) {
 		c = *s++;

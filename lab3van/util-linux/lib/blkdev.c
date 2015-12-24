@@ -1,4 +1,13 @@
+<<<<<<< HEAD
 
+=======
+/*
+ * No copyright is claimed.  This code is in the public domain; do with
+ * it what you wish.
+ *
+ * Written by Karel Zak <kzak@redhat.com>
+ */
+>>>>>>> master-vanilla
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
@@ -14,6 +23,7 @@
 #endif
 
 #ifdef HAVE_SYS_DISK_H
+<<<<<<< HEAD
 #ifdef HAVE_SYS_QUEUE_H
 #include <sys/queue.h> /* for LIST_HEAD */
 #endif
@@ -27,6 +37,23 @@
 #include "blkdev.h"
 #include "linux_version.h"
 #include "c.h"
+=======
+# ifdef HAVE_SYS_QUEUE_H
+#  include <sys/queue.h>	/* for LIST_HEAD */
+# endif
+# include <sys/disk.h>
+#endif
+
+#ifndef EBADFD
+# define EBADFD 77		/* File descriptor in bad state */
+#endif
+
+#include "blkdev.h"
+#include "c.h"
+#include "linux_version.h"
+#include "fileutils.h"
+#include "nls.h"
+>>>>>>> master-vanilla
 
 static long
 blkdev_valid_offset (int fd, off_t offset) {
@@ -39,6 +66,15 @@ blkdev_valid_offset (int fd, off_t offset) {
 	return 1;
 }
 
+<<<<<<< HEAD
+=======
+int is_blkdev(int fd)
+{
+	struct stat st;
+	return (fstat(fd, &st) == 0 && S_ISBLK(st.st_mode));
+}
+
+>>>>>>> master-vanilla
 off_t
 blkdev_find_size (int fd) {
 	uintmax_t high, low = 0;
@@ -117,7 +153,11 @@ blkdev_get_size(int fd, unsigned long long *bytes)
 		struct floppy_struct this_floppy;
 
 		if (ioctl(fd, FDGETPRM, &this_floppy) >= 0) {
+<<<<<<< HEAD
 			*bytes = this_floppy.size << 9;
+=======
+			*bytes = ((unsigned long long) this_floppy.size) << 9;
+>>>>>>> master-vanilla
 			return 0;
 		}
 	}
@@ -247,8 +287,111 @@ int blkdev_is_misaligned(int fd)
 #endif
 }
 
+<<<<<<< HEAD
 
 #ifdef TEST_PROGRAM
+=======
+int open_blkdev_or_file(const struct stat *st, const char *name, const int oflag)
+{
+	int fd;
+
+	if (S_ISBLK(st->st_mode)) {
+		fd = open(name, oflag | O_EXCL);
+	} else
+		fd = open(name, oflag);
+	if (-1 < fd && !is_same_inode(fd, st)) {
+		close(fd);
+		errno = EBADFD;
+		return -1;
+	}
+	if (-1 < fd && S_ISBLK(st->st_mode) && blkdev_is_misaligned(fd))
+		warnx(_("warning: %s is misaligned"), name);
+	return fd;
+}
+
+int blkdev_is_cdrom(int fd)
+{
+#ifdef CDROM_GET_CAPABILITY
+	int ret;
+
+	if ((ret = ioctl(fd, CDROM_GET_CAPABILITY, NULL)) < 0)
+		return 0;
+	else
+		return ret;
+#else
+	return 0;
+#endif
+}
+
+/*
+ * Get kernel's interpretation of the device's geometry.
+ *
+ * Returns the heads and sectors - but not cylinders
+ * as it's truncated for disks with more than 65535 tracks.
+ *
+ * Note that this is deprecated in favor of LBA addressing.
+ */
+int blkdev_get_geometry(int fd, unsigned int *h, unsigned int *s)
+{
+#ifdef HDIO_GETGEO
+	struct hd_geometry geometry;
+
+	if (ioctl(fd, HDIO_GETGEO, &geometry) == 0) {
+		*h = geometry.heads;
+		*s = geometry.sectors;
+		return 0;
+	}
+#else
+	*h = 0;
+	*s = 0;
+#endif
+	return -1;
+}
+
+/*
+ * Convert scsi type to human readable string.
+ */
+const char *blkdev_scsi_type_to_name(int type)
+{
+	switch (type) {
+	case SCSI_TYPE_DISK:
+		return "disk";
+	case SCSI_TYPE_TAPE:
+		return "tape";
+	case SCSI_TYPE_PRINTER:
+		return "printer";
+	case SCSI_TYPE_PROCESSOR:
+		return "processor";
+	case SCSI_TYPE_WORM:
+		return "worm";
+	case SCSI_TYPE_ROM:
+		return "rom";
+	case SCSI_TYPE_SCANNER:
+		return "scanner";
+	case SCSI_TYPE_MOD:
+		return "mo-disk";
+	case SCSI_TYPE_MEDIUM_CHANGER:
+		return "changer";
+	case SCSI_TYPE_COMM:
+		return "comm";
+	case SCSI_TYPE_RAID:
+		return "raid";
+	case SCSI_TYPE_ENCLOSURE:
+		return "enclosure";
+	case SCSI_TYPE_RBC:
+		return "rbc";
+	case SCSI_TYPE_OSD:
+		return "osd";
+	case SCSI_TYPE_NO_LUN:
+		return "no-lun";
+	default:
+		break;
+	}
+	return NULL;
+}
+
+#ifdef TEST_PROGRAM_BLKDEV
+>>>>>>> master-vanilla
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -265,7 +408,11 @@ main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 
+<<<<<<< HEAD
 	if ((fd = open(argv[1], O_RDONLY)) < 0)
+=======
+	if ((fd = open(argv[1], O_RDONLY|O_CLOEXEC)) < 0)
+>>>>>>> master-vanilla
 		err(EXIT_FAILURE, "open %s failed", argv[1]);
 
 	if (blkdev_get_size(fd, &bytes) < 0)

@@ -34,7 +34,11 @@
 /*
  * modified by Kars de Jong <jongk@cs.utwente.nl>
  *	to use terminfo instead of termcap.
+<<<<<<< HEAD
  * 1999-02-22 Arkadiusz Mi∂kiewicz <misiek@pld.ORG.PL>
+=======
+ * 1999-02-22 Arkadiusz Mi≈õkiewicz <misiek@pld.ORG.PL>
+>>>>>>> master-vanilla
  * 	added Native Language Support
  * 1999-09-19 Bruno Haible <haible@clisp.cons.org>
  * 	modified to work correctly in multi-byte locales
@@ -54,6 +58,10 @@
 #include "xalloc.h"
 #include "widechar.h"
 #include "c.h"
+<<<<<<< HEAD
+=======
+#include "closestream.h"
+>>>>>>> master-vanilla
 
 #ifdef HAVE_WIDECHAR
 /* Output an ASCII character as a wide character */
@@ -131,6 +139,7 @@ int	iflag;
 static void __attribute__((__noreturn__))
 usage(FILE *out)
 {
+<<<<<<< HEAD
 	fprintf(out, _(
 		"\nUsage:\n"
 		" %s [options] [file...]\n"), program_invocation_short_name);
@@ -141,6 +150,22 @@ usage(FILE *out)
 		" -i, --indicated            underlining is indicated via a separate line\n"
 		" -V, --version              output version information and exit\n"
 		" -h, --help                 display this help and exit\n\n"));
+=======
+	fputs(USAGE_HEADER, out);
+	fprintf(out, _(" %s [options] [<file> ...]\n"), program_invocation_short_name);
+
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Do underlining.\n"), out);
+
+	fputs(USAGE_OPTIONS, out);
+	fputs(_(" -t, -T, --terminal TERMINAL  override the TERM environment variable\n"), out);
+	fputs(_(" -i, --indicated              underlining is indicated via a separate line\n"), out);
+	fputs(USAGE_SEPARATOR, out);
+	fputs(USAGE_HELP, out);
+	fputs(USAGE_VERSION, out);
+
+	fprintf(out, USAGE_MAN_TAIL("ul(1)"));
+>>>>>>> master-vanilla
 
 	exit(out == stderr ? EXIT_FAILURE : EXIT_SUCCESS);
 }
@@ -162,12 +187,17 @@ int main(int argc, char **argv)
 	setlocale(LC_ALL, "");
 	bindtextdomain(PACKAGE, LOCALEDIR);
 	textdomain(PACKAGE);
+<<<<<<< HEAD
+=======
+	atexit(close_stdout);
+>>>>>>> master-vanilla
 
 	signal(SIGINT, sig_handler);
 	signal(SIGTERM, sig_handler);
 
 	termtype = getenv("TERM");
 
+<<<<<<< HEAD
 	/*
 	 * FIXME: why terminal type is lpr when command begins with c and has
 	 * no terminal? If this behavior can be explained please insert
@@ -177,6 +207,8 @@ int main(int argc, char **argv)
 	if (termtype == NULL || (argv[0][0] == 'c' && !isatty(STDOUT_FILENO)))
 		termtype = "lpr";
 
+=======
+>>>>>>> master-vanilla
 	while ((c = getopt_long(argc, argv, "it:T:Vh", longopts, NULL)) != -1)
 		switch (c) {
 
@@ -190,8 +222,12 @@ int main(int argc, char **argv)
 			iflag = 1;
 			break;
 		case 'V':
+<<<<<<< HEAD
 			printf(_("%s from %s\n"), program_invocation_short_name,
 						  PACKAGE_STRING);
+=======
+			printf(UTIL_LINUX_VERSION);
+>>>>>>> master-vanilla
 			return EXIT_SUCCESS;
 		case 'h':
 			usage(stdout);
@@ -226,14 +262,21 @@ int main(int argc, char **argv)
 		for (; optind < argc; optind++) {
 			f = fopen(argv[optind],"r");
 			if (!f)
+<<<<<<< HEAD
 				err(EXIT_FAILURE, _("%s: open failed"),
+=======
+				err(EXIT_FAILURE, _("cannot open %s"),
+>>>>>>> master-vanilla
 				    argv[optind]);
 			filter(f);
 			fclose(f);
 		}
+<<<<<<< HEAD
 	if (ferror(stdout) || fclose(stdout))
 		return EXIT_FAILURE;
 
+=======
+>>>>>>> master-vanilla
 	free(obuf);
 	return EXIT_SUCCESS;
 }
@@ -282,6 +325,7 @@ static void filter(FILE *f)
 	wint_t c;
 	int i, w;
 
+<<<<<<< HEAD
 	while ((c = getwc(f)) != WEOF)
 	switch (c) {
 
@@ -370,6 +414,86 @@ static void filter(FILE *f)
 		}
 		setcol(col + w);
 		continue;
+=======
+	while ((c = getwc(f)) != WEOF) {
+		switch (c) {
+		case '\b':
+			setcol(col - 1);
+			continue;
+		case '\t':
+			setcol((col + 8) & ~07);
+			continue;
+		case '\r':
+			setcol(0);
+			continue;
+		case SO:
+			mode |= ALTSET;
+			continue;
+		case SI:
+			mode &= ~ALTSET;
+			continue;
+		case IESC:
+			if (handle_escape(f)) {
+				c = getwc(f);
+				errx(EXIT_FAILURE,
+				     _("unknown escape sequence in input: %o, %o"), IESC, c);
+			}
+			continue;
+		case '_':
+			if (obuf[col].c_char || obuf[col].c_width < 0) {
+				while (col > 0 && obuf[col].c_width < 0)
+					col--;
+				w = obuf[col].c_width;
+				for (i = 0; i < w; i++)
+					obuf[col++].c_mode |= UNDERL | mode;
+				setcol(col);
+				continue;
+			}
+			obuf[col].c_char = '_';
+			obuf[col].c_width = 1;
+			/* fall through */
+		case ' ':
+			setcol(col + 1);
+			continue;
+		case '\n':
+			flushln();
+			continue;
+		case '\f':
+			flushln();
+			putwchar('\f');
+			continue;
+		default:
+			if (!iswprint(c))
+				/* non printable */
+				continue;
+			w = wcwidth(c);
+			needcol(col + w);
+			if (obuf[col].c_char == '\0') {
+				obuf[col].c_char = c;
+				for (i = 0; i < w; i++)
+					obuf[col + i].c_mode = mode;
+				obuf[col].c_width = w;
+				for (i = 1; i < w; i++)
+					obuf[col + i].c_width = -1;
+			} else if (obuf[col].c_char == '_') {
+				obuf[col].c_char = c;
+				for (i = 0; i < w; i++)
+					obuf[col + i].c_mode |= UNDERL | mode;
+				obuf[col].c_width = w;
+				for (i = 1; i < w; i++)
+					obuf[col + i].c_width = -1;
+			} else if ((wint_t) obuf[col].c_char == c) {
+				for (i = 0; i < w; i++)
+					obuf[col + i].c_mode |= BOLD | mode;
+			} else {
+				w = obuf[col].c_width;
+				for (i = 0; i < w; i++)
+					obuf[col + i].c_mode = mode;
+			}
+			setcol(col + w);
+			continue;
+		}
+>>>>>>> master-vanilla
 	}
 	if (maxcol)
 		flushln();
@@ -447,8 +571,12 @@ static void overstrike(void)
 	putwchar('\r');
 	for (*cp = ' '; *cp == ' '; cp--)
 		*cp = 0;
+<<<<<<< HEAD
 	for (cp = lbuf; *cp; cp++)
 		putwchar(*cp);
+=======
+	fputws(lbuf, stdout);
+>>>>>>> master-vanilla
 	if (hadbold) {
 		putwchar('\r');
 		for (cp = lbuf; *cp; cp++)
@@ -463,11 +591,19 @@ static void iattr(void)
 {
 	register int i;
 #ifdef __GNUC__
+<<<<<<< HEAD
 	register char *lbuf = __builtin_alloca((maxcol+1)*sizeof(char));
 #else
 	char lbuf[BUFSIZ];
 #endif
 	register char *cp = lbuf;
+=======
+	register wchar_t *lbuf = __builtin_alloca((maxcol+1)*sizeof(wchar_t));
+#else
+	wchar_t lbuf[BUFSIZ];
+#endif
+	register wchar_t *cp = lbuf;
+>>>>>>> master-vanilla
 
 	for (i = 0; i < maxcol; i++)
 		switch (obuf[i].c_mode) {
@@ -481,8 +617,12 @@ static void iattr(void)
 		}
 	for (*cp = ' '; *cp == ' '; cp--)
 		*cp = 0;
+<<<<<<< HEAD
 	for (cp = lbuf; *cp; cp++)
 		putwchar(*cp);
+=======
+	fputws(lbuf, stdout);
+>>>>>>> master-vanilla
 	putwchar('\n');
 }
 
@@ -491,11 +631,19 @@ static void initbuf(void)
 	if (obuf == NULL) {
 		/* First time. */
 		obuflen = BUFSIZ;
+<<<<<<< HEAD
 		obuf = xmalloc(sizeof(struct CHAR) * obuflen);
 	}
 
 	/* assumes NORMAL == 0 */
 	memset(obuf, 0, sizeof(struct CHAR) * obuflen);
+=======
+		obuf = xcalloc(obuflen, sizeof(struct CHAR));
+	} else
+		/* assumes NORMAL == 0 */
+		memset(obuf, 0, sizeof(struct CHAR) * maxcol);
+
+>>>>>>> master-vanilla
 	setcol(0);
 	maxcol = 0;
 	mode &= ALTSET;
@@ -639,11 +787,19 @@ static void setcol(int newcol) {
 		needcol(col);
 }
 
+<<<<<<< HEAD
 static void needcol(int col) {
 	maxcol = col;
 
 	/* If col >= obuflen, expand obuf until obuflen > col. */
 	while (col >= obuflen) {
+=======
+static void needcol(int acol) {
+	maxcol = acol;
+
+	/* If col >= obuflen, expand obuf until obuflen > col. */
+	while (acol >= obuflen) {
+>>>>>>> master-vanilla
 		/* Paranoid check for obuflen == INT_MAX. */
 		if (obuflen == INT_MAX)
 			errx(EXIT_FAILURE, _("Input line too long."));

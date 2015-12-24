@@ -1,6 +1,10 @@
 
 /*
+<<<<<<< HEAD
  * encode.c - string convertion routines (mostly for compatibility with
+=======
+ * encode.c - string conversion routines (mostly for compatibility with
+>>>>>>> master-vanilla
  *            udev/volume_id)
  *
  * Copyright (C) 2008 Kay Sievers <kay.sievers@vrfy.org>
@@ -268,6 +272,15 @@ size_t blkid_encode_to_utf8(int enc, unsigned char *dest, size_t len,
 	return j;
 }
 
+<<<<<<< HEAD
+=======
+unsigned char *blkid_encode_alloc(size_t count, size_t *reslen)
+{
+	*reslen = (count * 3) + 1;
+	return calloc(1, *reslen);
+}
+
+>>>>>>> master-vanilla
 /**
  * blkid_encode_string:
  * @str: input string to be encoded
@@ -284,7 +297,11 @@ int blkid_encode_string(const char *str, char *str_enc, size_t len)
 {
 	size_t i, j;
 
+<<<<<<< HEAD
 	if (str == NULL || str_enc == NULL)
+=======
+	if (!str || !str_enc || !len)
+>>>>>>> master-vanilla
 		return -1;
 
 	for (i = 0, j = 0; str[i] != '\0'; i++) {
@@ -332,6 +349,11 @@ err:
  */
 int blkid_safe_string(const char *str, char *str_safe, size_t len)
 {
+<<<<<<< HEAD
+=======
+	if (!str || !str_safe || !len)
+		return -1;
+>>>>>>> master-vanilla
 	replace_whitespace(str, str_safe, len);
 	replace_chars(str_safe, UDEV_ALLOWED_CHARS_INPUT);
 	return 0;

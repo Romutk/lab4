@@ -37,13 +37,29 @@
  *                           patches from Andries.Brouwer@cwi.nl
  * Wed Sep 14 22:31:17 1994: patches from Carl Christofferson
  *                           (cchris@connected.com)
+<<<<<<< HEAD
  * 1999-02-22 Arkadiusz Mi∂kiewicz <misiek@pld.ORG.PL>
+=======
+ * 1999-02-22 Arkadiusz Mi≈õkiewicz <misiek@pld.ORG.PL>
+>>>>>>> master-vanilla
  * 	added Native Language Support
  * 1999-09-19 Bruno Haible <haible@clisp.cons.org>
  * 	modified to work correctly in multi-byte locales
  *
  */
 
+<<<<<<< HEAD
+=======
+/*
+ * This command is deprecated.  The utility is in maintenance mode,
+ * meaning we keep them in source tree for backward compatibility
+ * only.  Do not waste time making this command better, unless the
+ * fix is about security or other very critical issue.
+ *
+ * See Documentation/deprecated.txt for more information.
+ */
+
+>>>>>>> master-vanilla
 #include <stdlib.h>
 #include <errno.h>
 #include <ctype.h>
@@ -56,6 +72,10 @@
 #include "xalloc.h"
 #include "widechar.h"
 #include "strutils.h"
+<<<<<<< HEAD
+=======
+#include "closestream.h"
+>>>>>>> master-vanilla
 
 #define	BS	'\b'		/* backspace */
 #define	TAB	'\t'		/* tab */
@@ -105,7 +125,11 @@ CSET last_set;			/* char_set of last char printed */
 LINE *lines;
 int compress_spaces;		/* if doing space -> tab conversion */
 int fine;			/* if `fine' resolution (half lines) */
+<<<<<<< HEAD
 int max_bufd_lines;		/* max # lines to keep in memory */
+=======
+unsigned max_bufd_lines;	/* max # lines to keep in memory */
+>>>>>>> master-vanilla
 int nblank_lines;		/* # blanks after last flushed line */
 int no_backspaces;		/* if not to output any backspaces */
 int pass_unknown_seqs;		/* whether to pass unknown control sequences */
@@ -120,6 +144,12 @@ static void __attribute__((__noreturn__)) usage(FILE *out)
 		"\nUsage:\n"
 		" %s [options]\n"), program_invocation_short_name);
 
+<<<<<<< HEAD
+=======
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Filter out reverse line feeds.\n"), out);
+
+>>>>>>> master-vanilla
 	fprintf(out, _(
 		"\nOptions:\n"
 		" -b, --no-backspaces    do not output backspaces\n"
@@ -135,12 +165,22 @@ static void __attribute__((__noreturn__)) usage(FILE *out)
 		"%s reads from standard input and writes to standard output\n\n"),
 		program_invocation_short_name);
 
+<<<<<<< HEAD
 	exit(out == stderr ? EXIT_FAILURE : EXIT_SUCCESS);
 }
 
 static void __attribute__((__noreturn__)) wrerr()
 {
 	errx(EXIT_FAILURE, _("write error."));
+=======
+	fprintf(out, USAGE_MAN_TAIL("col(1)"));
+	exit(out == stderr ? EXIT_FAILURE : EXIT_SUCCESS);
+}
+
+static void __attribute__((__noreturn__)) wrerr(void)
+{
+	errx(EXIT_FAILURE, _("write error"));
+>>>>>>> master-vanilla
 }
 
 int main(int argc, char **argv)
@@ -156,7 +196,10 @@ int main(int argc, char **argv)
 	int this_line;			/* line l points to */
 	int nflushd_lines;		/* number of lines that were flushed */
 	int adjust, opt, warned;
+<<<<<<< HEAD
 	unsigned long tmplong;
+=======
+>>>>>>> master-vanilla
 	int ret = EXIT_SUCCESS;
 
 	static const struct option longopts[] = {
@@ -174,6 +217,10 @@ int main(int argc, char **argv)
 	setlocale(LC_ALL, "");
 	bindtextdomain(PACKAGE, LOCALEDIR);
 	textdomain(PACKAGE);
+<<<<<<< HEAD
+=======
+	atexit(close_stdout);
+>>>>>>> master-vanilla
 
 	max_bufd_lines = 128 * 2;
 	compress_spaces = 1;		/* compress spaces into tabs */
@@ -195,10 +242,14 @@ int main(int argc, char **argv)
 			 * Buffered line count, which is a value in half
 			 * lines e.g. twice the amount specified.
 			 */
+<<<<<<< HEAD
 			tmplong = strtoul_or_err(optarg, _("bad -l argument")) * 2;
 			if ((INT_MAX) < tmplong)
 				errx(EXIT_FAILURE, _("argument %lu is too large"), tmplong);
 			max_bufd_lines = (int) tmplong;
+=======
+			max_bufd_lines = strtou32_or_err(optarg, _("bad -l argument")) * 2;
+>>>>>>> master-vanilla
 			break;
 		case 'p':
 			pass_unknown_seqs = 1;
@@ -207,8 +258,12 @@ int main(int argc, char **argv)
 			compress_spaces = 0;
 			break;
 		case 'V':
+<<<<<<< HEAD
 			printf(_("%s from %s\n"), program_invocation_short_name,
 						  PACKAGE_STRING);
+=======
+			printf(UTIL_LINUX_VERSION);
+>>>>>>> master-vanilla
 			return EXIT_SUCCESS;
 		case 'H':
 			usage(stdout);
@@ -341,7 +396,12 @@ int main(int argc, char **argv)
 			}
 			this_line = cur_line + adjust;
 			nmove = this_line - nflushd_lines;
+<<<<<<< HEAD
 			if (nmove >= max_bufd_lines + BUFFER_MARGIN) {
+=======
+			if (nmove > 0
+			    && (unsigned) nmove >= max_bufd_lines + BUFFER_MARGIN) {
+>>>>>>> master-vanilla
 				nflushd_lines += nmove - max_bufd_lines;
 				flush_lines(nmove - max_bufd_lines);
 			}
@@ -388,8 +448,11 @@ int main(int argc, char **argv)
 		/* missing a \n on the last line? */
 		nblank_lines = 2;
 	flush_blanks();
+<<<<<<< HEAD
 	if (ferror(stdout) || fclose(stdout))
 		return EXIT_FAILURE;
+=======
+>>>>>>> master-vanilla
 	return ret;
 }
 
@@ -405,8 +468,12 @@ void flush_lines(int nflush)
 			flush_line(l);
 		}
 		nblank_lines++;
+<<<<<<< HEAD
 		if (l->l_line)
 			free((void *)l->l_line);
+=======
+		free((void *)l->l_line);
+>>>>>>> master-vanilla
 		free_line(l);
 	}
 	if (lines)
@@ -418,7 +485,11 @@ void flush_lines(int nflush)
  * is the number of half line feeds, otherwise it is the number of whole line
  * feeds.
  */
+<<<<<<< HEAD
 void flush_blanks()
+=======
+void flush_blanks(void)
+>>>>>>> master-vanilla
 {
 	int half, i, nb;
 
@@ -553,7 +624,11 @@ void flush_line(LINE *l)
 static LINE *line_freelist;
 
 LINE *
+<<<<<<< HEAD
 alloc_line()
+=======
+alloc_line(void)
+>>>>>>> master-vanilla
 {
 	LINE *l;
 	int i;

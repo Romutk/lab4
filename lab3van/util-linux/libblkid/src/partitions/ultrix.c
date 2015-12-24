@@ -15,7 +15,13 @@
 #include "partitions.h"
 
 #define ULTRIX_MAXPARTITIONS	8
+<<<<<<< HEAD
 #define ULTRIX_MAGIC		0x032957
+=======
+
+#define ULTRIX_MAGIC		0x032957
+#define ULTRIX_MAGIC_STR	"\x02\x29\x57"
+>>>>>>> master-vanilla
 
 /* sector with partition table */
 #define ULTRIX_SECTOR		((16384 - sizeof(struct ultrix_disklabel)) >> 9)
@@ -42,14 +48,23 @@ static int probe_ultrix_pt(blkid_probe pr,
 	int i;
 
 	data = blkid_probe_get_sector(pr, ULTRIX_SECTOR);
+<<<<<<< HEAD
 	if (!data)
 		goto nothing;
+=======
+	if (!data) {
+		if (errno)
+			return -errno;
+		goto nothing;
+	}
+>>>>>>> master-vanilla
 
 	l = (struct ultrix_disklabel *) (data + ULTRIX_OFFSET);
 
 	if (l->pt_magic != ULTRIX_MAGIC || l->pt_valid != 1)
 		goto nothing;
 
+<<<<<<< HEAD
 	if (blkid_partitions_need_typeonly(pr))
 		/* caller does not ask for details about partitions */
 		return 0;
@@ -57,6 +72,20 @@ static int probe_ultrix_pt(blkid_probe pr,
 	ls = blkid_probe_get_partlist(pr);
 	if (!ls)
 		goto err;
+=======
+	if (blkid_probe_set_magic(pr, (ULTRIX_SECTOR << 9) + ULTRIX_OFFSET,
+			sizeof(ULTRIX_MAGIC_STR) - 1,
+			(unsigned char *) ULTRIX_MAGIC_STR))
+		goto err;
+
+	if (blkid_partitions_need_typeonly(pr))
+		/* caller does not ask for details about partitions */
+		return BLKID_PROBE_OK;
+
+	ls = blkid_probe_get_partlist(pr);
+	if (!ls)
+		goto nothing;
+>>>>>>> master-vanilla
 
 	tab = blkid_partlist_new_parttable(ls, "ultrix", 0);
 	if (!tab)
@@ -73,11 +102,19 @@ static int probe_ultrix_pt(blkid_probe pr,
 		}
 	}
 
+<<<<<<< HEAD
 	return 0;
 nothing:
 	return 1;
 err:
 	return -1;
+=======
+	return BLKID_PROBE_OK;
+nothing:
+	return BLKID_PROBE_NONE;
+err:
+	return -ENOMEM;
+>>>>>>> master-vanilla
 }
 
 const struct blkid_idinfo ultrix_pt_idinfo =

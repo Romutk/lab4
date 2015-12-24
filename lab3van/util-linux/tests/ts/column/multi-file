@@ -2,7 +2,11 @@
 
 #
 # Copyright (C) 2011 Sami Kerola <kerolasa@iki.fi>
+<<<<<<< HEAD
 #               2011 Karel Zak <kzak@redhat.com> 
+=======
+#               2011 Karel Zak <kzak@redhat.com>
+>>>>>>> master-vanilla
 #
 # This file is part of util-linux.
 #
@@ -16,13 +20,23 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
+<<<<<<< HEAD
 TS_TOPDIR="$(dirname $0)/../.."
+=======
+TS_TOPDIR="${0%/*}/../.."
+>>>>>>> master-vanilla
 TS_DESC="multiple files"
 
 . $TS_TOPDIR/functions.sh
 ts_init "$*"
 
+<<<<<<< HEAD
 cd $TS_OUTDIR
+=======
+ts_check_test_command "$TS_CMD_COLUMN"
+
+ts_cd "$TS_OUTDIR"
+>>>>>>> master-vanilla
 
 $TS_CMD_COLUMN -x -c 50 $TS_SELF/input \
 			$TS_SELF/input \

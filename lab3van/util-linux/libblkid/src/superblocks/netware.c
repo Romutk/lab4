@@ -71,7 +71,11 @@ static int probe_netware(blkid_probe pr, const struct blkid_idmag *mag)
 
 	nw = blkid_probe_get_sb(pr, mag, struct netware_super_block);
 	if (!nw)
+<<<<<<< HEAD
 		return -1;
+=======
+		return errno ? -errno : 1;
+>>>>>>> master-vanilla
 
 	blkid_probe_set_uuid(pr, nw->SBH_PoolID);
 

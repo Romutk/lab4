@@ -34,7 +34,11 @@
 uuid_time \- extract the time at which the UUID was created
 .SH SYNOPSIS
 .nf
+<<<<<<< HEAD
 .B #include <uuid/uuid.h>
+=======
+.B #include <uuid.h>
+>>>>>>> master-vanilla
 .sp
 .BI "time_t uuid_time(uuid_t " uu ", struct timeval *" ret_tv )
 .fi
@@ -60,11 +64,19 @@ the epoch, is also stored in the location pointed to by
 (see
 .BR gettimeofday "(2))."
 .SH AUTHOR
+<<<<<<< HEAD
 Theodore Y. Ts'o
+=======
+Theodore Y.\& Ts'o
+>>>>>>> master-vanilla
 .SH AVAILABILITY
 .B libuuid
 is part of the util-linux package since version 2.15.1 and is available from
 ftp://ftp.kernel.org/pub/linux/utils/util-linux/.
+<<<<<<< HEAD
+=======
+.na
+>>>>>>> master-vanilla
 .SH "SEE ALSO"
 .BR uuid (3),
 .BR uuid_clear (3),
@@ -74,3 +86,7 @@ ftp://ftp.kernel.org/pub/linux/utils/util-linux/.
 .BR uuid_is_null (3),
 .BR uuid_parse (3),
 .BR uuid_unparse (3)
+<<<<<<< HEAD
+=======
+.ad
+>>>>>>> master-vanilla

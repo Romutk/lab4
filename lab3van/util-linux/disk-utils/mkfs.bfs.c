@@ -1,6 +1,10 @@
 /*
  *  mkfs.bfs - Create SCO BFS filesystem - aeb, 1999-09-07
  *
+<<<<<<< HEAD
+=======
+ *	Usage: mkfs.bfs [-N nr-of-inodes] [-V volume-name] [-F fsname] device
+>>>>>>> master-vanilla
  */
 
 #include <errno.h>
@@ -16,9 +20,17 @@
 
 #include "blkdev.h"
 #include "c.h"
+<<<<<<< HEAD
 #include "nls.h"
 #include "strutils.h"
 #include "xalloc.h"
+=======
+#include "closestream.h"
+#include "nls.h"
+#include "strutils.h"
+#include "xalloc.h"
+#include "bitops.h"
+>>>>>>> master-vanilla
 
 #define BFS_ROOT_INO		2
 #define BFS_NAMELEN		14
@@ -27,6 +39,7 @@
 
 /* superblock - 512 bytes */
 struct bfssb {
+<<<<<<< HEAD
 	unsigned int s_magic;
 	unsigned int s_start;	/* byte offset of start of data */
 	unsigned int s_end;	/* sizeof(slice)-1 */
@@ -34,6 +47,15 @@ struct bfssb {
 	/* for recovery during compaction */
 	int s_from, s_to;	/* src and dest block of current transfer */
 	int s_backup_from, s_backup_to;
+=======
+	uint32_t s_magic;
+	uint32_t s_start;	/* byte offset of start of data */
+	uint32_t s_end;	/* sizeof(slice)-1 */
+
+	/* for recovery during compaction */
+	uint32_t s_from, s_to;	/* src and dest block of current transfer */
+	int32_t s_backup_from, s_backup_to;
+>>>>>>> master-vanilla
 
 	/* labels - may well contain garbage */
 	char s_fsname[6];
@@ -43,6 +65,7 @@ struct bfssb {
 
 /* inode - 64 bytes */
 struct bfsi {
+<<<<<<< HEAD
 	unsigned short i_ino;
 	unsigned char i_pad1[2];
 	unsigned long i_first_block;
@@ -53,6 +76,18 @@ struct bfsi {
 	unsigned long i_uid, i_gid;
 	unsigned long i_nlinks;
 	unsigned long i_atime, i_mtime, i_ctime;
+=======
+	uint16_t i_ino;
+	unsigned char i_pad1[2];
+	uint32_t i_first_block;
+	uint32_t i_last_block;
+	uint32_t i_bytes_to_end;
+	uint32_t i_type;	/* 1: file, 2: the unique dir */
+	uint32_t i_mode;
+	uint32_t i_uid, i_gid;
+	uint32_t i_nlinks;
+	uint32_t i_atime, i_mtime, i_ctime;
+>>>>>>> master-vanilla
 	unsigned char i_pad2[16];
 };
 
@@ -60,7 +95,11 @@ struct bfsi {
 
 /* directory entry - 16 bytes */
 struct bfsde {
+<<<<<<< HEAD
 	unsigned short d_ino;
+=======
+	uint16_t d_ino;
+>>>>>>> master-vanilla
 	char d_name[BFS_NAMELEN];
 };
 
@@ -69,6 +108,13 @@ static void __attribute__ ((__noreturn__)) usage(FILE * out)
 	fprintf(out,
 		_("Usage: %s [options] device [block-count]\n"),
 		program_invocation_short_name);
+<<<<<<< HEAD
+=======
+
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Make an SCO bfs filesystem.\n"), out);
+
+>>>>>>> master-vanilla
 	fprintf(out, _("\nOptions:\n"
 		       " -N, --inodes=NUM    specify desired number of inodes\n"
 		       " -V, --vname=NAME    specify volume name\n"
@@ -80,12 +126,20 @@ static void __attribute__ ((__noreturn__)) usage(FILE * out)
 		       "                     -V as version must be only option\n"
 		       " -h, --help          display this help and exit\n\n"));
 
+<<<<<<< HEAD
+=======
+	fprintf(out, USAGE_MAN_TAIL("mkfs.bfs(8)"));
+>>>>>>> master-vanilla
 	exit(out == stderr ? EXIT_FAILURE : EXIT_SUCCESS);
 }
 
 static void __attribute__ ((__noreturn__)) print_version(void)
 {
+<<<<<<< HEAD
 	printf(_("%s from %s\n"), program_invocation_short_name, PACKAGE_STRING);
+=======
+	printf(UTIL_LINUX_VERSION);
+>>>>>>> master-vanilla
 	exit(EXIT_SUCCESS);
 }
 
@@ -97,6 +151,10 @@ int main(int argc, char **argv)
 	unsigned long long user_specified_total_blocks = 0;
 	int verbose = 0;
 	int fd;
+<<<<<<< HEAD
+=======
+	uint32_t first_block;
+>>>>>>> master-vanilla
 	struct bfssb sb;
 	struct bfsi ri;
 	struct bfsde de;
@@ -115,6 +173,14 @@ int main(int argc, char **argv)
 		{NULL, 0, NULL, 0}
 	};
 
+<<<<<<< HEAD
+=======
+	setlocale(LC_ALL, "");
+	bindtextdomain(PACKAGE, LOCALEDIR);
+	textdomain(PACKAGE);
+	atexit(close_stdout);
+
+>>>>>>> master-vanilla
 	if (argc < 2)
 		usage(stderr);
 
@@ -168,18 +234,28 @@ int main(int argc, char **argv)
 	device = argv[optind++];
 
 	if (stat(device, &statbuf) < 0)
+<<<<<<< HEAD
 		err(EXIT_FAILURE, _("cannot stat device %s"), device);
 
 	if (!S_ISBLK(statbuf.st_mode))
 		errx(EXIT_FAILURE, _("%s is not a block special device"), device);
 
 	fd = open(device, O_RDWR | O_EXCL);
+=======
+		err(EXIT_FAILURE, _("stat of %s failed"), device);
+
+	fd = open_blkdev_or_file(&statbuf, device, O_RDWR);
+>>>>>>> master-vanilla
 	if (fd < 0)
 		err(EXIT_FAILURE, _("cannot open %s"), device);
 
 	if (optind == argc - 1)
 		user_specified_total_blocks =
+<<<<<<< HEAD
 			strtoll_or_err(argv[optind], _("invalid block-count"));
+=======
+			strtou64_or_err(argv[optind], _("invalid block-count"));
+>>>>>>> master-vanilla
 	else if (optind != argc)
 		usage(stderr);
 
@@ -212,16 +288,26 @@ int main(int argc, char **argv)
 	ino_blocks = (ino_bytes + BFS_BLOCKSIZE - 1) / BFS_BLOCKSIZE;
 	data_blocks = total_blocks - ino_blocks - 1;
 
+<<<<<<< HEAD
 	/* mimic the behaviour of SCO's mkfs - maybe this limit is needed */
+=======
+	/* mimic the behavior of SCO's mkfs - maybe this limit is needed */
+>>>>>>> master-vanilla
 	if (data_blocks < 32)
 		errx(EXIT_FAILURE,
 		     _("not enough space, need at least %llu blocks"),
 		     ino_blocks + 33);
 
 	memset(&sb, 0, sizeof(sb));
+<<<<<<< HEAD
 	sb.s_magic = BFS_SUPER_MAGIC;
 	sb.s_start = ino_bytes + sizeof(struct bfssb);
 	sb.s_end = total_blocks * BFS_BLOCKSIZE - 1;
+=======
+	sb.s_magic = cpu_to_le32(BFS_SUPER_MAGIC);
+	sb.s_start = cpu_to_le32(ino_bytes + sizeof(struct bfssb));
+	sb.s_end = cpu_to_le32(total_blocks * BFS_BLOCKSIZE - 1);
+>>>>>>> master-vanilla
 	sb.s_from = sb.s_to = sb.s_backup_from = sb.s_backup_to = -1;
 	memcpy(sb.s_fsname, fsname, 6);
 	memcpy(sb.s_volume, volume, 6);
@@ -232,6 +318,7 @@ int main(int argc, char **argv)
 		fprintf(stderr, _("FSname: <%-6s>\n"), fsname);
 		fprintf(stderr, _("BlockSize: %d\n"), BFS_BLOCKSIZE);
 		if (ino_blocks == 1)
+<<<<<<< HEAD
 			fprintf(stderr, _("Inodes: %lu (in 1 block)\n"),
 				inodes);
 		else
@@ -240,12 +327,23 @@ int main(int argc, char **argv)
 		fprintf(stderr, _("Blocks: %lld\n"), total_blocks);
 		fprintf(stderr, _("Inode end: %d, Data end: %d\n"),
 			sb.s_start - 1, sb.s_end);
+=======
+			fprintf(stderr, _("Inodes: %ld (in 1 block)\n"),
+				inodes);
+		else
+			fprintf(stderr, _("Inodes: %ld (in %llu blocks)\n"),
+				inodes, ino_blocks);
+		fprintf(stderr, _("Blocks: %llu\n"), total_blocks);
+		fprintf(stderr, _("Inode end: %d, Data end: %d\n"),
+			le32_to_cpu(sb.s_start) - 1, le32_to_cpu(sb.s_end));
+>>>>>>> master-vanilla
 	}
 
 	if (write(fd, &sb, sizeof(sb)) != sizeof(sb))
 		err(EXIT_FAILURE, _("error writing superblock"));
 
 	memset(&ri, 0, sizeof(ri));
+<<<<<<< HEAD
 	ri.i_ino = BFS_ROOT_INO;
 	ri.i_first_block = 1 + ino_blocks;
 	ri.i_last_block = ri.i_first_block +
@@ -261,6 +359,24 @@ int main(int argc, char **argv)
 	ri.i_atime = now;
 	ri.i_mtime = now;
 	ri.i_ctime = now;
+=======
+	ri.i_ino = cpu_to_le16(BFS_ROOT_INO);
+	first_block = 1 + ino_blocks;
+	ri.i_first_block = cpu_to_le32(first_block);
+	ri.i_last_block = cpu_to_le32(first_block +
+	    (inodes * sizeof(de) - 1) / BFS_BLOCKSIZE);
+	ri.i_bytes_to_end = cpu_to_le32(first_block * BFS_BLOCKSIZE
+	    + 2 * sizeof(struct bfsde) - 1);
+	ri.i_type = cpu_to_le32(BFS_DIR_TYPE);
+	ri.i_mode = cpu_to_le32(S_IFDIR | 0755);	/* or just 0755 */
+	ri.i_uid = cpu_to_le32(0);
+	ri.i_gid = cpu_to_le32(1);			/* random */
+	ri.i_nlinks = 2;
+	time(&now);
+	ri.i_atime = cpu_to_le32(now);
+	ri.i_mtime = cpu_to_le32(now);
+	ri.i_ctime = cpu_to_le32(now);
+>>>>>>> master-vanilla
 
 	if (write(fd, &ri, sizeof(ri)) != sizeof(ri))
 		err(EXIT_FAILURE, _("error writing root inode"));
@@ -274,7 +390,11 @@ int main(int argc, char **argv)
 		err(EXIT_FAILURE, _("seek error"));
 
 	memset(&de, 0, sizeof(de));
+<<<<<<< HEAD
 	de.d_ino = BFS_ROOT_INO;
+=======
+	de.d_ino = cpu_to_le16(BFS_ROOT_INO);
+>>>>>>> master-vanilla
 	memcpy(de.d_name, ".", 1);
 	if (write(fd, &de, sizeof(de)) != sizeof(de))
 		err(EXIT_FAILURE, _("error writing . entry"));
@@ -283,7 +403,11 @@ int main(int argc, char **argv)
 	if (write(fd, &de, sizeof(de)) != sizeof(de))
 		err(EXIT_FAILURE, _("error writing .. entry"));
 
+<<<<<<< HEAD
 	if (close(fd) < 0)
+=======
+	if (close_fd(fd) != 0)
+>>>>>>> master-vanilla
 		err(EXIT_FAILURE, _("error closing %s"), device);
 
 	return EXIT_SUCCESS;

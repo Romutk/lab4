@@ -34,7 +34,11 @@
 uuid_is_null \- compare the value of the UUID to the NULL value
 .SH SYNOPSIS
 .nf
+<<<<<<< HEAD
 .B #include <uuid/uuid.h>
+=======
+.B #include <uuid.h>
+>>>>>>> master-vanilla
 .sp
 .BI "int uuid_is_null(uuid_t " uu );
 .fi
@@ -46,11 +50,19 @@ function compares the value of the supplied UUID variable
 to the NULL value.  If the value is equal to the NULL UUID, 1 is returned,
 otherwise 0 is returned.
 .SH AUTHOR
+<<<<<<< HEAD
 Theodore Y. Ts'o
+=======
+Theodore Y.\& Ts'o
+>>>>>>> master-vanilla
 .SH AVAILABILITY
 .B libuuid
 is part of the util-linux package since version 2.15.1 and is available from
 ftp://ftp.kernel.org/pub/linux/utils/util-linux/.
+<<<<<<< HEAD
+=======
+.na
+>>>>>>> master-vanilla
 .SH "SEE ALSO"
 .BR uuid (3),
 .BR uuid_clear (3),
@@ -60,3 +72,7 @@ ftp://ftp.kernel.org/pub/linux/utils/util-linux/.
 .BR uuid_time (3),
 .BR uuid_parse (3),
 .BR uuid_unparse (3)
+<<<<<<< HEAD
+=======
+.ad
+>>>>>>> master-vanilla

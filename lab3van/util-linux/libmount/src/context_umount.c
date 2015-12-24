@@ -15,6 +15,10 @@
 #include <sys/mount.h>
 
 #include "pathnames.h"
+<<<<<<< HEAD
+=======
+#include "loopdev.h"
+>>>>>>> master-vanilla
 #include "strutils.h"
 #include "mountP.h"
 
@@ -22,7 +26,11 @@
  * umount2 flags
  */
 #ifndef MNT_FORCE
+<<<<<<< HEAD
 # define MNT_FORCE        0x00000001	/* Attempt to forcibily umount */
+=======
+# define MNT_FORCE        0x00000001	/* Attempt to forcibly umount */
+>>>>>>> master-vanilla
 #endif
 
 #ifndef MNT_DETACH
@@ -37,6 +45,7 @@
 # define UMOUNT_UNUSED    0x80000000	/* Flag guaranteed to be unused */
 #endif
 
+<<<<<<< HEAD
 
 static int lookup_umount_fs(struct libmnt_context *cxt)
 {
@@ -63,6 +72,69 @@ static int lookup_umount_fs(struct libmnt_context *cxt)
 	fs = mnt_table_find_target(mtab, tgt, MNT_ITER_BACKWARD);
 	if (!fs) {
 		/* maybe the option is source rather than target (mountpoint) */
+=======
+/**
+ * mnt_context_find_umount_fs:
+ * @cxt: mount context
+ * @tgt: mountpoint, device, ...
+ * @pfs: returns point to filesystem
+ *
+ * Returns: 0 on success, <0 on error, 1 if target filesystem not found
+ */
+int mnt_context_find_umount_fs(struct libmnt_context *cxt,
+			       const char *tgt,
+			       struct libmnt_fs **pfs)
+{
+	int rc;
+	struct libmnt_table *mtab = NULL;
+	struct libmnt_fs *fs;
+	char *loopdev = NULL;
+
+	if (pfs)
+		*pfs = NULL;
+
+	if (!cxt || !tgt || !pfs)
+		return -EINVAL;
+
+	DBG(CXT, ul_debugobj(cxt, "umount: lookup FS for '%s'", tgt));
+
+	if (!*tgt)
+		return 1; /* empty string is not an error */
+
+	/*
+	 * The mtab file may be huge and on systems with utab we have to merge
+	 * userspace mount options into /proc/self/mountinfo. This all is
+	 * expensive. The mtab filter allows to filter out entries, then
+	 * mtab and utab are very tiny files.
+	 *
+	 * *but*... the filter uses mnt_fs_streq_{target,srcpath} functions
+	 * where LABEL, UUID or symlinks are canonicalized. It means that
+	 * it's usable only for canonicalized stuff (e.g. kernel mountinfo).
+	 */
+	if (!mnt_context_mtab_writable(cxt) && *tgt == '/' &&
+	    !mnt_context_is_force(cxt) && !mnt_context_is_lazy(cxt))
+		rc = mnt_context_get_mtab_for_target(cxt, &mtab, tgt);
+	else
+		rc = mnt_context_get_mtab(cxt, &mtab);
+
+	if (rc) {
+		DBG(CXT, ul_debugobj(cxt, "umount: failed to read mtab"));
+		return rc;
+	}
+
+	if (mnt_table_get_nents(mtab) == 0) {
+		DBG(CXT, ul_debugobj(cxt, "umount: mtab empty"));
+		return 1;
+	}
+
+try_loopdev:
+	fs = mnt_table_find_target(mtab, tgt, MNT_ITER_BACKWARD);
+	if (!fs && mnt_context_is_swapmatch(cxt)) {
+		/*
+		 * Maybe the option is source rather than target (sometimes
+		 * people use e.g. "umount /dev/sda1")
+		 */
+>>>>>>> master-vanilla
 		fs = mnt_table_find_source(mtab, tgt, MNT_ITER_BACKWARD);
 
 		if (fs) {
@@ -70,21 +142,37 @@ static int lookup_umount_fs(struct libmnt_context *cxt)
 							mnt_fs_get_target(fs),
 							MNT_ITER_BACKWARD);
 			if (!fs1) {
+<<<<<<< HEAD
 				DBG(CXT, mnt_debug_h(cxt, "mtab is broken?!?!"));
 				return -EINVAL;
+=======
+				DBG(CXT, ul_debugobj(cxt, "mtab is broken?!?!"));
+				rc = -EINVAL;
+				goto err;
+>>>>>>> master-vanilla
 			}
 			if (fs != fs1) {
 				/* Something was stacked over `file' on the
 				 * same mount point. */
+<<<<<<< HEAD
 				DBG(CXT, mnt_debug_h(cxt,
 						"umount: %s: %s is mounted "
 						"over it on the same point",
 						tgt, mnt_fs_get_source(fs1)));
 				return -EINVAL;
+=======
+				DBG(CXT, ul_debugobj(cxt,
+						"umount: %s: %s is mounted "
+						"over it on the same point",
+						tgt, mnt_fs_get_source(fs1)));
+				rc = -EINVAL;
+				goto err;
+>>>>>>> master-vanilla
 			}
 		}
 	}
 
+<<<<<<< HEAD
 	if (!fs) {
 		DBG(CXT, mnt_debug_h(cxt, "umount: cannot find %s in mtab", tgt));
 		return 0;
@@ -101,30 +189,216 @@ static int lookup_umount_fs(struct libmnt_context *cxt)
 	}
 
 	DBG(CXT, mnt_debug_h(cxt, "umount: mtab applied"));
+=======
+	if (!fs && !loopdev && mnt_context_is_swapmatch(cxt)) {
+		/*
+		 * Maybe the option is /path/file.img, try to convert to /dev/loopN
+		 */
+		struct stat st;
+
+		if (mnt_stat_mountpoint(tgt, &st) == 0 && S_ISREG(st.st_mode)) {
+			int count;
+			struct libmnt_cache *cache = mnt_context_get_cache(cxt);
+			const char *bf = cache ? mnt_resolve_path(tgt, cache) : tgt;
+
+			count = loopdev_count_by_backing_file(bf, &loopdev);
+			if (count == 1) {
+				DBG(CXT, ul_debugobj(cxt,
+					"umount: %s --> %s (retry)", tgt, loopdev));
+				tgt = loopdev;
+				goto try_loopdev;
+
+			} else if (count > 1)
+				DBG(CXT, ul_debugobj(cxt,
+					"umount: warning: %s is associated "
+					"with more than one loopdev", tgt));
+		}
+	}
+
+	if (pfs)
+		*pfs = fs;
+	free(loopdev);
+
+	DBG(CXT, ul_debugobj(cxt, "umount fs: %s", fs ? mnt_fs_get_target(fs) :
+							"<not found>"));
+	return fs ? 0 : 1;
+err:
+	free(loopdev);
+	return rc;
+}
+
+/* Check if there is something important in the utab file. The parsed utab is
+ * stored in context->utab and deallocated by mnt_free_context().
+ *
+ * This function exists to avoid (if possible) /proc/self/mountinfo usage, so
+ * don't use thigs like mnt_resolve_target(), mnt_context_get_mtab() etc here.
+ * See lookup_umount_fs() for more details.
+ */
+static int has_utab_entry(struct libmnt_context *cxt, const char *target)
+{
+	struct libmnt_cache *cache = NULL;
+	struct libmnt_fs *fs;
+	struct libmnt_iter itr;
+	char *cn = NULL;
+	int rc = 0;
+
+	assert(cxt);
+
+	if (!cxt->utab) {
+		const char *path = mnt_get_utab_path();
+
+		if (!path || is_file_empty(path))
+			return 0;
+		cxt->utab = mnt_new_table();
+		if (!cxt->utab)
+			return 0;
+		cxt->utab->fmt = MNT_FMT_UTAB;
+		if (mnt_table_parse_file(cxt->utab, path))
+			return 0;
+	}
+
+	/* paths in utab are canonicalized */
+	cache = mnt_context_get_cache(cxt);
+	cn = mnt_resolve_path(target, cache);
+	mnt_reset_iter(&itr, MNT_ITER_BACKWARD);
+
+	while (mnt_table_next_fs(cxt->utab, &itr, &fs) == 0) {
+		if (mnt_fs_streq_target(fs, cn)) {
+			rc = 1;
+			break;
+		}
+	}
+
+	if (!cache)
+		free(cn);
+
+	return rc;
+}
+
+/* this is umount replacement to mnt_context_apply_fstab(), use
+ * mnt_context_tab_applied() to check result.
+ */
+static int lookup_umount_fs(struct libmnt_context *cxt)
+{
+	const char *tgt;
+	struct stat st;
+	struct libmnt_fs *fs = NULL;
+	int rc = 0;
+
+	assert(cxt);
+	assert(cxt->fs);
+
+	tgt = mnt_fs_get_target(cxt->fs);
+	if (!tgt) {
+		DBG(CXT, ul_debugobj(cxt, "umount: undefined target"));
+		return -EINVAL;
+	}
+
+	/*
+	 * Let's try to avoid mountinfo usage at all to minimize performance
+	 * degradation. Don't forget that kernel has to compose *whole*
+	 * mountinfo about all mountpoints although we look for only one entry.
+	 *
+	 * All we need is fstype and to check if there is no userspace mount
+	 * options for the target (e.g. helper=udisks to call /sbin/umount.udisks).
+	 *
+	 * So, let's use statfs() if possible (it's bad idea for --lazy/--force
+	 * umounts as target is probably unreachable NFS, also for --detach-loop
+	 * as this additionally needs to know the name of the loop device).
+	 */
+	if (!mnt_context_is_restricted(cxt)
+	    && *tgt == '/'
+	    && !(cxt->flags & MNT_FL_HELPER)
+	    && !mnt_context_mtab_writable(cxt)
+	    && !mnt_context_is_force(cxt)
+	    && !mnt_context_is_lazy(cxt)
+	    && !mnt_context_is_loopdel(cxt)
+	    && mnt_stat_mountpoint(tgt, &st) == 0 && S_ISDIR(st.st_mode)
+	    && !has_utab_entry(cxt, tgt)) {
+
+		const char *type = mnt_fs_get_fstype(cxt->fs);
+
+		/* !mnt_context_mtab_writable(cxt) && has_utab_entry() verified that there
+		 * is no stuff in utab, so disable all mtab/utab related actions */
+		mnt_context_disable_mtab(cxt, TRUE);
+
+		if (!type) {
+			struct statfs vfs;
+			if (statfs(tgt, &vfs) == 0)
+				type = mnt_statfs_get_fstype(&vfs);
+			if (type) {
+				rc = mnt_fs_set_fstype(cxt->fs, type);
+				if (rc)
+					return rc;
+			}
+		}
+		if (type) {
+			DBG(CXT, ul_debugobj(cxt,
+				"umount: mountinfo unnecessary [type=%s]", type));
+			return 0;
+		}
+	}
+
+	rc = mnt_context_find_umount_fs(cxt, tgt, &fs);
+	if (rc < 0)
+		return rc;
+
+	if (rc == 1 || !fs) {
+		DBG(CXT, ul_debugobj(cxt, "umount: cannot find '%s' in mtab", tgt));
+		return 0;	/* this is correct! */
+	}
+
+	if (fs != cxt->fs) {
+		/* copy from mtab to our FS description
+		 */
+		mnt_fs_set_source(cxt->fs, NULL);
+		mnt_fs_set_target(cxt->fs, NULL);
+
+		if (!mnt_copy_fs(cxt->fs, fs)) {
+			DBG(CXT, ul_debugobj(cxt, "umount: failed to copy FS"));
+			return -errno;
+		}
+		DBG(CXT, ul_debugobj(cxt, "umount: mtab applied"));
+	}
+
+>>>>>>> master-vanilla
 	cxt->flags |= MNT_FL_TAB_APPLIED;
 	return rc;
 }
 
 /* check if @devname is loopdev and if the device is associated
  * with a source from @fstab_fs
+<<<<<<< HEAD
  *
  * TODO : move this to loopdev.c
  */
 static int mnt_loopdev_associated_fs(const char *devname, struct libmnt_fs *fs)
+=======
+ */
+static int is_associated_fs(const char *devname, struct libmnt_fs *fs)
+>>>>>>> master-vanilla
 {
 	uintmax_t offset = 0;
 	const char *src;
 	char *val, *optstr;
 	size_t valsz;
+<<<<<<< HEAD
 
 	/* check if it begins with /dev/loop */
 	if (strncmp(devname, _PATH_DEV_LOOP, sizeof(_PATH_DEV_LOOP)))
+=======
+	int flags = 0;
+
+	/* check if it begins with /dev/loop */
+	if (strncmp(devname, _PATH_DEV_LOOP, sizeof(_PATH_DEV_LOOP) - 1))
+>>>>>>> master-vanilla
 		return 0;
 
 	src = mnt_fs_get_srcpath(fs);
 	if (!src)
 		return 0;
 
+<<<<<<< HEAD
 	/* check for offset option in @fs */
 	optstr = (char *) mnt_fs_get_user_options(fs);
 	if (optstr && !mnt_optstr_get_option(optstr, "offset=", &val, &valsz)) {
@@ -144,6 +418,20 @@ static int mnt_loopdev_associated_fs(const char *devname, struct libmnt_fs *fs)
 	 *	return 1;
 	 */
 	return 0;
+=======
+	/* check for the offset option in @fs */
+	optstr = (char *) mnt_fs_get_user_options(fs);
+
+	if (optstr &&
+	    mnt_optstr_get_option(optstr, "offset", &val, &valsz) == 0) {
+		flags |= LOOPDEV_FL_OFFSET;
+
+		if (mnt_parse_offset(val, valsz, &offset) != 0)
+			return 0;
+	}
+
+	return loopdev_is_used(devname, src, offset, flags);
+>>>>>>> master-vanilla
 }
 
 static int prepare_helper_from_options(struct libmnt_context *cxt,
@@ -153,7 +441,11 @@ static int prepare_helper_from_options(struct libmnt_context *cxt,
 	const char *opts;
 	size_t valsz;
 
+<<<<<<< HEAD
 	if (cxt->flags & MNT_FL_NOHELPERS)
+=======
+	if (mnt_context_is_nohelpers(cxt))
+>>>>>>> master-vanilla
 		return 0;
 
 	opts = mnt_fs_get_user_options(cxt->fs);
@@ -167,7 +459,11 @@ static int prepare_helper_from_options(struct libmnt_context *cxt,
 	if (!suffix)
 		return -ENOMEM;
 
+<<<<<<< HEAD
 	DBG(CXT, mnt_debug_h(cxt, "umount: umount.%s %s requested", suffix, name));
+=======
+	DBG(CXT, ul_debugobj(cxt, "umount: umount.%s %s requested", suffix, name));
+>>>>>>> master-vanilla
 
 	return mnt_context_prepare_helper(cxt, "umount", suffix);
 }
@@ -187,6 +483,7 @@ static int evaluate_permissions(struct libmnt_context *cxt)
 	assert(cxt->fs);
 	assert((cxt->flags & MNT_FL_MOUNTFLAGS_MERGED));
 
+<<<<<<< HEAD
 	if (!cxt || !cxt->fs)
 		return -EINVAL;
 
@@ -197,6 +494,15 @@ static int evaluate_permissions(struct libmnt_context *cxt)
 
 	if (!(cxt->flags & MNT_FL_TAB_APPLIED)) {
 		DBG(CXT, mnt_debug_h(cxt,
+=======
+	if (!mnt_context_is_restricted(cxt))
+		 return 0;		/* superuser mount */
+
+	DBG(CXT, ul_debugobj(cxt, "umount: evaluating permissions"));
+
+	if (!mnt_context_tab_applied(cxt)) {
+		DBG(CXT, ul_debugobj(cxt,
+>>>>>>> master-vanilla
 				"cannot find %s in mtab and you are not root",
 				mnt_fs_get_target(cxt->fs)));
 		goto eperm;
@@ -212,7 +518,11 @@ static int evaluate_permissions(struct libmnt_context *cxt)
 	}
 
 	/*
+<<<<<<< HEAD
 	 * User mounts has to be in /etc/fstab
+=======
+	 * User mounts have to be in /etc/fstab
+>>>>>>> master-vanilla
 	 */
 	rc = mnt_context_get_fstab(cxt, &fstab);
 	if (rc)
@@ -223,7 +533,11 @@ static int evaluate_permissions(struct libmnt_context *cxt)
 
 	if (mnt_fs_get_bindsrc(cxt->fs)) {
 		src = mnt_fs_get_bindsrc(cxt->fs);
+<<<<<<< HEAD
 		DBG(CXT, mnt_debug_h(cxt,
+=======
+		DBG(CXT, ul_debugobj(cxt,
+>>>>>>> master-vanilla
 				"umount: using bind source: %s", src));
 	}
 
@@ -231,17 +545,26 @@ static int evaluate_permissions(struct libmnt_context *cxt)
 	 *	/dev/sda1 /mnt/zip auto user,noauto  0 0
 	 *	/dev/sda4 /mnt/zip auto user,noauto  0 0
 	 * then "mount /dev/sda4" followed by "umount /mnt/zip" used to fail.
+<<<<<<< HEAD
 	 * So, we must not look for file, but for the pair (dev,file) in fstab.
+=======
+	 * So, we must not look for the file, but for the pair (dev,file) in fstab.
+>>>>>>> master-vanilla
 	  */
 	fs = mnt_table_find_pair(fstab, src, tgt, MNT_ITER_FORWARD);
 	if (!fs) {
 		/*
 		 * It's possible that there is /path/file.img in fstab and
+<<<<<<< HEAD
 		 * /dev/loop0 in mtab -- then we have to check releation
+=======
+		 * /dev/loop0 in mtab -- then we have to check the relation
+>>>>>>> master-vanilla
 		 * between loopdev and the file.
 		 */
 		fs = mnt_table_find_target(fstab, tgt, MNT_ITER_FORWARD);
 		if (fs) {
+<<<<<<< HEAD
 			const char *dev = mnt_fs_get_srcpath(cxt->fs);		/* devname from mtab */
 
 			if (!dev || !mnt_loopdev_associated_fs(dev, fs))
@@ -249,6 +572,17 @@ static int evaluate_permissions(struct libmnt_context *cxt)
 		}
 		if (!fs) {
 			DBG(CXT, mnt_debug_h(cxt,
+=======
+			struct libmnt_cache *cache = mnt_context_get_cache(cxt);
+			const char *sp = mnt_fs_get_srcpath(cxt->fs);		/* devname from mtab */
+			const char *dev = sp && cache ? mnt_resolve_path(sp, cache) : sp;
+
+			if (!dev || !is_associated_fs(dev, fs))
+				fs = NULL;
+		}
+		if (!fs) {
+			DBG(CXT, ul_debugobj(cxt,
+>>>>>>> master-vanilla
 					"umount %s: mtab disagrees with fstab",
 					tgt));
 			goto eperm;
@@ -274,28 +608,47 @@ static int evaluate_permissions(struct libmnt_context *cxt)
 		goto eperm;
 
 	if (u_flags & MNT_MS_USERS) {
+<<<<<<< HEAD
 		DBG(CXT, mnt_debug_h(cxt,
+=======
+		DBG(CXT, ul_debugobj(cxt,
+>>>>>>> master-vanilla
 			"umount: promiscuous setting ('users') in fstab"));
 		return 0;
 	}
 	/*
+<<<<<<< HEAD
 	 * Check user=<username> setting from mtab if there is user, owner or
 	 * group option in /etc/fstab
 	 */
 	if ((u_flags & MNT_MS_USER) || (u_flags & MNT_MS_OWNER) ||
 	    (u_flags & MNT_MS_GROUP)) {
+=======
+	 * Check user=<username> setting from mtab if there is a user, owner or
+	 * group option in /etc/fstab
+	 */
+	if (u_flags & (MNT_MS_USER | MNT_MS_OWNER | MNT_MS_GROUP)) {
+>>>>>>> master-vanilla
 
 		char *curr_user = NULL;
 		char *mtab_user = NULL;
 		size_t sz;
 
+<<<<<<< HEAD
 		DBG(CXT, mnt_debug_h(cxt,
+=======
+		DBG(CXT, ul_debugobj(cxt,
+>>>>>>> master-vanilla
 				"umount: checking user=<username> from mtab"));
 
 		curr_user = mnt_get_username(getuid());
 
 		if (!curr_user) {
+<<<<<<< HEAD
 			DBG(CXT, mnt_debug_h(cxt, "umount %s: cannot "
+=======
+			DBG(CXT, ul_debugobj(cxt, "umount %s: cannot "
+>>>>>>> master-vanilla
 				"convert %d to username", tgt, getuid()));
 			goto eperm;
 		}
@@ -305,6 +658,7 @@ static int evaluate_permissions(struct libmnt_context *cxt)
 		if (optstr && !mnt_optstr_get_option(optstr,
 					"user", &mtab_user, &sz) && sz)
 			ok = !strncmp(curr_user, mtab_user, sz);
+<<<<<<< HEAD
 	}
 
 	if (ok) {
@@ -313,6 +667,18 @@ static int evaluate_permissions(struct libmnt_context *cxt)
 	}
 eperm:
 	DBG(CXT, mnt_debug_h(cxt, "umount is not allowed for you"));
+=======
+
+		free(curr_user);
+	}
+
+	if (ok) {
+		DBG(CXT, ul_debugobj(cxt, "umount %s is allowed", tgt));
+		return 0;
+	}
+eperm:
+	DBG(CXT, ul_debugobj(cxt, "umount is not allowed for you"));
+>>>>>>> master-vanilla
 	return -EPERM;
 }
 
@@ -326,6 +692,15 @@ static int exec_helper(struct libmnt_context *cxt)
 	assert((cxt->flags & MNT_FL_MOUNTFLAGS_MERGED));
 	assert(cxt->helper_exec_status == 1);
 
+<<<<<<< HEAD
+=======
+	if (mnt_context_is_fake(cxt)) {
+		DBG(CXT, ul_debugobj(cxt, "fake mode: does not execute helper"));
+		cxt->helper_exec_status = rc = 0;
+		return rc;
+	}
+
+>>>>>>> master-vanilla
 	DBG_FLUSH;
 
 	switch (fork()) {
@@ -345,6 +720,7 @@ static int exec_helper(struct libmnt_context *cxt)
 		args[i++] = cxt->helper;			/* 1 */
 		args[i++] = mnt_fs_get_target(cxt->fs);		/* 2 */
 
+<<<<<<< HEAD
 		if (cxt->flags & MNT_FL_NOMTAB)
 			args[i++] = "-n";			/* 3 */
 		if (cxt->flags & MNT_FL_LAZY)
@@ -367,6 +743,29 @@ static int exec_helper(struct libmnt_context *cxt)
 			DBG(CXT, mnt_debug_h(cxt, "argv[%d] = \"%s\"",
 							i, args[i]));
 #endif
+=======
+		if (mnt_context_is_nomtab(cxt))
+			args[i++] = "-n";			/* 3 */
+		if (mnt_context_is_lazy(cxt))
+			args[i++] = "-l";			/* 4 */
+		if (mnt_context_is_force(cxt))
+			args[i++] = "-f";			/* 5 */
+		if (mnt_context_is_verbose(cxt))
+			args[i++] = "-v";			/* 6 */
+		if (mnt_context_is_rdonly_umount(cxt))
+			args[i++] = "-r";			/* 7 */
+		if (type
+		    && strchr(type, '.')
+		    && !endswith(cxt->helper, type)) {
+			args[i++] = "-t";			/* 8 */
+			args[i++] = (char *) type;		/* 9 */
+		}
+
+		args[i] = NULL;					/* 10 */
+		for (i = 0; args[i]; i++)
+			DBG(CXT, ul_debugobj(cxt, "argv[%d] = \"%s\"",
+							i, args[i]));
+>>>>>>> master-vanilla
 		DBG_FLUSH;
 		execv(cxt->helper, (char * const *) args);
 		exit(EXIT_FAILURE);
@@ -377,7 +776,11 @@ static int exec_helper(struct libmnt_context *cxt)
 		wait(&st);
 		cxt->helper_status = WIFEXITED(st) ? WEXITSTATUS(st) : -1;
 
+<<<<<<< HEAD
 		DBG(CXT, mnt_debug_h(cxt, "%s executed [status=%d]",
+=======
+		DBG(CXT, ul_debugobj(cxt, "%s executed [status=%d]",
+>>>>>>> master-vanilla
 					cxt->helper, cxt->helper_status));
 		cxt->helper_exec_status = rc = 0;
 		break;
@@ -385,7 +788,11 @@ static int exec_helper(struct libmnt_context *cxt)
 
 	case -1:
 		cxt->helper_exec_status = rc = -errno;
+<<<<<<< HEAD
 		DBG(CXT, mnt_debug_h(cxt, "fork() failed"));
+=======
+		DBG(CXT, ul_debugobj(cxt, "fork() failed"));
+>>>>>>> master-vanilla
 		break;
 	}
 
@@ -395,7 +802,11 @@ static int exec_helper(struct libmnt_context *cxt)
 /*
  * mnt_context_helper_setopt() backend.
  *
+<<<<<<< HEAD
  * This function applies umount.<type> command line option (for example parsed
+=======
+ * This function applies umount.type command line option (for example parsed
+>>>>>>> master-vanilla
  * by getopt() or getopt_long()) to @cxt. All unknown options are ignored and
  * then 1 is returned.
  *
@@ -436,7 +847,11 @@ int mnt_context_umount_setopt(struct libmnt_context *cxt, int c, char *arg)
 	return rc;
 }
 
+<<<<<<< HEAD
 /* Check whether the kernel supports UMOUNT_NOFOLLOW flag */
+=======
+/* Check whether the kernel supports the UMOUNT_NOFOLLOW flag */
+>>>>>>> master-vanilla
 static int umount_nofollow_support(void)
 {
 	int res = umount2("", UMOUNT_UNUSED);
@@ -470,6 +885,7 @@ static int do_umount(struct libmnt_context *cxt)
 	if (!target)
 		return -EINVAL;
 
+<<<<<<< HEAD
 	if (cxt->flags & MNT_FL_FAKE)
 		return 0;
 
@@ -478,6 +894,13 @@ static int do_umount(struct libmnt_context *cxt)
 	if (cxt->restricted) {
 		/*
 		 * extra paranoa for non-root users
+=======
+	DBG(CXT, ul_debugobj(cxt, "do umount"));
+
+	if (cxt->restricted && !mnt_context_is_fake(cxt)) {
+		/*
+		 * extra paranoia for non-root users
+>>>>>>> master-vanilla
 		 * -- chdir to the parent of the mountpoint and use NOFOLLOW
 		 *    flag to avoid races and symlink attacks.
 		 */
@@ -490,6 +913,7 @@ static int do_umount(struct libmnt_context *cxt)
 		target = tgtbuf;
 	}
 
+<<<<<<< HEAD
 	if (cxt->flags & MNT_FL_LAZY)
 		flags |= MNT_DETACH;
 
@@ -504,10 +928,31 @@ static int do_umount(struct libmnt_context *cxt)
 		cxt->syscall_status = -errno;
 
 	free(tgtbuf);
+=======
+	if (mnt_context_is_lazy(cxt))
+		flags |= MNT_DETACH;
+
+	else if (mnt_context_is_force(cxt))
+		flags |= MNT_FORCE;
+
+	DBG(CXT, ul_debugobj(cxt, "umount(2) [target='%s', flags=0x%08x]%s",
+				target, flags,
+				mnt_context_is_fake(cxt) ? " (FAKE)" : ""));
+
+	if (mnt_context_is_fake(cxt))
+		rc = 0;
+	else {
+		rc = flags ? umount2(target, flags) : umount(target);
+		if (rc < 0)
+			cxt->syscall_status = -errno;
+		free(tgtbuf);
+	}
+>>>>>>> master-vanilla
 
 	/*
 	 * try remount read-only
 	 */
+<<<<<<< HEAD
 	if (rc < 0 && cxt->syscall_status == -EBUSY &&
 	    (cxt->flags & MNT_FL_RDONLY_UMOUNT) && src) {
 
@@ -515,31 +960,60 @@ static int do_umount(struct libmnt_context *cxt)
 		cxt->flags &= ~MNT_FL_LOOPDEL;
 		DBG(CXT, mnt_debug_h(cxt,
 			"umount(2) failed [errno=%d] -- tring remount read-only",
+=======
+	if (rc < 0
+	    && cxt->syscall_status == -EBUSY
+	    && mnt_context_is_rdonly_umount(cxt)
+	    && src) {
+
+		mnt_context_set_mflags(cxt, (cxt->mountflags |
+					     MS_REMOUNT | MS_RDONLY));
+		mnt_context_enable_loopdel(cxt, FALSE);
+
+		DBG(CXT, ul_debugobj(cxt,
+			"umount(2) failed [errno=%d] -- trying to remount read-only",
+>>>>>>> master-vanilla
 			-cxt->syscall_status));
 
 		rc = mount(src, mnt_fs_get_target(cxt->fs), NULL,
 			    MS_MGC_VAL | MS_REMOUNT | MS_RDONLY, NULL);
 		if (rc < 0) {
 			cxt->syscall_status = -errno;
+<<<<<<< HEAD
 			DBG(CXT, mnt_debug_h(cxt,
+=======
+			DBG(CXT, ul_debugobj(cxt,
+>>>>>>> master-vanilla
 				"read-only re-mount(2) failed [errno=%d]",
 				-cxt->syscall_status));
 
 			return -cxt->syscall_status;
 		}
 		cxt->syscall_status = 0;
+<<<<<<< HEAD
 		DBG(CXT, mnt_debug_h(cxt, "read-only re-mount(2) success"));
+=======
+		DBG(CXT, ul_debugobj(cxt, "read-only re-mount(2) success"));
+>>>>>>> master-vanilla
 		return 0;
 	}
 
 	if (rc < 0) {
+<<<<<<< HEAD
 		DBG(CXT, mnt_debug_h(cxt, "umount(2) failed [errno=%d]",
+=======
+		DBG(CXT, ul_debugobj(cxt, "umount(2) failed [errno=%d]",
+>>>>>>> master-vanilla
 			-cxt->syscall_status));
 		return -cxt->syscall_status;
 	}
 
 	cxt->syscall_status = 0;
+<<<<<<< HEAD
 	DBG(CXT, mnt_debug_h(cxt, "umount(2) success"));
+=======
+	DBG(CXT, ul_debugobj(cxt, "umount(2) success"));
+>>>>>>> master-vanilla
 	return 0;
 }
 
@@ -555,6 +1029,7 @@ int mnt_context_prepare_umount(struct libmnt_context *cxt)
 {
 	int rc;
 
+<<<<<<< HEAD
 	assert(cxt);
 	assert(cxt->fs);
 	assert(cxt->helper_exec_status == 1);
@@ -563,10 +1038,21 @@ int mnt_context_prepare_umount(struct libmnt_context *cxt)
 	if (!cxt || !cxt->fs || (cxt->fs->flags & MNT_FS_SWAP))
 		return -EINVAL;
 	if (!mnt_fs_get_source(cxt->fs) && !mnt_fs_get_target(cxt->fs))
+=======
+	if (!cxt || !cxt->fs || mnt_fs_is_swaparea(cxt->fs))
+		return -EINVAL;
+	if (!mnt_context_get_source(cxt) && !mnt_context_get_target(cxt))
+>>>>>>> master-vanilla
 		return -EINVAL;
 	if (cxt->flags & MNT_FL_PREPARED)
 		return 0;
 
+<<<<<<< HEAD
+=======
+	assert(cxt->helper_exec_status == 1);
+	assert(cxt->syscall_status == 1);
+
+>>>>>>> master-vanilla
 	free(cxt->helper);	/* be paranoid */
 	cxt->helper = NULL;
 	cxt->action = MNT_ACT_UMOUNT;
@@ -576,8 +1062,11 @@ int mnt_context_prepare_umount(struct libmnt_context *cxt)
 		rc = mnt_context_merge_mflags(cxt);
 	if (!rc)
 		rc = evaluate_permissions(cxt);
+<<<<<<< HEAD
 	if (!rc)
 	       rc = mnt_context_prepare_target(cxt);
+=======
+>>>>>>> master-vanilla
 
 	if (!rc && !cxt->helper) {
 
@@ -590,6 +1079,7 @@ int mnt_context_prepare_umount(struct libmnt_context *cxt)
 			rc = mnt_context_prepare_helper(cxt, "umount", NULL);
 	}
 
+<<<<<<< HEAD
 /* TODO
 	if ((cxt->flags & MNT_FL_LOOPDEL) &&
 	    (!mnt_is_loopdev(src) || mnt_loopdev_is_autoclear(src)))
@@ -597,6 +1087,21 @@ int mnt_context_prepare_umount(struct libmnt_context *cxt)
 */
 	if (rc) {
 		DBG(CXT, mnt_debug_h(cxt, "umount: preparing failed"));
+=======
+	if (!rc && (cxt->user_mountflags & MNT_MS_LOOP))
+		/* loop option explicitly specified in mtab, detach this loop */
+		mnt_context_enable_loopdel(cxt, TRUE);
+
+	if (!rc && mnt_context_is_loopdel(cxt) && cxt->fs) {
+		const char *src = mnt_fs_get_srcpath(cxt->fs);
+
+		if (src && (!is_loopdev(src) || loopdev_is_autoclear(src)))
+			mnt_context_enable_loopdel(cxt, FALSE);
+	}
+
+	if (rc) {
+		DBG(CXT, ul_debugobj(cxt, "umount: preparing failed"));
+>>>>>>> master-vanilla
 		return rc;
 	}
 	cxt->flags |= MNT_FL_PREPARED;
@@ -613,7 +1118,11 @@ int mnt_context_prepare_umount(struct libmnt_context *cxt)
  * See also mnt_context_disable_helpers().
  *
  * WARNING: non-zero return code does not mean that umount(2) syscall or
+<<<<<<< HEAD
  *          umount.type helper wasn't sucessfully called.
+=======
+ *          umount.type helper wasn't successfully called.
+>>>>>>> master-vanilla
  *
  *          Check mnt_context_get_status() after error!
 *
@@ -636,6 +1145,7 @@ int mnt_context_do_umount(struct libmnt_context *cxt)
 	rc = do_umount(cxt);
 	if (rc)
 		return rc;
+<<<<<<< HEAD
 /* TODO
 	if (cxt->flags & MNT_FL_LOOPDEL)
 		rc = mnt_loopdev_clean(mnt_fs_get_source(cxt->fs));
@@ -665,6 +1175,32 @@ int mnt_context_do_umount(struct libmnt_context *cxt)
 					       cxt->mountflags, NULL, cxt->fs);
 	}
 
+=======
+
+	if (mnt_context_get_status(cxt) && !mnt_context_is_fake(cxt)) {
+		/*
+		 * Umounted, do some post-umount operations
+		 *	- remove loopdev
+		 *	- refresh in-memory mtab stuff if remount rather than
+		 *	  umount has been performed
+		 */
+		if (mnt_context_is_loopdel(cxt)
+		    && !(cxt->mountflags & MS_REMOUNT))
+			rc = mnt_context_delete_loopdev(cxt);
+
+		if (!mnt_context_is_nomtab(cxt)
+		    && mnt_context_get_status(cxt)
+		    && !cxt->helper
+		    && mnt_context_is_rdonly_umount(cxt)
+		    && (cxt->mountflags & MS_REMOUNT)) {
+
+			/* use "remount" instead of "umount" in /etc/mtab */
+			if (!rc && cxt->update && mnt_context_mtab_writable(cxt))
+				rc = mnt_update_set_fs(cxt->update,
+						       cxt->mountflags, NULL, cxt->fs);
+		}
+	}
+>>>>>>> master-vanilla
 	return rc;
 }
 
@@ -708,7 +1244,11 @@ int mnt_context_finalize_umount(struct libmnt_context *cxt)
  * See also mnt_context_disable_helpers().
  *
  * WARNING: non-zero return code does not mean that umount(2) syscall or
+<<<<<<< HEAD
  *          umount.type helper wasn't sucessfully called.
+=======
+ *          umount.type helper wasn't successfully called.
+>>>>>>> master-vanilla
  *
  *          Check mnt_context_get_status() after error!
  *
@@ -725,6 +1265,11 @@ int mnt_context_umount(struct libmnt_context *cxt)
 	assert(cxt->helper_exec_status == 1);
 	assert(cxt->syscall_status == 1);
 
+<<<<<<< HEAD
+=======
+	DBG(CXT, ul_debugobj(cxt, "umount: %s", mnt_context_get_target(cxt)));
+
+>>>>>>> master-vanilla
 	rc = mnt_context_prepare_umount(cxt);
 	if (!rc)
 		rc = mnt_context_prepare_update(cxt);
@@ -734,3 +1279,98 @@ int mnt_context_umount(struct libmnt_context *cxt)
 		rc = mnt_context_update_tabs(cxt);
 	return rc;
 }
+<<<<<<< HEAD
+=======
+
+
+/**
+ * mnt_context_next_umount:
+ * @cxt: context
+ * @itr: iterator
+ * @fs: returns the current filesystem
+ * @mntrc: returns the return code from mnt_context_umount()
+ * @ignored: returns 1 for not matching
+ *
+ * This function tries to umount the next filesystem from mtab (as returned by
+ * mnt_context_get_mtab()).
+ *
+ * You can filter out filesystems by:
+ *	mnt_context_set_options_pattern() to simulate umount -a -O pattern
+ *	mnt_context_set_fstype_pattern()  to simulate umount -a -t pattern
+ *
+ * If the filesystem is not mounted or does not match the defined criteria,
+ * then the function mnt_context_next_umount() returns zero, but the @ignored is
+ * non-zero. Note that the root filesystem is always ignored.
+ *
+ * If umount(2) syscall or umount.type helper failed, then the
+ * mnt_context_next_umount() function returns zero, but the @mntrc is non-zero.
+ * Use also mnt_context_get_status() to check if the filesystem was
+ * successfully umounted.
+ *
+ * Returns: 0 on success,
+ *         <0 in case of error (!= umount(2) errors)
+ *          1 at the end of the list.
+ */
+int mnt_context_next_umount(struct libmnt_context *cxt,
+			   struct libmnt_iter *itr,
+			   struct libmnt_fs **fs,
+			   int *mntrc,
+			   int *ignored)
+{
+	struct libmnt_table *mtab;
+	const char *tgt;
+	int rc;
+
+	if (ignored)
+		*ignored = 0;
+	if (mntrc)
+		*mntrc = 0;
+
+	if (!cxt || !fs || !itr)
+		return -EINVAL;
+
+	rc = mnt_context_get_mtab(cxt, &mtab);
+	cxt->mtab = NULL;		/* do not reset mtab */
+	mnt_reset_context(cxt);
+	cxt->mtab = mtab;
+
+	if (rc)
+		return rc;
+
+	do {
+		rc = mnt_table_next_fs(mtab, itr, fs);
+		if (rc != 0)
+			return rc;	/* no more filesystems (or error) */
+
+		tgt = mnt_fs_get_target(*fs);
+	} while (!tgt);
+
+	DBG(CXT, ul_debugobj(cxt, "next-umount: trying %s", tgt));
+
+	/* ignore filesystems which don't match options patterns */
+	if ((cxt->fstype_pattern && !mnt_fs_match_fstype(*fs,
+					cxt->fstype_pattern)) ||
+
+	/* ignore filesystems which don't match type patterns */
+	   (cxt->optstr_pattern && !mnt_fs_match_options(*fs,
+					cxt->optstr_pattern))) {
+		if (ignored)
+			*ignored = 1;
+		DBG(CXT, ul_debugobj(cxt, "next-umount: not-match "
+				"[fstype: %s, t-pattern: %s, options: %s, O-pattern: %s]",
+				mnt_fs_get_fstype(*fs),
+				cxt->fstype_pattern,
+				mnt_fs_get_options(*fs),
+				cxt->optstr_pattern));
+		return 0;
+	}
+
+	rc = mnt_context_set_fs(cxt, *fs);
+	if (rc)
+		return rc;
+	rc = mnt_context_umount(cxt);
+	if (mntrc)
+		*mntrc = rc;
+	return 0;
+}
+>>>>>>> master-vanilla

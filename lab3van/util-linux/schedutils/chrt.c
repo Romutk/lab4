@@ -1,4 +1,5 @@
 /*
+<<<<<<< HEAD
  * chrt.c - chrt
  * Command-line utility for manipulating a task's real-time attributes 
  *
@@ -8,6 +9,15 @@
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License, v2, as
+=======
+ * chrt.c - manipulate a task's real-time attributes
+ *
+ * 27-Apr-2002: initial version - Robert Love <rml@tech9.net>
+ * 04-May-2011: make it thread-aware - Davidlohr Bueso <dave@gnu.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License, version 2, as
+>>>>>>> master-vanilla
  * published by the Free Software Foundation
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,9 +25,15 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
+<<<<<<< HEAD
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+=======
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+>>>>>>> master-vanilla
  *
  * Copyright (C) 2004 Robert Love
  */
@@ -31,7 +47,11 @@
 
 #include "c.h"
 #include "nls.h"
+<<<<<<< HEAD
 
+=======
+#include "closestream.h"
+>>>>>>> master-vanilla
 #include "strutils.h"
 #include "procutils.h"
 
@@ -59,6 +79,7 @@ static void __attribute__((__noreturn__)) show_usage(int rc)
 {
 	FILE *out = rc == EXIT_SUCCESS ? stdout : stderr;
 
+<<<<<<< HEAD
 	fprintf(out, _(
 	"\nchrt - manipulate real-time attributes of a process\n"
 	"\nSet policy:\n"
@@ -88,6 +109,42 @@ static void __attribute__((__noreturn__)) show_usage(int rc)
 	"  -v | --verbose       display status information\n"
 	"  -V | --version       output version information\n\n"));
 
+=======
+	fputs(_("Show or change the real-time scheduling attributes of a process.\n"), out);
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Set policy:\n"
+	" chrt [options] <priority> <command> [<arg>...]\n"
+	" chrt [options] -p <priority> <pid>\n"), out);
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Get policy:\n"
+	" chrt [options] -p <pid>\n"), out);
+
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Policy options:\n"), out);
+	fputs(_(" -b, --batch          set policy to SCHED_BATCH\n"), out);
+	fputs(_(" -f, --fifo           set policy to SCHED_FIFO\n"), out);
+	fputs(_(" -i, --idle           set policy to SCHED_IDLE\n"), out);
+	fputs(_(" -o, --other          set policy to SCHED_OTHER\n"), out);
+	fputs(_(" -r, --rr             set policy to SCHED_RR (default)\n"), out);
+
+#ifdef SCHED_RESET_ON_FORK
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Scheduling flag:\n"), out);
+	fputs(_(" -R, --reset-on-fork  set SCHED_RESET_ON_FORK for FIFO or RR\n"), out);
+#endif
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Other options:\n"), out);
+	fputs(_(" -a, --all-tasks      operate on all the tasks (threads) for a given pid\n"), out);
+	fputs(_(" -m, --max            show min and max valid priorities\n"), out);
+	fputs(_(" -p, --pid            operate on existing given pid\n"), out);
+	fputs(_(" -v, --verbose        display status information\n"), out);
+
+	fputs(USAGE_SEPARATOR, out);
+	fputs(USAGE_HELP, out);
+	fputs(USAGE_VERSION, out);
+
+	fprintf(out, USAGE_MAN_TAIL("chrt(1)"));
+>>>>>>> master-vanilla
 	exit(rc);
 }
 
@@ -218,6 +275,10 @@ int main(int argc, char **argv)
 	setlocale(LC_ALL, "");
 	bindtextdomain(PACKAGE, LOCALEDIR);
 	textdomain(PACKAGE);
+<<<<<<< HEAD
+=======
+	atexit(close_stdout);
+>>>>>>> master-vanilla
 
 	while((i = getopt_long(argc, argv, "+abfiphmoRrvV", longopts, NULL)) != -1)
 	{
@@ -253,7 +314,11 @@ int main(int argc, char **argv)
 			break;
 		case 'p':
 			errno = 0;
+<<<<<<< HEAD
 			pid = strtol_or_err(argv[argc - 1], _("failed to parse pid"));
+=======
+			pid = strtos32_or_err(argv[argc - 1], _("invalid PID argument"));
+>>>>>>> master-vanilla
 			break;
 		case 'r':
 			policy = SCHED_RR;
@@ -262,11 +327,19 @@ int main(int argc, char **argv)
 			verbose = 1;
 			break;
 		case 'V':
+<<<<<<< HEAD
 			printf("%s from %s\n", program_invocation_short_name,
 					       PACKAGE_STRING);
 			return EXIT_SUCCESS;
 		case 'h':
 			ret = EXIT_SUCCESS;
+=======
+			printf(UTIL_LINUX_VERSION);
+			return EXIT_SUCCESS;
+		case 'h':
+			ret = EXIT_SUCCESS;
+			/* fallthrough */
+>>>>>>> master-vanilla
 		default:
 			show_usage(ret);
 		}
@@ -294,13 +367,21 @@ int main(int argc, char **argv)
 	}
 
 	errno = 0;
+<<<<<<< HEAD
 	priority = strtol_or_err(argv[optind], _("failed to parse priority"));
+=======
+	priority = strtos32_or_err(argv[optind], _("invalid priority argument"));
+>>>>>>> master-vanilla
 
 #ifdef SCHED_RESET_ON_FORK
 	/* sanity check */
 	if ((policy_flag & SCHED_RESET_ON_FORK) &&
 	    !(policy == SCHED_FIFO || policy == SCHED_RR))
+<<<<<<< HEAD
 		errx(EXIT_FAILURE, _("SCHED_RESET_ON_FORK flag is suppoted for "
+=======
+		errx(EXIT_FAILURE, _("SCHED_RESET_ON_FORK flag is supported for "
+>>>>>>> master-vanilla
 				     "SCHED_FIFO and SCHED_RR policies only"));
 #endif
 
@@ -329,7 +410,10 @@ int main(int argc, char **argv)
 	if (!pid) {
 		argv += optind + 1;
 		execvp(argv[0], argv);
+<<<<<<< HEAD
 		perror("execvp");
+=======
+>>>>>>> master-vanilla
 		err(EXIT_FAILURE, _("failed to execute %s"), argv[0]);
 	}
 

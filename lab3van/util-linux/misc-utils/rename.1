@@ -6,7 +6,12 @@
 rename \- rename files
 .SH SYNOPSIS
 .B rename
+<<<<<<< HEAD
 .RI [ options ] " expression replacement file" ...
+=======
+[options]
+.IR "expression replacement file" ...
+>>>>>>> master-vanilla
 .SH DESCRIPTION
 .B rename
 will rename the specified files by replacing the first occurrence of
@@ -15,6 +20,7 @@ in their name by
 .IR replacement .
 .SH OPTIONS
 .TP
+<<<<<<< HEAD
 \fB\-v\fR, \fB\-\-verbose\fR
 Give visual feedback which files where renamed, if any.
 .TP
@@ -22,6 +28,18 @@ Give visual feedback which files where renamed, if any.
 Display version information and exit.
 .TP
 \fB\-h\fR, \fB\-\-help\fR
+=======
+.BR \-s , " \-\-symlink"
+Do not rename a symlink but its target.
+.TP
+.BR \-v , " \-\-verbose"
+Show which files where renamed, if any.
+.TP
+.BR \-V , " \-\-version"
+Display version information and exit.
+.TP
+.BR \-h , " \-\-help"
+>>>>>>> master-vanilla
 Display help text and exit.
 .SH EXAMPLES
 Given the files
@@ -52,8 +70,32 @@ the command will perform the action without any questions.  For example, the
 result can be quite drastic when the command is run as root in the /lib
 directory.  Always make a backup before running the command, unless you truly
 know what you are doing.
+<<<<<<< HEAD
 .SH "SEE ALSO"
 .BR mmv (1),
+=======
+.SH "EXIT STATUS"
+.RS
+.PD 0
+.TP
+.B 0
+all requested rename operations were successful
+.TP
+.B 1
+all rename operations failed
+.TP
+.B 2
+some rename operations failed
+.TP
+.B 4
+nothing was renamed
+.TP
+.B 64
+unanticipated error occurred
+.PD
+.RE
+.SH "SEE ALSO"
+>>>>>>> master-vanilla
 .BR mv (1)
 .SH AVAILABILITY
 The rename command is part of the util-linux package and is available from

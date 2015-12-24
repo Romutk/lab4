@@ -14,6 +14,7 @@
 #include <stdint.h>
 
 #include "partitions.h"
+<<<<<<< HEAD
 
 #define BSD_MAXPARTITIONS	16
 #define BSD_FS_UNUSED		0
@@ -98,6 +99,15 @@ struct bsd_disklabel {
 
 /* Returns 'blkid_idmag' in bytes */
 #define BLKID_MAG_OFFSET(_mag)  ((_mag)->kboff >> 10) + ((_mag)->sboff)
+=======
+#include "pt-bsd.h"
+
+/* Returns 'blkid_idmag' in 512-sectors */
+#define BLKID_MAG_SECTOR(_mag)  (((_mag)->kboff / 2)  + ((_mag)->sboff >> 9))
+
+/* Returns 'blkid_idmag' in bytes */
+#define BLKID_MAG_OFFSET(_mag)  ((_mag)->kboff << 10) + ((_mag)->sboff)
+>>>>>>> master-vanilla
 
 /* Returns 'blkid_idmag' offset in bytes within the last sector */
 #define BLKID_MAG_LASTOFFSET(_mag) \
@@ -113,6 +123,7 @@ static int probe_bsd_pt(blkid_probe pr, const struct blkid_idmag *mag)
 	blkid_partlist ls;
 	int i, nparts = BSD_MAXPARTITIONS;
 	unsigned char *data;
+<<<<<<< HEAD
 
 	if (blkid_partitions_need_typeonly(pr))
 		/* caller does not ask for details about partitions */
@@ -121,18 +132,37 @@ static int probe_bsd_pt(blkid_probe pr, const struct blkid_idmag *mag)
 	data = blkid_probe_get_sector(pr, BLKID_MAG_SECTOR(mag));
 	if (!data)
 		goto nothing;
+=======
+	int rc = BLKID_PROBE_NONE;
+
+	if (blkid_partitions_need_typeonly(pr))
+		/* caller does not ask for details about partitions */
+		return rc;
+
+	data = blkid_probe_get_sector(pr, BLKID_MAG_SECTOR(mag));
+	if (!data) {
+		if (errno)
+			rc = -errno;
+		goto nothing;
+	}
+>>>>>>> master-vanilla
 
 	l = (struct bsd_disklabel *) data + BLKID_MAG_LASTOFFSET(mag);
 
 	ls = blkid_probe_get_partlist(pr);
 	if (!ls)
+<<<<<<< HEAD
 		goto err;
+=======
+		goto nothing;
+>>>>>>> master-vanilla
 
 	/* try to determine the real type of BSD system according to
 	 * (parental) primary partition */
 	parent = blkid_partlist_get_parent(ls);
 	if (parent) {
 		switch(blkid_partition_get_type(parent)) {
+<<<<<<< HEAD
 		case BLKID_FREEBSD_PARTITION:
 			name = "freebsd";
 			break;
@@ -146,21 +176,48 @@ static int probe_bsd_pt(blkid_probe pr, const struct blkid_idmag *mag)
 			DBG(DEBUG_LOWPROBE, printf(
 				"WARNING: BSD label detected on unknown (0x%x) "
 				"primary partition\n",
+=======
+		case MBR_FREEBSD_PARTITION:
+			name = "freebsd";
+			break;
+		case MBR_NETBSD_PARTITION:
+			name = "netbsd";
+			break;
+		case MBR_OPENBSD_PARTITION:
+			name = "openbsd";
+			break;
+		default:
+			DBG(LOWPROBE, ul_debug(
+				"WARNING: BSD label detected on unknown (0x%x) "
+				"primary partition",
+>>>>>>> master-vanilla
 				blkid_partition_get_type(parent)));
 			break;
 		}
 	}
 
 	tab = blkid_partlist_new_parttable(ls, name, BLKID_MAG_OFFSET(mag));
+<<<<<<< HEAD
 	if (!tab)
 		goto err;
+=======
+	if (!tab) {
+		rc = -ENOMEM;
+		goto nothing;
+	}
+>>>>>>> master-vanilla
 
 	if (le16_to_cpu(l->d_npartitions) < BSD_MAXPARTITIONS)
 		nparts = le16_to_cpu(l->d_npartitions);
 
 	else if (le16_to_cpu(l->d_npartitions) > BSD_MAXPARTITIONS)
+<<<<<<< HEAD
 		DBG(DEBUG_LOWPROBE, printf(
 			"WARNING: ignore %d more BSD partitions\n",
+=======
+		DBG(LOWPROBE, ul_debug(
+			"WARNING: ignore %d more BSD partitions",
+>>>>>>> master-vanilla
 			le16_to_cpu(l->d_npartitions) - BSD_MAXPARTITIONS));
 
 	for (i = 0, p = l->d_partitions; i < nparts; i++, p++) {
@@ -174,26 +231,54 @@ static int probe_bsd_pt(blkid_probe pr, const struct blkid_idmag *mag)
 		start = le32_to_cpu(p->p_offset);
 		size = le32_to_cpu(p->p_size);
 
+<<<<<<< HEAD
 		if (parent && !blkid_is_nested_dimension(parent, start, size)) {
 			DBG(DEBUG_LOWPROBE, printf(
 				"WARNING: BSD partition (%d) overflow "
 				"detected, ignore\n", i));
+=======
+		if (parent && blkid_partition_get_start(parent) == start
+			   && blkid_partition_get_size(parent) == size) {
+			DBG(LOWPROBE, ul_debug(
+				"WARNING: BSD partition (%d) same like parent, "
+				"ignore", i));
+			continue;
+		}
+		if (parent && !blkid_is_nested_dimension(parent, start, size)) {
+			DBG(LOWPROBE, ul_debug(
+				"WARNING: BSD partition (%d) overflow "
+				"detected, ignore", i));
+>>>>>>> master-vanilla
 			continue;
 		}
 
 		par = blkid_partlist_add_partition(ls, tab, start, size);
+<<<<<<< HEAD
 		if (!par)
 			goto err;
+=======
+		if (!par) {
+			rc = -ENOMEM;
+			goto nothing;
+		}
+>>>>>>> master-vanilla
 
 		blkid_partition_set_type(par, p->p_fstype);
 	}
 
+<<<<<<< HEAD
 	return 0;
 
 nothing:
 	return 1;
 err:
 	return -1;
+=======
+	return BLKID_PROBE_OK;
+
+nothing:
+	return rc;
+>>>>>>> master-vanilla
 }
 
 
@@ -222,7 +307,11 @@ err:
  * alpha luna88k mac68k    |      0      |     64
  * sparc(OpenBSD) vax      |             |
  * ------------------------+-------------+------------
+<<<<<<< HEAD
  * spark64 sparc(NetBSD)   |      0      |    128
+=======
+ * sparc64 sparc(NetBSD)   |      0      |    128
+>>>>>>> master-vanilla
  * ------------------------+-------------+------------
  *
  * ...and more (see http://fxr.watson.org/fxr/ident?v=NETBSD;i=LABELSECTOR)

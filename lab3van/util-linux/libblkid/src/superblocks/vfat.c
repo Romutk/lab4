@@ -16,6 +16,10 @@
 #include <ctype.h>
 #include <stdint.h>
 
+<<<<<<< HEAD
+=======
+#include "pt-mbr.h"
+>>>>>>> master-vanilla
 #include "superblocks.h"
 
 /* Yucky misaligned values */
@@ -123,9 +127,14 @@ static unsigned char *search_fat_label(blkid_probe pr,
 	struct vfat_dir_entry *ent, *dir = NULL;
 	uint32_t i;
 
+<<<<<<< HEAD
 	DBG(DEBUG_LOWPROBE,
 		printf("\tlook for label in root-dir "
 			"(entries: %d, offset: %jd)\n", entries, offset));
+=======
+	DBG(LOWPROBE, ul_debug("\tlook for label in root-dir "
+			"(entries: %d, offset: %jd)", entries, offset));
+>>>>>>> master-vanilla
 
 	if (!blkid_probe_is_tiny(pr)) {
 		/* large disk, read whole root directory */
@@ -163,15 +172,24 @@ static unsigned char *search_fat_label(blkid_probe pr,
 
 		if ((ent->attr & (FAT_ATTR_VOLUME_ID | FAT_ATTR_DIR)) ==
 		    FAT_ATTR_VOLUME_ID) {
+<<<<<<< HEAD
 			DBG(DEBUG_LOWPROBE,
 				printf("\tfound fs LABEL at entry %d\n", i));
+=======
+			DBG(LOWPROBE, ul_debug("\tfound fs LABEL at entry %d", i));
+>>>>>>> master-vanilla
 			return ent->name;
 		}
 	}
 	return NULL;
 }
 
+<<<<<<< HEAD
 static int fat_valid_superblock(const struct blkid_idmag *mag,
+=======
+static int fat_valid_superblock(blkid_probe pr,
+			const struct blkid_idmag *mag,
+>>>>>>> master-vanilla
 			struct msdos_super_block *ms,
 			struct vfat_super_block *vs,
 			uint32_t *cluster_count, uint32_t *fat_size)
@@ -245,6 +263,23 @@ static int fat_valid_superblock(const struct blkid_idmag *mag,
 	if (cluster_count)
 		*cluster_count = __cluster_count;
 
+<<<<<<< HEAD
+=======
+	if (blkid_probe_is_wholedisk(pr)) {
+		/* OK, seems like FAT, but it's possible that we found boot
+		 * sector with crazy FAT-like stuff (magic strings, media,
+		 * etc..) before MBR. Let's make sure that there is no MBR with
+		 * usable partition. */
+		unsigned char *buf = (unsigned char *) ms;
+		if (mbr_is_valid_magic(buf)) {
+			struct dos_partition *p0 = mbr_get_partition(buf, 0);
+			if (dos_partition_get_size(p0) != 0 &&
+			    (p0->boot_ind == 0 || p0->boot_ind == 0x80))
+				return 0;
+		}
+	}
+
+>>>>>>> master-vanilla
 	return 1;	/* valid */
 }
 
@@ -257,18 +292,36 @@ int blkid_probe_is_vfat(blkid_probe pr)
 	struct vfat_super_block *vs;
 	struct msdos_super_block *ms;
 	const struct blkid_idmag *mag = NULL;
+<<<<<<< HEAD
 
 	if (blkid_probe_get_idmag(pr, &vfat_idinfo, NULL, &mag) || !mag)
+=======
+	int rc;
+
+	rc = blkid_probe_get_idmag(pr, &vfat_idinfo, NULL, &mag);
+	if (rc < 0)
+		return rc;	/* error */
+	if (rc != BLKID_PROBE_OK || !mag)
+>>>>>>> master-vanilla
 		return 0;
 
 	ms = blkid_probe_get_sb(pr, mag, struct msdos_super_block);
 	if (!ms)
+<<<<<<< HEAD
 		return 0;
 	vs = blkid_probe_get_sb(pr, mag, struct vfat_super_block);
 	if (!vs)
 		return 0;
 
 	return fat_valid_superblock(mag, ms, vs, NULL, NULL);
+=======
+		return errno ? -errno : 0;
+	vs = blkid_probe_get_sb(pr, mag, struct vfat_super_block);
+	if (!vs)
+		return errno ? -errno : 0;
+
+	return fat_valid_superblock(pr, mag, ms, vs, NULL, NULL);
+>>>>>>> master-vanilla
 }
 
 /* FAT label extraction from the root directory taken from Kay
@@ -285,11 +338,21 @@ static int probe_vfat(blkid_probe pr, const struct blkid_idmag *mag)
 
 	ms = blkid_probe_get_sb(pr, mag, struct msdos_super_block);
 	if (!ms)
+<<<<<<< HEAD
 		return 0;
 	vs = blkid_probe_get_sb(pr, mag, struct vfat_super_block);
 	if (!vs)
 		return 0;
 	if (!fat_valid_superblock(mag, ms, vs, &cluster_count, &fat_size))
+=======
+		return errno ? -errno : 1;
+
+	vs = blkid_probe_get_sb(pr, mag, struct vfat_super_block);
+	if (!vs)
+		return errno ? -errno : 1;
+
+	if (!fat_valid_superblock(pr, mag, ms, vs, &cluster_count, &fat_size))
+>>>>>>> master-vanilla
 		return 1;
 
 	sector_size = unaligned_le16(&ms->ms_sector_size);
@@ -349,7 +412,11 @@ static int probe_vfat(blkid_probe pr, const struct blkid_idmag *mag)
 			}
 
 			/* get FAT entry */
+<<<<<<< HEAD
 			fat_entry_off = (reserved * sector_size) +
+=======
+			fat_entry_off = ((uint64_t) reserved * sector_size) +
+>>>>>>> master-vanilla
 				(next * sizeof(uint32_t));
 			buf = blkid_probe_get_buffer(pr, fat_entry_off, buf_size);
 			if (buf == NULL)
@@ -378,16 +445,27 @@ static int probe_vfat(blkid_probe pr, const struct blkid_idmag *mag)
 					(blkid_loff_t) fsinfo_sect * sector_size,
 					sizeof(struct fat32_fsinfo));
 			if (buf == NULL)
+<<<<<<< HEAD
 				return -1;
+=======
+				return errno ? -errno : 1;
+>>>>>>> master-vanilla
 
 			fsinfo = (struct fat32_fsinfo *) buf;
 			if (memcmp(fsinfo->signature1, "\x52\x52\x61\x41", 4) != 0 &&
 			    memcmp(fsinfo->signature1, "\x52\x52\x64\x41", 4) != 0 &&
 			    memcmp(fsinfo->signature1, "\x00\x00\x00\x00", 4) != 0)
+<<<<<<< HEAD
 				return -1;
 			if (memcmp(fsinfo->signature2, "\x72\x72\x41\x61", 4) != 0 &&
 			    memcmp(fsinfo->signature2, "\x00\x00\x00\x00", 4) != 0)
 				return -1;
+=======
+				return 1;
+			if (memcmp(fsinfo->signature2, "\x72\x72\x41\x61", 4) != 0 &&
+			    memcmp(fsinfo->signature2, "\x00\x00\x00\x00", 4) != 0)
+				return 1;
+>>>>>>> master-vanilla
 		}
 	}
 

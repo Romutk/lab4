@@ -109,14 +109,22 @@ static int probe_ocfs(blkid_probe pr, const struct blkid_idmag *mag)
 	buf = blkid_probe_get_buffer(pr, mag->kboff << 10,
 			sizeof(struct ocfs_volume_header));
 	if (!buf)
+<<<<<<< HEAD
 		return -1;
+=======
+		return errno ? -errno : 1;
+>>>>>>> master-vanilla
 	memcpy(&ovh, buf, sizeof(ovh));
 
 	/* label */
 	buf = blkid_probe_get_buffer(pr, (mag->kboff << 10) + 512,
 			sizeof(struct ocfs_volume_label));
 	if (!buf)
+<<<<<<< HEAD
 		return -1;
+=======
+		return errno ? -errno : 1;
+>>>>>>> master-vanilla
 	memcpy(&ovl, buf, sizeof(ovl));
 
 	maj = ocfsmajor(ovh);
@@ -144,7 +152,11 @@ static int probe_ocfs2(blkid_probe pr, const struct blkid_idmag *mag)
 
 	osb = blkid_probe_get_sb(pr, mag, struct ocfs2_super_block);
 	if (!osb)
+<<<<<<< HEAD
 		return -1;
+=======
+		return errno ? -errno : 1;
+>>>>>>> master-vanilla
 
 	blkid_probe_set_label(pr, (unsigned char *) osb->s_label, sizeof(osb->s_label));
 	blkid_probe_set_uuid(pr, osb->s_uuid);
@@ -162,7 +174,11 @@ static int probe_oracleasm(blkid_probe pr, const struct blkid_idmag *mag)
 
 	dl = blkid_probe_get_sb(pr, mag, struct oracle_asm_disk_label);
 	if (!dl)
+<<<<<<< HEAD
 		return -1;
+=======
+		return errno ? -errno : 1;
+>>>>>>> master-vanilla
 
 	blkid_probe_set_label(pr, (unsigned char *) dl->dl_id, sizeof(dl->dl_id));
 	return 0;
@@ -174,7 +190,11 @@ const struct blkid_idinfo ocfs_idinfo =
 	.name		= "ocfs",
 	.usage		= BLKID_USAGE_FILESYSTEM,
 	.probefunc	= probe_ocfs,
+<<<<<<< HEAD
 	.minsz		= 108 * 1024 * 1024,
+=======
+	.minsz		= 14000 * 1024,
+>>>>>>> master-vanilla
 	.magics		=
 	{
 		{ .magic = "OracleCFS", .len = 9, .kboff = 8 },
@@ -187,7 +207,11 @@ const struct blkid_idinfo ocfs2_idinfo =
 	.name		= "ocfs2",
 	.usage		= BLKID_USAGE_FILESYSTEM,
 	.probefunc	= probe_ocfs2,
+<<<<<<< HEAD
 	.minsz		= 108 * 1024 * 1024,
+=======
+	.minsz		= 14000 * 1024,
+>>>>>>> master-vanilla
 	.magics		=
 	{
 		{ .magic = "OCFSV2", .len = 6, .kboff = 1 },

@@ -15,12 +15,22 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
+<<<<<<< HEAD
 TS_TOPDIR="$(dirname $0)/../.."
+=======
+TS_TOPDIR="${0%/*}/../.."
+>>>>>>> master-vanilla
 TS_DESC="call mount.<type>"
 MOUNTER="/sbin/mount.mytest"
 
 . $TS_TOPDIR/functions.sh
 ts_init "$*"
+<<<<<<< HEAD
+=======
+
+ts_check_test_command "$TS_CMD_MOUNT"
+
+>>>>>>> master-vanilla
 ts_skip_nonroot
 
 cat > $MOUNTER <<\EOF
@@ -32,7 +42,11 @@ echo "$0 called with \"$*\""
 EOF
 chmod +x $MOUNTER
 
+<<<<<<< HEAD
 $TS_CMD_MOUNT -v -v -v -t mytest  /foo /bar &> $TS_OUTPUT
+=======
+$TS_CMD_MOUNT -t mytest /foo /bar &> $TS_OUTPUT
+>>>>>>> master-vanilla
 
 rm -f $MOUNTER
 

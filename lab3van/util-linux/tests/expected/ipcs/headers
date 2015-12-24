@@ -27,19 +27,32 @@ semid      perms      cuid       cgid       uid        gid
 ------ Semaphore Status --------
 
 test: all headers
+<<<<<<< HEAD
+=======
+------ Message Queues --------
+key        msqid      owner      perms      used-bytes   messages    
+--
+>>>>>>> master-vanilla
 ------ Shared Memory Segments --------
 key        shmid      owner      perms      bytes      nattch     status      
 --
 ------ Semaphore Arrays --------
 key        semid      owner      perms      nsems     
+<<<<<<< HEAD
 --
 ------ Message Queues --------
 key        msqid      owner      perms      used-bytes   messages    
+=======
+------ Message Queues Send/Recv/Change Times --------
+msqid    owner      send                 recv                 change              
+--
+>>>>>>> master-vanilla
 ------ Shared Memory Attach/Detach/Change Times --------
 shmid      owner      attached             detached             changed             
 --
 ------ Semaphore Operation/Change Times --------
 semid    owner      last-op                    last-changed              
+<<<<<<< HEAD
 --
 ------ Message Queues Send/Recv/Change Times --------
 msqid    owner      send                 recv                 change              
@@ -48,11 +61,22 @@ shmid      owner      cpid       lpid
 --
 ------ Message Queues PIDs --------
 msqid      owner      lspid      lrpid     
+=======
+------ Message Queues PIDs --------
+msqid      owner      lspid      lrpid     
+--
+------ Shared Memory Creator/Last-op PIDs --------
+shmid      owner      cpid       lpid      
+------ Message Queues Creators/Owners --------
+msqid      perms      cuid       cgid       uid        gid       
+--
+>>>>>>> master-vanilla
 ------ Shared Memory Segment Creators/Owners --------
 shmid      perms      cuid       cgid       uid        gid       
 --
 ------ Semaphore Arrays Creators/Owners --------
 semid      perms      cuid       cgid       uid        gid       
+<<<<<<< HEAD
 --
 ------ Message Queues Creators/Owners --------
 msqid      perms      cuid       cgid       uid        gid       
@@ -62,3 +86,11 @@ msqid      perms      cuid       cgid       uid        gid
 ------ Shared Memory Status --------
 ------ Semaphore Status --------
 ------ Messages Status --------
+=======
+------ Messages Limits --------
+------ Shared Memory Limits --------
+------ Semaphore Limits --------
+------ Messages Status --------
+------ Shared Memory Status --------
+------ Semaphore Status --------
+>>>>>>> master-vanilla
