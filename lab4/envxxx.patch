@@ -1,0 +1,1386 @@
+diff -Nrc moreutils/debian/changelog mooreutils/debian/changelog
+*** moreutils/debian/changelog	2015-12-24 17:25:17.721555130 +0400
+--- mooreutils/debian/changelog	1970-01-01 03:00:00.000000000 +0300
+***************
+*** 1,517 ****
+- moreutils (0.57) unstable; urgency=medium
+- 
+-   * Avoid using non-portable error() in ifdata, a portability reversion
+-     introduced in 0.56.
+- 
+-  -- Joey Hess <id@joeyh.name>  Mon, 13 Jul 2015 18:29:06 -0400
+- 
+- moreutils (0.56) unstable; urgency=medium
+- 
+-   * ifdata: Fix error messages when a non-existent network interface
+-     is queried. Closes: #386754 Thanks, Nicolas Schier
+-   * errno.docbook: Fix typo. Closes: #749399
+-   * vidir: Create missing target directories. Closes: #728688
+-     Thanks, Nicolas Schier
+- 
+-  -- Joey Hess <id@joeyh.name>  Wed, 03 Jun 2015 12:03:50 -0400
+- 
+- moreutils (0.55) unstable; urgency=medium
+- 
+-   * parallel: serialise output through internal pipe. Closes: #704125
+-     Thanks, Nicolas Schier.
+-   * sponge: add append option '-a'. Closes: #623197
+-     Thanks, Nicolas Schier.
+- 
+-  -- Joey Hess <id@joeyh.name>  Mon, 19 Jan 2015 13:58:08 -0400
+- 
+- moreutils (0.54) unstable; urgency=medium
+- 
+-   * vidir: Fix bug in handling filenames that share a common
+-     prefix when renaming. Closes: #654326
+-     Thanks, Kushal Kumaran
+- 
+-  -- Joey Hess <id@joeyh.name>  Fri, 28 Nov 2014 11:25:32 -0400
+- 
+- moreutils (0.53) unstable; urgency=medium
+- 
+-   * Orphaned the Debian package.
+- 
+-  -- Joey Hess <joeyh@debian.org>  Sat, 08 Nov 2014 00:31:54 -0400
+- 
+- moreutils (0.52) unstable; urgency=medium
+- 
+-   * Fix docbook markup for parallel examples. Closes: #756377
+-   * ts: Add -s option to make timestamp relative to start.
+-     Thanks, Adam Juraszek.
+- 
+-  -- Joey Hess <joeyh@debian.org>  Tue, 09 Sep 2014 14:12:05 -0400
+- 
+- moreutils (0.51) unstable; urgency=low
+- 
+-   * Fix ifdata to build on OS X. Thanks, Peter Eisentraut
+-     Closes: #575294
+-   * use docbook-xsl for building man pages. Thanks, Peter Eisentraut
+-     for extensive patch set!
+-     Closes: #728831
+-   * Fix ifdata, ifne, parallel to build on illumos. Thanks, Gabriele Giacone
+-     Closes: #733736
+- 
+-  -- Joey Hess <joeyh@debian.org>  Thu, 27 Feb 2014 12:01:21 -0400
+- 
+- moreutils (0.50) unstable; urgency=low
+- 
+-   * Fix build on Hurd. Closes: #716653
+-     (Thanks, Pino Toscano)
+- 
+-  -- Joey Hess <joeyh@debian.org>  Mon, 26 Aug 2013 13:00:24 -0400
+- 
+- moreutils (0.49) unstable; urgency=low
+- 
+-   * ts: Fix timezone used with -i
+-   * errno, isutf8: Fix zero-termination of option list, which could lead
+-     to getopt crash. Closes: #715867
+-     (Thanks, Mayhem Team)
+- 
+-  -- Joey Hess <joeyh@debian.org>  Wed, 10 Jul 2013 16:21:41 -0400
+- 
+- moreutils (0.48) unstable; urgency=low
+- 
+-   * Allow overriding PREFIX and CFLAGS to make the build more flexible
+-     (Thanks, Ben Walton)
+-   * Typo. Closes: #697113
+-   * ts: -i enables incremental timestamping.
+-     Thanks, Thomas Vander Stichele
+-   * ts: Support single-digit day dates.
+-     Thanks, Peter Lunicks
+-   * sponge: Check fclose to detect certian short reads. Closes: #704453
+- 
+-  -- Joey Hess <joeyh@debian.org>  Sat, 04 May 2013 23:50:03 -0400
+- 
+- moreutils (0.47) unstable; urgency=low
+- 
+-   * errno: New utility that looks up errno numbers or names.
+- 
+-  -- Joey Hess <joeyh@debian.org>  Mon, 25 Jun 2012 16:31:17 -0400
+- 
+- moreutils (0.46) unstable; urgency=low
+- 
+-   * Typo. Closes: #649158
+-   * combine: Avoid reading files twice, to support data coming from
+-     pipes. Closes: #667960 Thanks, Carsten Hey
+- 
+-  -- Joey Hess <joeyh@debian.org>  Mon, 09 Apr 2012 16:19:34 -0400
+- 
+- moreutils (0.45) unstable; urgency=low
+- 
+-   * ts: Support %.s for seconds sinch epoch with subsecond resolution.
+-     Closes: #619764
+- 
+-  -- Joey Hess <joeyh@debian.org>  Sun, 19 Jun 2011 15:44:28 -0400
+- 
+- moreutils (0.44) unstable; urgency=low
+- 
+-   * pee: Propigate exit status of commands run.
+- 
+-  -- Joey Hess <joeyh@debian.org>  Thu, 10 Mar 2011 17:38:14 -0400
+- 
+- moreutils (0.43) unstable; urgency=low
+- 
+-   * chronic: New command, runs a command quietly, unless it fails.
+-   * Now depends on IPC::Run, used by chronic.
+- 
+-  -- Joey Hess <joeyh@debian.org>  Fri, 29 Oct 2010 15:54:37 -0400
+- 
+- moreutils (0.42) unstable; urgency=low
+- 
+-   * sponge: Guarantee that output file is always updated atomically,
+-     by renaming a temp file into place. Closes: #592144
+-   * sponge: Ensure that output file permissions are always preserved
+-     if it already exists.
+-   * Typo. Closes: #596032
+- 
+-  -- Joey Hess <joeyh@debian.org>  Wed, 06 Oct 2010 20:03:25 -0400
+- 
+- moreutils (0.41) unstable; urgency=low
+- 
+-   * ifdata.docbook: Mark interface as required in synopsis. Closes: #588397
+-   * Add missing AUTHOR section to docbook man pages.
+-   * sponge: Correct bad use of fread that caused a trailing quantity of
+-     soaked data to be silently discarded when a temp file was used
+-     and sponge output to stdout. Closes: #595220
+- 
+-  -- Joey Hess <joeyh@debian.org>  Thu, 02 Sep 2010 16:47:10 -0400
+- 
+- moreutils (0.40) unstable; urgency=low
+- 
+-   * lckdo: Now deprecated, since util-linux's flock(1) can do the same
+-     thing.
+-   * parallel: -i will now replace {} inside parameters, before the {} had
+-     to be a separate parameter.
+- 
+-  -- Joey Hess <joeyh@debian.org>  Tue, 06 Jul 2010 19:38:14 -0400
+- 
+- moreutils (0.39) unstable; urgency=low
+- 
+-   * parallel: Fix exit code handling when commands are specified after --
+-   * parallel: Make -j 0 do something reasonable (start all jobs at once).
+-   * parallel: Fix to really avoid running new jobs when load is too high.
+-   * parallel: Fix logic error in code handling -l that could make parallel
+-     return a bogus 255 exit code when all jobs succeeded. Closes: #569617
+-   * parallel: Allow a decimal load value to be specified with -l
+-   * Caps sillyness. Closes: #570815
+-   * zrun: Add support for .xz files.
+- 
+-  -- Joey Hess <joeyh@debian.org>  Tue, 23 Feb 2010 15:51:26 -0500
+- 
+- moreutils (0.38) unstable; urgency=low
+- 
+-   * Description improvements. Closes: #549450
+-     (Thanks, Justin B Rye)
+-   * parallel: Allow running independent commands,
+-     like `parallel -j3 -- ls df "echo hi"`
+-   * ifdata: Add FreeBSD kernel support, although some of the more esoteric
+-     interface options are not currently supported in FreeBSD.
+-   * parallel: Define WEXITED to allow building on FreeBSD kernel.
+-   * Thanks Enrico Tassi for the FreeBSD kernel support, which should
+-     be enough to get moreutils built on Debian kFreeBSD. Closes: #562609
+- 
+-  -- Joey Hess <joeyh@debian.org>  Tue, 09 Feb 2010 15:50:42 -0500
+- 
+- moreutils (0.37) unstable; urgency=low
+- 
+-   * parallel: Clarify man page regarding CPUs. Closes: #536597
+-   * parallel: Add -n option. Thanks, Pierre Habouzit. Closes: #537992
+-     (As a side effect, fixes a segfault if -- was omitted.)
+-   * parallel.1: Typo fixes. Closes: #538147
+- 
+-  -- Joey Hess <joeyh@debian.org>  Sat, 25 Jul 2009 10:18:40 +0200
+- 
+- moreutils (0.36) unstable; urgency=low
+- 
+-   * parallel: New program, contributed by Tollef Fog Heen,
+-     that can run multiple jobs in parallel, optionally checking
+-     load average.
+-   * mispipe: Fix closing of extra pipe FD before starting command
+-     so it is not inherited by daemons. Closes: #533448
+-     (Thanks, Jeremie Koenig)
+- 
+-  -- Joey Hess <joeyh@debian.org>  Fri, 10 Jul 2009 11:01:41 -0400
+- 
+- moreutils (0.35) unstable; urgency=low
+- 
+-   * ifdata: Don't assume that all interface names are 6 characters or less,
+-     for instance "wmaster0" is longer. Increase the limit to 20 characters.
+-     Closes: #526654 (Thanks, Alan Pope)
+-   * isutf8: Reject UTF-8-encoded UTF-16 surrogates. Closes: #525301
+-     (Thanks, Jakub Wilk and liw)
+- 
+-  -- Joey Hess <joeyh@debian.org>  Tue, 05 May 2009 15:06:41 -0400
+- 
+- moreutils (0.34) unstable; urgency=low
+- 
+-   * vipe: Avoid dying on empty input. Thanks, Anders Kaseorg
+-     Closes: #508491
+- 
+-  -- Joey Hess <joeyh@debian.org>  Thu, 11 Dec 2008 15:11:23 -0500
+- 
+- moreutils (0.33) unstable; urgency=low
+- 
+-   * Support installing moreutils into prefixes other than /usr (Evan Broder)
+-   * Fix zrun breakage introduced last version. Closes: #504129
+- 
+-  -- Joey Hess <joeyh@debian.org>  Fri, 31 Oct 2008 17:01:03 -0400
+- 
+- moreutils (0.32) unstable; urgency=low
+- 
+-   * zrun: Can be linked to zsomeprog to run the equivilant of zrun someprog.
+-     Closes: #411623 (Stefan Fritsch)
+-   * zrun: Add support for lzma and lzo. (Stefan Fritsch)
+-   * Fix pod error in vidir(1).
+- 
+-  -- Joey Hess <joeyh@debian.org>  Sun, 26 Oct 2008 23:43:30 -0400
+- 
+- moreutils (0.31) unstable; urgency=low
+- 
+-   * pee.1: Document difference with tee in stdout.
+-   * ts: Support displaying fractional seconds via a "%.S" conversion
+-     specification. Closes: #482789
+- 
+-  -- Joey Hess <joeyh@debian.org>  Sat, 28 Jun 2008 23:19:31 -0400
+- 
+- moreutils (0.30) unstable; urgency=low
+- 
+-   * debhelper v7; rules file minimisation
+-   * Use DESTDIR instead of PREFIX.
+-   * Add a DOCBOOK2XMAN setting. (Greg KH)
+-   * ifne: Add -n which makes it run the command if stdin is empty.
+-   * ifne: If no command is specified, print usage information.
+- 
+-  -- Joey Hess <joeyh@debian.org>  Wed, 14 May 2008 19:37:42 -0400
+- 
+- moreutils (0.29) unstable; urgency=low
+- 
+-   * Add ifne, contributed by Javier Merino.
+-   * sponge, ifne: Ensure that suspending/resuming doesn't
+-     result in partial writes of the data, by using fwrite()
+-     rather than write().
+-   * sponge: Handle large data sizes by using a temp file rather than by
+-     consuming arbitrary amounts of memory. Patch by Brock Noland.
+-   * ts: Allow both -r and a format to be specified, to parse dates and output
+-     in a specified format.
+-   * ts: Fix bug in timezone regexp.
+- 
+-  -- Joey Hess <joeyh@debian.org>  Tue, 15 Apr 2008 15:30:52 -0400
+- 
+- moreutils (0.28) unstable; urgency=low
+- 
+-   * Moved to a git repository.
+-   * vidir: Applied patch from Stefan Fritsch (one part of #412176):
+-     - Check for control characters (especially newlines) in filenames
+-       and error out, since this can greatly confuse the editor or vidir.
+-     - If the source of a rename does not exist (and thus the rename will fail
+-       anyway), vidir should not move an existing target file to a tmpfile.
+-     - If a directory is renamed, vidir should take that into account when
+-       renaming files in this directory.
+-     - If a directory name is passed as name/ to vidir, vidir should not
+-       add second slash after the name.
+-   * vidir: Add support for unlinking directories. To recursivly delete
+-     a directory and its contents, pipe find to vidir, and delete the directory
+-     and its contents in the editor. Closes: #412176
+-   * Add example to man page about recursive modification of directories.
+-     Closes: #390099
+- 
+-  -- Joey Hess <joeyh@debian.org>  Sat, 02 Feb 2008 17:26:23 -0500
+- 
+- moreutils (0.27) unstable; urgency=low
+- 
+-   * vidir: Check exit codes of close. Closes: #463739
+- 
+-  -- Joey Hess <joeyh@debian.org>  Sat, 02 Feb 2008 16:42:18 -0500
+- 
+- moreutils (0.26) unstable; urgency=low
+- 
+-   * isutf8: Correct inverted exit code when passed a file to check.
+-     Closes: #453306
+- 
+-  -- Joey Hess <joeyh@debian.org>  Wed, 28 Nov 2007 14:19:32 -0500
+- 
+- moreutils (0.25) unstable; urgency=low
+- 
+-   * isutf8: Detect and reject overlong UTF-8 sequences. Closes: #440951
+-     Many thanks to liw for the patch.
+- 
+-  -- Joey Hess <joeyh@debian.org>  Mon, 12 Nov 2007 11:58:07 -0500
+- 
+- moreutils (0.24) unstable; urgency=low
+- 
+-   * vidir: Force numbers to normalised integers.
+-   * vidir: Abort on unknown item numbers rather than deleting them.
+-     Closes: #442440
+- 
+-  -- Joey Hess <joeyh@debian.org>  Sun, 16 Sep 2007 13:05:54 -0400
+- 
+- moreutils (0.23) unstable; urgency=low
+- 
+-   * Add pointer to join from combine's man page. Closes: #435516
+-   * Don't strip binaries for debian package if built with
+-     DEB_BUILD_OPTIONS=nostrip. Closes: #437577
+-   * Include Michael Tokarev's lckdo program and replace / conflict with the
+-     current lckdo package. (Robert Edmonds) Closes: #432906
+-   * lckdo: Don't clear other flags when setting close on exec.
+- 
+-  -- Joey Hess <joeyh@debian.org>  Wed, 05 Sep 2007 21:45:25 -0400
+- 
+- moreutils (0.22) unstable; urgency=low
+- 
+-   * vidir, zrun: Don't put temp files in the current directory. Closes: #429367
+- 
+-  -- Joey Hess <joeyh@debian.org>  Mon, 25 Jun 2007 16:11:27 -0400
+- 
+- moreutils (0.21) unstable; urgency=low
+- 
+-   * Patch from Sergej Pupykin fixing ifdata -pN.
+- 
+-  -- Joey Hess <joeyh@debian.org>  Mon, 25 Jun 2007 13:07:21 -0400
+- 
+- moreutils (0.20) unstable; urgency=low
+- 
+-   * Typo fixes from Ralf Wildenhues.
+-   * ifdata: Add -bips and -bops options contributed by André Appel,
+-     to print the number of bytes of incoming/outgoing traffic per second.
+- 
+-  -- Joey Hess <joeyh@debian.org>  Sat, 23 Dec 2006 15:55:45 -0500
+- 
+- moreutils (0.19) unstable; urgency=low
+- 
+-   * vidir: Don't ignore files whose names end in dots. Closes: #398141
+-     Thanks, Bram Sanders.
+- 
+-  -- Joey Hess <joeyh@debian.org>  Sat, 11 Nov 2006 22:02:17 -0500
+- 
+- moreutils (0.18) unstable; urgency=low
+- 
+-   * mispipe.docbook: Typo. Closes: #386756
+-   * spongs: Output to stdout if no file is specified, useful in a pipeline
+-     such as: cvs diff | sponge | patch -R -p0
+-     Closes: #387501
+- 
+-  -- Joey Hess <joeyh@debian.org>  Thu, 14 Sep 2006 15:13:46 -0400
+- 
+- moreutils (0.17) unstable; urgency=low
+- 
+-   * Add missing \n to sponge usage. Closes: #383944
+-   * Add mispipe, contributed by Nathanael Nerode. Pipes together two commands,
+-     returning the exit status of the first.
+- 
+-  -- Joey Hess <joeyh@debian.org>  Thu,  7 Sep 2006 20:49:16 -0400
+- 
+- moreutils (0.16) unstable; urgency=low
+- 
+-   * Change the default ts format to include the month and day, for consistency
+-     with syslog format.
+-   * Add -r switch to ts, which makes it convert existing timestamps in
+-     the input into relative times, such as "15m2s ago". Many common date
+-     formats are supported.
+- 
+-  -- Joey Hess <joeyh@debian.org>  Sat, 19 Aug 2006 15:27:42 -0400
+- 
+- moreutils (0.15) unstable; urgency=low
+- 
+-   * Remove notes about potential tools from README, moved to wiki.
+-   * vidir: Don't abort if it sees an empty or all-whitespace line.
+-   * vidir: If just a filename is removed and the number is left,
+-     treat this the same as removing the whole line, and delete the file,
+-     instead of trying to rename the file to "".
+-   * vidir: Remove the periods after the item numbers.
+-   * vidir: Man page improvements. Closes: #378122
+-   * combine: Man page improvements, to clarify even more that order does
+-     matter and that the operations are not commutative. Closes: #361123
+-   * combine: The behavior of "or" was fairly strange if lines were repeated in
+-     a file. Changed behavior to just print all lines from both files, even
+-     if this means printing dups. Not sure I like this behavior either, but
+-     it's consistent with the very useful behaviors of "and" and "not".
+-   * vidir, vipe: Use /usr/bin/editor if it's present, and EDITOR and VISUAL
+-     arn't set, to comply with Debian policy. For portability, fall back to vi
+-     if there's no /usr/bin/editor. Closes: #378623
+- 
+-  -- Joey Hess <joeyh@debian.org>  Tue, 25 Jul 2006 22:26:56 -0400
+- 
+- moreutils (0.14) unstable; urgency=low
+- 
+-   * vidir: Also support EDITOR or VISUAL that contains spaces and parameters.
+- 
+-  -- Joey Hess <joeyh@debian.org>  Wed, 12 Jul 2006 13:35:49 -0400
+- 
+- moreutils (0.13) unstable; urgency=low
+- 
+-   * ifdata: typo
+-   * vipe: Support EDITOR or VISUAL that contains spaces and parameters.
+- 
+-  -- Joey Hess <joeyh@debian.org>  Wed, 12 Jul 2006 12:53:44 -0400
+- 
+- moreutils (0.12) unstable; urgency=low
+- 
+-   * Really fix typo. Closes: #369485
+-   * zrun: Add usage message.
+-   * ifdata: Fix bug in argument parsing that could make it segfault.
+-   * combine: Allow operators to be written in any case.
+- 
+-  -- Joey Hess <joeyh@debian.org>  Wed, 28 Jun 2006 14:04:49 -0400
+- 
+- moreutils (0.11) unstable; urgency=low
+- 
+-   * combine: better synopsis. Closes: #360544
+-   * ifdata: basically rewritten by Adam Lackorzynski, code size is 40%
+-     smaller, macros removed, return checks added for all lib calls.
+-     Closes: #361728
+-   * vidir: behave properly if passed a directory name to edit. Closes: #369156
+-   * check-isutf8: needs to be a bash script, the way it encodes characters
+-     won't work with dash.
+-   * check-isutf8: exit nonzero if any tests fail
+- 
+-  -- Joey Hess <joeyh@debian.org>  Sat, 27 May 2006 19:12:50 -0400
+- 
+- moreutils (0.10) unstable; urgency=low
+- 
+-   * ifdata: patch from Adam Lackorzynski to translate French error messages
+-     to English and to convert some #defines to enums.
+-   * ifdata: patch from Adam Lackorzynski to avoid printing info for
+-     bogus interface. Closes: #360433
+-   * Add zrun, contributed by Chung-chieh Shan (you might prefer to alias it to
+-     "z").
+- 
+-  -- Joey Hess <joeyh@debian.org>  Sun,  2 Apr 2006 18:34:01 -0400
+- 
+- moreutils (0.9) unstable; urgency=low
+- 
+-   * ifdata: robustness patch from Adam Lackorzynski, in particular deal with
+-     /proc not mounted. Closes: #358930
+-   * Typo fixes. Closes: #359039, #359040
+-   * pee: don't send a copy of every line sent to every command to stdout.
+-     Seems best for it not to output anything to stdout on its on at all.
+-     Closes: #359041
+- 
+-  -- Joey Hess <joeyh@debian.org>  Mon, 27 Mar 2006 13:45:45 -0500
+- 
+- moreutils (0.8) unstable; urgency=low
+- 
+-   * Back to Mithandir's C sponge, now fixed.
+-   * tss.1, ifdata.1: typo fix. Closes: #358557, #358556
+-   * ifdata: patch from its author to make it behave properly on big endian
+-     systems. Closes: #358860
+- 
+-  -- Joey Hess <joeyh@debian.org>  Fri, 24 Mar 2006 20:52:21 -0500
+- 
+- moreutils (0.7) unstable; urgency=low
+- 
+-   * Add pee (pipe tee) contributed by Miek Gieben.
+-   * ifdata: Patch from KELEMEN Peter to add support for printing hardware
+-     interface. Closes: #357646
+- 
+-  -- Joey Hess <joeyh@debian.org>  Sat, 18 Mar 2006 14:17:08 -0500
+- 
+- moreutils (0.6) unstable; urgency=low
+- 
+-   * Revert to perl sponge since the C one corrupts larger files.
+-     Hopefully temporary..
+- 
+-  -- Joey Hess <joeyh@debian.org>  Fri, 10 Mar 2006 15:33:43 -0500
+- 
+- moreutils (0.5) unstable; urgency=low
+- 
+-   * Added ifdata, by Benjamin BAYART (originally called ifcfg).
+-   * Made ifdata -Wall clean.
+-   * Made ifdata support -h and print usage on unknown options.
+-   * Cleaned up ifdata's behavior when asked to print info for nonexistant
+-     devices. Still needs improvement.
+-   * Indentation improvements.
+-   * Replaced and(1) and not(1) by combine, based on an idea by Matt Taggart.
+- 
+-  -- Joey Hess <joeyh@debian.org>  Tue,  7 Mar 2006 23:02:14 -0500
+- 
+- moreutils (0.4) unstable; urgency=low
+- 
+-   * Added versions of and(1) and not(1) that support arbitrary numbers of
+-     input files.
+- 
+-  -- Joey Hess <joeyh@debian.org>  Sun,  5 Mar 2006 22:28:13 -0500
+- 
+- moreutils (0.3) unstable; urgency=low
+- 
+-   * Switch sponge to a C implementation by mithandir.
+-   * Added a list of prospective tools that I am considering adding to the
+-     README file.
+- 
+-  -- Joey Hess <joeyh@debian.org>  Fri,  3 Mar 2006 18:09:46 -0500
+- 
+- moreutils (0.2) unstable; urgency=low
+- 
+-   * Build dep on docbook-xml.
+- 
+-  -- Joey Hess <joeyh@debian.org>  Sun, 19 Feb 2006 18:40:56 -0500
+- 
+- moreutils (0.1) unstable; urgency=low
+- 
+-   * First release.
+- 
+-  -- Joey Hess <joeyh@debian.org>  Sun, 12 Feb 2006 17:11:21 -0500
+--- 0 ----
+diff -Nrc moreutils/debian/compat mooreutils/debian/compat
+*** moreutils/debian/compat	2015-12-24 17:25:17.721555130 +0400
+--- mooreutils/debian/compat	1970-01-01 03:00:00.000000000 +0300
+***************
+*** 1 ****
+- 9
+--- 0 ----
+diff -Nrc moreutils/debian/control mooreutils/debian/control
+*** moreutils/debian/control	2015-12-24 17:25:17.721555130 +0400
+--- mooreutils/debian/control	1970-01-01 03:00:00.000000000 +0300
+***************
+*** 1,35 ****
+- Source: moreutils
+- Section: utils
+- Priority: optional
+- Build-Depends: debhelper (>= 9), dpkg-dev (>= 1.9.0), docbook-xml, docbook-xsl, libxml2-utils, xsltproc
+- Maintainer: Nicolas Schier <nicolas@hjem.rpa.no>
+- Standards-Version: 3.9.6
+- Vcs-Git: git://git.joeyh.name/moreutils
+- Homepage: http://joeyh.name/code/moreutils/
+- 
+- Package: moreutils
+- Architecture: any
+- Depends: ${shlibs:Depends}, ${misc:Depends}, ${perl:Depends}, libipc-run-perl
+- Suggests: libtime-duration-perl, libtimedate-perl
+- Conflicts: lckdo
+- Replaces: lckdo
+- Description: additional Unix utilities
+-  This is a growing collection of the Unix tools that nobody thought
+-  to write long ago, when Unix was young.
+-  .
+-  So far, it includes the following utilities:
+-   - chronic: runs a command quietly unless it fails
+-   - combine: combine the lines in two files using boolean operations
+-   - errno: look up errno names and descriptions
+-   - ifdata: get network interface info without parsing ifconfig output
+-   - ifne: run a program if the standard input is not empty
+-   - isutf8: check if a file or standard input is utf-8
+-   - lckdo: execute a program with a lock held
+-   - mispipe: pipe two commands, returning the exit status of the first
+-   - parallel: run multiple jobs at once
+-   - pee: tee standard input to pipes
+-   - sponge: soak up standard input and write to a file
+-   - ts: timestamp standard input
+-   - vidir: edit a directory in your text editor
+-   - vipe: insert a text editor into a pipe
+-   - zrun: automatically uncompress arguments to command
+--- 0 ----
+diff -Nrc moreutils/debian/copyright mooreutils/debian/copyright
+*** moreutils/debian/copyright	2015-12-24 17:25:17.721555130 +0400
+--- mooreutils/debian/copyright	1970-01-01 03:00:00.000000000 +0300
+***************
+*** 1,78 ****
+- Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+- Source: Contributed by many folks.
+- 
+- Files: *
+- Copyright: 2006-2015 Joey Hess <id@joeyh.name>
+- License: GPL-2+
+- 
+- Files: isutf8.*
+- Copyright: 2005 Lars Wirzenius
+- License: GPL-2+
+- 
+- Files: sponge.*
+- Copyright: 2006 Tollef Fog Heen
+- License: GPL-2
+- 
+- Files: ifdata.c
+- Copyright: 2002 Benjamin BAYART
+- License: GPL-2+
+- 
+- Files: pee.c
+- Copyright: 2006 Miek Gieben
+- License: GPL-2+
+- 
+- Files: zrun
+- Copyright: 2006 Chung-chieh Shan
+- License: GPL-2+
+- 
+- Files: mispipe.c
+- Copyright: 2004 Nathanael Nerode
+- License: GPL-2+ or Expat
+- 
+- Files: lckdo.c lckdo.docbook
+- Copyright: Michael Tokarev
+- License: other
+-  Public domain
+- 
+- Files: ifne.c ifne.docbook
+- Copyright: 2008 Javier Merino
+- License: GPL-2+
+- 
+- Files: parallel.c
+- Copyright: 2008  Tollef Fog Heen <tfheen@err.no>
+- License: GPL-2
+- 
+- Files: errno.c errno.docbook
+- Copyright: 2012 Lars Wirzenius
+- License: GPL-2+
+- 
+- Files: physmem.c
+- Copyright: 2000, 2001, 2003, 2005, 2006 Free Software Foundation, Inc.
+- License: GPL-2+
+- 
+- License: GPL-2
+-  The full text of the GPL is distributed as COPYING in moreutils's source,
+-  and is distributed in /usr/share/common-licenses/GPL-2 on Debian systems.
+- 
+- License: GPL-2+
+-  The full text of the GPL is distributed as COPYING in moreutils's source,
+-  and is distributed in /usr/share/common-licenses/GPL-2 on Debian systems.
+- 
+- License: Expat
+-  * Permission is hereby granted, free of charge, to any person obtaining a
+-  * copy of this software and associated documentation files (the "Software"),
+-  * to deal in the Software without restriction, including without limitation
+-  * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+-  * and/or sell copies of the Software, and to permit persons to whom the
+-  * Software is furnished to do so, subject to the following conditions:
+-  *
+-  * The above copyright notice and this permission notice shall be included in
+-  * all copies or substantial portions of the Software.
+-  *
+-  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+-  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+-  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+-  * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+-  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+-  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN 
+-  * THE SOFTWARE.
+--- 0 ----
+diff -Nrc moreutils/debian/docs mooreutils/debian/docs
+*** moreutils/debian/docs	2015-12-24 17:25:17.721555130 +0400
+--- mooreutils/debian/docs	1970-01-01 03:00:00.000000000 +0300
+***************
+*** 1 ****
+- README
+--- 0 ----
+diff -Nrc moreutils/debian/rules mooreutils/debian/rules
+*** moreutils/debian/rules	2015-12-24 17:25:17.721555130 +0400
+--- mooreutils/debian/rules	1970-01-01 03:00:00.000000000 +0300
+***************
+*** 1,8 ****
+- #!/usr/bin/make -f
+- 
+- # Prevent the makefile from stripping, in case it's being built in
+- # unstripped mode.
+- export INSTALL_BIN=install
+- 
+- %:
+- 	dh $@
+--- 0 ----
+diff -Nrc moreutils/envx.c mooreutils/envx.c
+*** moreutils/envx.c	1970-01-01 03:00:00.000000000 +0300
+--- mooreutils/envx.c	2015-12-24 17:43:01.437565200 +0400
+***************
+*** 0 ****
+--- 1,27 ----
++ #include <stdio.h>
++ # include <stdlib.h>
++ # include <string.h>
++ int main(int argc, char const *argv[])
++ {
++ 
++ 	char str[80];
++ 	char* pid = argv[1];
++ 
++ 	if( argc<2 ) return 1;
++ 
++ 	strcpy(str, "/proc/");
++ 	strcat(str, pid);
++ 	strcat(str, "/environ");
++ 
++ 	char ch;
++ 	FILE *fp;
++ 	fp = fopen(str,"r");
++ 	printf("Text from file:%s\n", str);
++ 
++ 	while( ( ch = fgetc(fp) ) != EOF )
++ 	printf("%c",ch);
++ 
++ 	fclose(fp);
++ 	printf("\n");
++ 	return 0;
++ }
+diff -Nrc moreutils/.git/config mooreutils/.git/config
+*** moreutils/.git/config	2015-12-24 17:25:17.721555130 +0400
+--- mooreutils/.git/config	1970-01-01 03:00:00.000000000 +0300
+***************
+*** 1,11 ****
+- [core]
+- 	repositoryformatversion = 0
+- 	filemode = true
+- 	bare = false
+- 	logallrefupdates = true
+- [remote "origin"]
+- 	fetch = +refs/heads/*:refs/remotes/origin/*
+- 	url = git://git.kitenet.net/moreutils
+- [branch "master"]
+- 	remote = origin
+- 	merge = refs/heads/master
+--- 0 ----
+diff -Nrc moreutils/.git/description mooreutils/.git/description
+*** moreutils/.git/description	2015-12-24 17:25:16.257555116 +0400
+--- mooreutils/.git/description	1970-01-01 03:00:00.000000000 +0300
+***************
+*** 1 ****
+- Unnamed repository; edit this file 'description' to name the repository.
+--- 0 ----
+diff -Nrc moreutils/.git/HEAD mooreutils/.git/HEAD
+*** moreutils/.git/HEAD	2015-12-24 17:25:17.717555130 +0400
+--- mooreutils/.git/HEAD	1970-01-01 03:00:00.000000000 +0300
+***************
+*** 1 ****
+- ref: refs/heads/master
+--- 0 ----
+diff -Nrc moreutils/.git/hooks/applypatch-msg.sample mooreutils/.git/hooks/applypatch-msg.sample
+*** moreutils/.git/hooks/applypatch-msg.sample	2015-12-24 17:25:16.257555116 +0400
+--- mooreutils/.git/hooks/applypatch-msg.sample	1970-01-01 03:00:00.000000000 +0300
+***************
+*** 1,15 ****
+- #!/bin/sh
+- #
+- # An example hook script to check the commit log message taken by
+- # applypatch from an e-mail message.
+- #
+- # The hook should exit with non-zero status after issuing an
+- # appropriate message if it wants to stop the commit.  The hook is
+- # allowed to edit the commit message file.
+- #
+- # To enable this hook, rename this file to "applypatch-msg".
+- 
+- . git-sh-setup
+- test -x "$GIT_DIR/hooks/commit-msg" &&
+- 	exec "$GIT_DIR/hooks/commit-msg" ${1+"$@"}
+- :
+--- 0 ----
+diff -Nrc moreutils/.git/hooks/commit-msg.sample mooreutils/.git/hooks/commit-msg.sample
+*** moreutils/.git/hooks/commit-msg.sample	2015-12-24 17:25:16.257555116 +0400
+--- mooreutils/.git/hooks/commit-msg.sample	1970-01-01 03:00:00.000000000 +0300
+***************
+*** 1,24 ****
+- #!/bin/sh
+- #
+- # An example hook script to check the commit log message.
+- # Called by "git commit" with one argument, the name of the file
+- # that has the commit message.  The hook should exit with non-zero
+- # status after issuing an appropriate message if it wants to stop the
+- # commit.  The hook is allowed to edit the commit message file.
+- #
+- # To enable this hook, rename this file to "commit-msg".
+- 
+- # Uncomment the below to add a Signed-off-by line to the message.
+- # Doing this in a hook is a bad idea in general, but the prepare-commit-msg
+- # hook is more suited to it.
+- #
+- # SOB=$(git var GIT_AUTHOR_IDENT | sed -n 's/^\(.*>\).*$/Signed-off-by: \1/p')
+- # grep -qs "^$SOB" "$1" || echo "$SOB" >> "$1"
+- 
+- # This example catches duplicate Signed-off-by lines.
+- 
+- test "" = "$(grep '^Signed-off-by: ' "$1" |
+- 	 sort | uniq -c | sed -e '/^[ 	]*1[ 	]/d')" || {
+- 	echo >&2 Duplicate Signed-off-by lines.
+- 	exit 1
+- }
+--- 0 ----
+diff -Nrc moreutils/.git/hooks/post-update.sample mooreutils/.git/hooks/post-update.sample
+*** moreutils/.git/hooks/post-update.sample	2015-12-24 17:25:16.257555116 +0400
+--- mooreutils/.git/hooks/post-update.sample	1970-01-01 03:00:00.000000000 +0300
+***************
+*** 1,8 ****
+- #!/bin/sh
+- #
+- # An example hook script to prepare a packed repository for use over
+- # dumb transports.
+- #
+- # To enable this hook, rename this file to "post-update".
+- 
+- exec git update-server-info
+--- 0 ----
+diff -Nrc moreutils/.git/hooks/pre-applypatch.sample mooreutils/.git/hooks/pre-applypatch.sample
+*** moreutils/.git/hooks/pre-applypatch.sample	2015-12-24 17:25:16.257555116 +0400
+--- mooreutils/.git/hooks/pre-applypatch.sample	1970-01-01 03:00:00.000000000 +0300
+***************
+*** 1,14 ****
+- #!/bin/sh
+- #
+- # An example hook script to verify what is about to be committed
+- # by applypatch from an e-mail message.
+- #
+- # The hook should exit with non-zero status after issuing an
+- # appropriate message if it wants to stop the commit.
+- #
+- # To enable this hook, rename this file to "pre-applypatch".
+- 
+- . git-sh-setup
+- test -x "$GIT_DIR/hooks/pre-commit" &&
+- 	exec "$GIT_DIR/hooks/pre-commit" ${1+"$@"}
+- :
+--- 0 ----
+diff -Nrc moreutils/.git/hooks/pre-commit.sample mooreutils/.git/hooks/pre-commit.sample
+*** moreutils/.git/hooks/pre-commit.sample	2015-12-24 17:25:16.257555116 +0400
+--- mooreutils/.git/hooks/pre-commit.sample	1970-01-01 03:00:00.000000000 +0300
+***************
+*** 1,50 ****
+- #!/bin/sh
+- #
+- # An example hook script to verify what is about to be committed.
+- # Called by "git commit" with no arguments.  The hook should
+- # exit with non-zero status after issuing an appropriate message if
+- # it wants to stop the commit.
+- #
+- # To enable this hook, rename this file to "pre-commit".
+- 
+- if git rev-parse --verify HEAD >/dev/null 2>&1
+- then
+- 	against=HEAD
+- else
+- 	# Initial commit: diff against an empty tree object
+- 	against=4b825dc642cb6eb9a060e54bf8d69288fbee4904
+- fi
+- 
+- # If you want to allow non-ascii filenames set this variable to true.
+- allownonascii=$(git config hooks.allownonascii)
+- 
+- # Redirect output to stderr.
+- exec 1>&2
+- 
+- # Cross platform projects tend to avoid non-ascii filenames; prevent
+- # them from being added to the repository. We exploit the fact that the
+- # printable range starts at the space character and ends with tilde.
+- if [ "$allownonascii" != "true" ] &&
+- 	# Note that the use of brackets around a tr range is ok here, (it's
+- 	# even required, for portability to Solaris 10's /usr/bin/tr), since
+- 	# the square bracket bytes happen to fall in the designated range.
+- 	test $(git diff --cached --name-only --diff-filter=A -z $against |
+- 	  LC_ALL=C tr -d '[ -~]\0' | wc -c) != 0
+- then
+- 	echo "Error: Attempt to add a non-ascii file name."
+- 	echo
+- 	echo "This can cause problems if you want to work"
+- 	echo "with people on other platforms."
+- 	echo
+- 	echo "To be portable it is advisable to rename the file ..."
+- 	echo
+- 	echo "If you know what you are doing you can disable this"
+- 	echo "check using:"
+- 	echo
+- 	echo "  git config hooks.allownonascii true"
+- 	echo
+- 	exit 1
+- fi
+- 
+- # If there are whitespace errors, print the offending file names and fail.
+- exec git diff-index --check --cached $against --
+--- 0 ----
+diff -Nrc moreutils/.git/hooks/prepare-commit-msg.sample mooreutils/.git/hooks/prepare-commit-msg.sample
+*** moreutils/.git/hooks/prepare-commit-msg.sample	2015-12-24 17:25:16.257555116 +0400
+--- mooreutils/.git/hooks/prepare-commit-msg.sample	1970-01-01 03:00:00.000000000 +0300
+***************
+*** 1,36 ****
+- #!/bin/sh
+- #
+- # An example hook script to prepare the commit log message.
+- # Called by "git commit" with the name of the file that has the
+- # commit message, followed by the description of the commit
+- # message's source.  The hook's purpose is to edit the commit
+- # message file.  If the hook fails with a non-zero status,
+- # the commit is aborted.
+- #
+- # To enable this hook, rename this file to "prepare-commit-msg".
+- 
+- # This hook includes three examples.  The first comments out the
+- # "Conflicts:" part of a merge commit.
+- #
+- # The second includes the output of "git diff --name-status -r"
+- # into the message, just before the "git status" output.  It is
+- # commented because it doesn't cope with --amend or with squashed
+- # commits.
+- #
+- # The third example adds a Signed-off-by line to the message, that can
+- # still be edited.  This is rarely a good idea.
+- 
+- case "$2,$3" in
+-   merge,)
+-     /usr/bin/perl -i.bak -ne 's/^/# /, s/^# #/#/ if /^Conflicts/ .. /#/; print' "$1" ;;
+- 
+- # ,|template,)
+- #   /usr/bin/perl -i.bak -pe '
+- #      print "\n" . `git diff --cached --name-status -r`
+- #	 if /^#/ && $first++ == 0' "$1" ;;
+- 
+-   *) ;;
+- esac
+- 
+- # SOB=$(git var GIT_AUTHOR_IDENT | sed -n 's/^\(.*>\).*$/Signed-off-by: \1/p')
+- # grep -qs "^$SOB" "$1" || echo "$SOB" >> "$1"
+--- 0 ----
+diff -Nrc moreutils/.git/hooks/pre-rebase.sample mooreutils/.git/hooks/pre-rebase.sample
+*** moreutils/.git/hooks/pre-rebase.sample	2015-12-24 17:25:16.257555116 +0400
+--- mooreutils/.git/hooks/pre-rebase.sample	1970-01-01 03:00:00.000000000 +0300
+***************
+*** 1,169 ****
+- #!/bin/sh
+- #
+- # Copyright (c) 2006, 2008 Junio C Hamano
+- #
+- # The "pre-rebase" hook is run just before "git rebase" starts doing
+- # its job, and can prevent the command from running by exiting with
+- # non-zero status.
+- #
+- # The hook is called with the following parameters:
+- #
+- # $1 -- the upstream the series was forked from.
+- # $2 -- the branch being rebased (or empty when rebasing the current branch).
+- #
+- # This sample shows how to prevent topic branches that are already
+- # merged to 'next' branch from getting rebased, because allowing it
+- # would result in rebasing already published history.
+- 
+- publish=next
+- basebranch="$1"
+- if test "$#" = 2
+- then
+- 	topic="refs/heads/$2"
+- else
+- 	topic=`git symbolic-ref HEAD` ||
+- 	exit 0 ;# we do not interrupt rebasing detached HEAD
+- fi
+- 
+- case "$topic" in
+- refs/heads/??/*)
+- 	;;
+- *)
+- 	exit 0 ;# we do not interrupt others.
+- 	;;
+- esac
+- 
+- # Now we are dealing with a topic branch being rebased
+- # on top of master.  Is it OK to rebase it?
+- 
+- # Does the topic really exist?
+- git show-ref -q "$topic" || {
+- 	echo >&2 "No such branch $topic"
+- 	exit 1
+- }
+- 
+- # Is topic fully merged to master?
+- not_in_master=`git rev-list --pretty=oneline ^master "$topic"`
+- if test -z "$not_in_master"
+- then
+- 	echo >&2 "$topic is fully merged to master; better remove it."
+- 	exit 1 ;# we could allow it, but there is no point.
+- fi
+- 
+- # Is topic ever merged to next?  If so you should not be rebasing it.
+- only_next_1=`git rev-list ^master "^$topic" ${publish} | sort`
+- only_next_2=`git rev-list ^master           ${publish} | sort`
+- if test "$only_next_1" = "$only_next_2"
+- then
+- 	not_in_topic=`git rev-list "^$topic" master`
+- 	if test -z "$not_in_topic"
+- 	then
+- 		echo >&2 "$topic is already up-to-date with master"
+- 		exit 1 ;# we could allow it, but there is no point.
+- 	else
+- 		exit 0
+- 	fi
+- else
+- 	not_in_next=`git rev-list --pretty=oneline ^${publish} "$topic"`
+- 	/usr/bin/perl -e '
+- 		my $topic = $ARGV[0];
+- 		my $msg = "* $topic has commits already merged to public branch:\n";
+- 		my (%not_in_next) = map {
+- 			/^([0-9a-f]+) /;
+- 			($1 => 1);
+- 		} split(/\n/, $ARGV[1]);
+- 		for my $elem (map {
+- 				/^([0-9a-f]+) (.*)$/;
+- 				[$1 => $2];
+- 			} split(/\n/, $ARGV[2])) {
+- 			if (!exists $not_in_next{$elem->[0]}) {
+- 				if ($msg) {
+- 					print STDERR $msg;
+- 					undef $msg;
+- 				}
+- 				print STDERR " $elem->[1]\n";
+- 			}
+- 		}
+- 	' "$topic" "$not_in_next" "$not_in_master"
+- 	exit 1
+- fi
+- 
+- <<\DOC_END
+- 
+- This sample hook safeguards topic branches that have been
+- published from being rewound.
+- 
+- The workflow assumed here is:
+- 
+-  * Once a topic branch forks from "master", "master" is never
+-    merged into it again (either directly or indirectly).
+- 
+-  * Once a topic branch is fully cooked and merged into "master",
+-    it is deleted.  If you need to build on top of it to correct
+-    earlier mistakes, a new topic branch is created by forking at
+-    the tip of the "master".  This is not strictly necessary, but
+-    it makes it easier to keep your history simple.
+- 
+-  * Whenever you need to test or publish your changes to topic
+-    branches, merge them into "next" branch.
+- 
+- The script, being an example, hardcodes the publish branch name
+- to be "next", but it is trivial to make it configurable via
+- $GIT_DIR/config mechanism.
+- 
+- With this workflow, you would want to know:
+- 
+- (1) ... if a topic branch has ever been merged to "next".  Young
+-     topic branches can have stupid mistakes you would rather
+-     clean up before publishing, and things that have not been
+-     merged into other branches can be easily rebased without
+-     affecting other people.  But once it is published, you would
+-     not want to rewind it.
+- 
+- (2) ... if a topic branch has been fully merged to "master".
+-     Then you can delete it.  More importantly, you should not
+-     build on top of it -- other people may already want to
+-     change things related to the topic as patches against your
+-     "master", so if you need further changes, it is better to
+-     fork the topic (perhaps with the same name) afresh from the
+-     tip of "master".
+- 
+- Let's look at this example:
+- 
+- 		   o---o---o---o---o---o---o---o---o---o "next"
+- 		  /       /           /           /
+- 		 /   a---a---b A     /           /
+- 		/   /               /           /
+- 	       /   /   c---c---c---c B         /
+- 	      /   /   /             \         /
+- 	     /   /   /   b---b C     \       /
+- 	    /   /   /   /             \     /
+-     ---o---o---o---o---o---o---o---o---o---o---o "master"
+- 
+- 
+- A, B and C are topic branches.
+- 
+-  * A has one fix since it was merged up to "next".
+- 
+-  * B has finished.  It has been fully merged up to "master" and "next",
+-    and is ready to be deleted.
+- 
+-  * C has not merged to "next" at all.
+- 
+- We would want to allow C to be rebased, refuse A, and encourage
+- B to be deleted.
+- 
+- To compute (1):
+- 
+- 	git rev-list ^master ^topic next
+- 	git rev-list ^master        next
+- 
+- 	if these match, topic has not merged in next at all.
+- 
+- To compute (2):
+- 
+- 	git rev-list master..topic
+- 
+- 	if this is empty, it is fully merged to "master".
+- 
+- DOC_END
+--- 0 ----
+diff -Nrc moreutils/.git/hooks/update.sample mooreutils/.git/hooks/update.sample
+*** moreutils/.git/hooks/update.sample	2015-12-24 17:25:16.257555116 +0400
+--- mooreutils/.git/hooks/update.sample	1970-01-01 03:00:00.000000000 +0300
+***************
+*** 1,128 ****
+- #!/bin/sh
+- #
+- # An example hook script to blocks unannotated tags from entering.
+- # Called by "git receive-pack" with arguments: refname sha1-old sha1-new
+- #
+- # To enable this hook, rename this file to "update".
+- #
+- # Config
+- # ------
+- # hooks.allowunannotated
+- #   This boolean sets whether unannotated tags will be allowed into the
+- #   repository.  By default they won't be.
+- # hooks.allowdeletetag
+- #   This boolean sets whether deleting tags will be allowed in the
+- #   repository.  By default they won't be.
+- # hooks.allowmodifytag
+- #   This boolean sets whether a tag may be modified after creation. By default
+- #   it won't be.
+- # hooks.allowdeletebranch
+- #   This boolean sets whether deleting branches will be allowed in the
+- #   repository.  By default they won't be.
+- # hooks.denycreatebranch
+- #   This boolean sets whether remotely creating branches will be denied
+- #   in the repository.  By default this is allowed.
+- #
+- 
+- # --- Command line
+- refname="$1"
+- oldrev="$2"
+- newrev="$3"
+- 
+- # --- Safety check
+- if [ -z "$GIT_DIR" ]; then
+- 	echo "Don't run this script from the command line." >&2
+- 	echo " (if you want, you could supply GIT_DIR then run" >&2
+- 	echo "  $0 <ref> <oldrev> <newrev>)" >&2
+- 	exit 1
+- fi
+- 
+- if [ -z "$refname" -o -z "$oldrev" -o -z "$newrev" ]; then
+- 	echo "Usage: $0 <ref> <oldrev> <newrev>" >&2
+- 	exit 1
+- fi
+- 
+- # --- Config
+- allowunannotated=$(git config --bool hooks.allowunannotated)
+- allowdeletebranch=$(git config --bool hooks.allowdeletebranch)
+- denycreatebranch=$(git config --bool hooks.denycreatebranch)
+- allowdeletetag=$(git config --bool hooks.allowdeletetag)
+- allowmodifytag=$(git config --bool hooks.allowmodifytag)
+- 
+- # check for no description
+- projectdesc=$(sed -e '1q' "$GIT_DIR/description")
+- case "$projectdesc" in
+- "Unnamed repository"* | "")
+- 	echo "*** Project description file hasn't been set" >&2
+- 	exit 1
+- 	;;
+- esac
+- 
+- # --- Check types
+- # if $newrev is 0000...0000, it's a commit to delete a ref.
+- zero="0000000000000000000000000000000000000000"
+- if [ "$newrev" = "$zero" ]; then
+- 	newrev_type=delete
+- else
+- 	newrev_type=$(git cat-file -t $newrev)
+- fi
+- 
+- case "$refname","$newrev_type" in
+- 	refs/tags/*,commit)
+- 		# un-annotated tag
+- 		short_refname=${refname##refs/tags/}
+- 		if [ "$allowunannotated" != "true" ]; then
+- 			echo "*** The un-annotated tag, $short_refname, is not allowed in this repository" >&2
+- 			echo "*** Use 'git tag [ -a | -s ]' for tags you want to propagate." >&2
+- 			exit 1
+- 		fi
+- 		;;
+- 	refs/tags/*,delete)
+- 		# delete tag
+- 		if [ "$allowdeletetag" != "true" ]; then
+- 			echo "*** Deleting a tag is not allowed in this repository" >&2
+- 			exit 1
+- 		fi
+- 		;;
+- 	refs/tags/*,tag)
+- 		# annotated tag
+- 		if [ "$allowmodifytag" != "true" ] && git rev-parse $refname > /dev/null 2>&1
+- 		then
+- 			echo "*** Tag '$refname' already exists." >&2
+- 			echo "*** Modifying a tag is not allowed in this repository." >&2
+- 			exit 1
+- 		fi
+- 		;;
+- 	refs/heads/*,commit)
+- 		# branch
+- 		if [ "$oldrev" = "$zero" -a "$denycreatebranch" = "true" ]; then
+- 			echo "*** Creating a branch is not allowed in this repository" >&2
+- 			exit 1
+- 		fi
+- 		;;
+- 	refs/heads/*,delete)
+- 		# delete branch
+- 		if [ "$allowdeletebranch" != "true" ]; then
+- 			echo "*** Deleting a branch is not allowed in this repository" >&2
+- 			exit 1
+- 		fi
+- 		;;
+- 	refs/remotes/*,commit)
+- 		# tracking branch
+- 		;;
+- 	refs/remotes/*,delete)
+- 		# delete tracking branch
+- 		if [ "$allowdeletebranch" != "true" ]; then
+- 			echo "*** Deleting a tracking branch is not allowed in this repository" >&2
+- 			exit 1
+- 		fi
+- 		;;
+- 	*)
+- 		# Anything else (is there anything else?)
+- 		echo "*** Update hook: unknown type of update to ref $refname of type $newrev_type" >&2
+- 		exit 1
+- 		;;
+- esac
+- 
+- # --- Finished
+- exit 0
+--- 0 ----
+Binary files moreutils/.git/index and mooreutils/.git/index differ
+diff -Nrc moreutils/.git/info/exclude mooreutils/.git/info/exclude
+*** moreutils/.git/info/exclude	2015-12-24 17:25:16.257555116 +0400
+--- mooreutils/.git/info/exclude	1970-01-01 03:00:00.000000000 +0300
+***************
+*** 1,6 ****
+- # git ls-files --others --exclude-from=.git/info/exclude
+- # Lines that start with '#' are comments.
+- # For a project mostly in C, the following would be a good set of
+- # exclude patterns (uncomment them if you want to use them):
+- # *.[oa]
+- # *~
+--- 0 ----
+diff -Nrc moreutils/.git/logs/HEAD mooreutils/.git/logs/HEAD
+*** moreutils/.git/logs/HEAD	2015-12-24 17:25:17.721555130 +0400
+--- mooreutils/.git/logs/HEAD	1970-01-01 03:00:00.000000000 +0300
+***************
+*** 1 ****
+- 0000000000000000000000000000000000000000 b92196912d363683f24e71b0b2351324d50f5375 Рома <newangel88@mail.ru> 1450963517 +0400	clone: from git://git.kitenet.net/moreutils
+--- 0 ----
+diff -Nrc moreutils/.git/logs/refs/heads/master mooreutils/.git/logs/refs/heads/master
+*** moreutils/.git/logs/refs/heads/master	2015-12-24 17:25:17.721555130 +0400
+--- mooreutils/.git/logs/refs/heads/master	1970-01-01 03:00:00.000000000 +0300
+***************
+*** 1 ****
+- 0000000000000000000000000000000000000000 b92196912d363683f24e71b0b2351324d50f5375 Рома <newangel88@mail.ru> 1450963517 +0400	clone: from git://git.kitenet.net/moreutils
+--- 0 ----
+Binary files moreutils/.git/objects/pack/pack-fa3d0c18181a14becf556bb5ca1f61eb5227a483.idx and mooreutils/.git/objects/pack/pack-fa3d0c18181a14becf556bb5ca1f61eb5227a483.idx differ
+Binary files moreutils/.git/objects/pack/pack-fa3d0c18181a14becf556bb5ca1f61eb5227a483.pack and mooreutils/.git/objects/pack/pack-fa3d0c18181a14becf556bb5ca1f61eb5227a483.pack differ
+diff -Nrc moreutils/.git/packed-refs mooreutils/.git/packed-refs
+*** moreutils/.git/packed-refs	2015-12-24 17:25:17.717555130 +0400
+--- mooreutils/.git/packed-refs	1970-01-01 03:00:00.000000000 +0300
+***************
+*** 1,98 ****
+- # pack-refs with: peeled 
+- b92196912d363683f24e71b0b2351324d50f5375 refs/remotes/origin/master
+- 7d606d7c155c331eff7601476cbf7ba48e6dc49b refs/remotes/origin/origin
+- f5020bcb703dadb7abf0bf75e0275c32ff8529c0 refs/remotes/origin/pristine-tar
+- ee3eecafa0cc1a4efa0503117144205bedbdf6a1 refs/tags/0.1
+- 68088da67528e6db63175305776e288d33755646 refs/tags/0.10
+- 82a9b595bbf3e600d213ad3517e3fa2c153ea9e8 refs/tags/0.11
+- a127a7e9f7cb198d1a3e50b20b73525f20264cfd refs/tags/0.12
+- 7d38acc76a549d06e2d90bae6bb814173799c461 refs/tags/0.13
+- 3de0317294bad0e765c97f6f5486f200ae2f6a33 refs/tags/0.14
+- c7f258b2fbdcae9dc20d83dde6252dc8579962a5 refs/tags/0.15
+- fba236a29d973360915b168a83f50e54e1ff1c75 refs/tags/0.16
+- 03924314a9abd0dd135f5fbc99197050b9abd15c refs/tags/0.17
+- 978f10e76bee0b53e4b6f578de0371a73e09cadc refs/tags/0.18
+- 0a72631e595507348b6a5518eb7b586b3a5c2bf6 refs/tags/0.19
+- b6547b684543ce4dca051366714065d6482e7bd5 refs/tags/0.20
+- 058c192993796e007353506873611d110bf613d0 refs/tags/0.21
+- 20f02556ba24e70151d51cd82b68a74f876ddedf refs/tags/0.22
+- cade3b932e3fc6f2fdc576a6ef0e061cf49a6653 refs/tags/0.23
+- 4a0cb2806a75ca4a36472835fcbe0f41085902b2 refs/tags/0.24
+- 97bbfc9b4a3f995776e5229bbfd8214282308b77 refs/tags/0.25
+- 36f9ddc3d3d521a1568685d2882ea892fda51593 refs/tags/0.26
+- 7d606d7c155c331eff7601476cbf7ba48e6dc49b refs/tags/0.27
+- 446c5df56ae089188397519cf2bc9f92e4a1b5fa refs/tags/0.28
+- ^33a313d03913e33ca8b8803caeb70baa8486ce32
+- d5e088f8b3b25ecc6df4763da80ee9fa06ac825b refs/tags/0.29
+- ^ab100606238850f43106ea7a3c939833efd25378
+- 31bab120cc259d70b3706dbd7210159b4667171d refs/tags/0.3
+- 7675c798ef94319444e15e7a4c3d5a11ac79a40c refs/tags/0.30
+- ^8a49d33f795107df284a8ca1a1ad8524c3e88865
+- 03d56c5b5b65b711ee5ff145c1889d283c865e09 refs/tags/0.31
+- ^8b407b19baf9819f186142653b77ed63977e244e
+- f9859bf37e1953fe749dbbd823469f352d37a421 refs/tags/0.32
+- ^1e73fbbb25bc43999320b2c9c5679ab0c8f3b528
+- f78f45fa13cd1b13db474993217468986d158276 refs/tags/0.33
+- ^6f2bc6bff8786f96265b170249b4cd4bc3e99247
+- 493fa41471bc0333edbd44e8e27dba1521b4bb01 refs/tags/0.34
+- ^3e03d4c45318bb0978e65850ec7f56bbb210d4f1
+- 640710d20868893ca67eb08a7a6708354b738d55 refs/tags/0.35
+- ^b729d870341ae06f9a5a945717eb61c1d60a3af5
+- 2c9695fa72b680a7c6926da6e3ed7c90b849264a refs/tags/0.36
+- ^6cf8eb501e1636b37bf61b86b0aaeade05fc768b
+- 4f1052c9f37ab4990aa8dea4cfc666c5644600c3 refs/tags/0.37
+- ^007d7b518d2d83b536adad36f3126856b1cd117a
+- 7b08a502cf608fabb96541fafb7fc133e6561083 refs/tags/0.38
+- ^9c0302474850fa0d16a1d2bca094325e9eea546b
+- fd31abc04396107b391747d93c71bf772dd35bd2 refs/tags/0.39
+- ^6ec9f75d9c41ff60acf1e3362321e76b699706b1
+- 6a7f34809e87a940cd30c7e9de160db4ee9e65ca refs/tags/0.4
+- 5d13c6af34288b721ed2c4e0aba20c190e9002ff refs/tags/0.40
+- ^5e413817d726a2879f56c94f498dcaa94f887813
+- f525e62386f92ac9fbd3f7a442994e6bcd97d61d refs/tags/0.41
+- ^5d40038af260b233bf64fa8dab00a55d65cada8c
+- 1a0ae212d61dfd0c38cc64efb78b7cef56676350 refs/tags/0.42
+- ^dc7df101d71be5c504529a47c541aa8bfc82edca
+- b0fa01f47fe6923057e9983948033bd13864a201 refs/tags/0.43
+- ^3bd91ea4f68fcc0bdc3d4cab3cb51095a87ab1f4
+- 4664b202f623bc9730db5fa3aca3b39a0f1115dc refs/tags/0.44
+- ^c27365c4f2a7e42841aef3f53b9316b4aaab730a
+- 9a5315785e5d053d6146b960b2f9c6f8b9d46dc1 refs/tags/0.45
+- ^929dee9e4544801af94a68a4e4631484fff4a3f3
+- 3b24bbd1da9ee8d3e6e181ef1c935c9e8bebea5b refs/tags/0.46
+- ^d4f8bd597243c251d8528b5f6e5e1993dda42ccb
+- a0578e7b5bc11f865be688675aa475cfe3a08cbe refs/tags/0.47
+- ^80dd7ed5d66eebd6ae7b7e3aadfa99f37ceb419f
+- e7197d9ec0ed995edad278e2321ae89904ff57cd refs/tags/0.48
+- ^337a7415b11bb2b3a5f47a1aa96b571a40da8762
+- ddad0b96f2edb7219c50fdb00c2a2fc21a81cc24 refs/tags/0.49
+- ^d3510311c1b0130b00912c1bbaec82fcd8f3b74e
+- 538cb394703d148130ec9a7f60da677996a4857a refs/tags/0.5
+- c646e27388eacdb984432b709fe59a4ec46f69bf refs/tags/0.50
+- ^323e2f7a120823806156c6afe9d4158904802b0e
+- 2324bbce65ef3c2e6b095b02c6c106bffb8ac187 refs/tags/0.51
+- ^f0eadf7076dc44bfd439e6199ad46eaeacfe19ec
+- bc4111d8d5591645d5ca9349cf8b64bc8befc134 refs/tags/0.52
+- ^ab65e3880c57b508b5f4e1ab46872dd797f5c1dd
+- 7d435598dfeca4b83b6e068559438dc28335cba5 refs/tags/0.53
+- ^2ac31faaefa940248c1d2818671bc7476661fabc
+- 4d8de6ea7c3c91322a60c483f0cab90080ce21bd refs/tags/0.54
+- ^fe7652adc13d99b8c697bccaff905eed22ef4a0c
+- f146fbbc0e5d9abbc16e9f8462a253da78eebbb5 refs/tags/0.55
+- ^bdb114b8de6fccfb903016fb57aa0c7375bd8afd
+- 399f582212e84ec42209571f539b97f2fb65b8fd refs/tags/0.56
+- ^7be6572532be02c03653f33dbf87c03b01e2bb26
+- 974aedc3435ed7e28c3354c901cf6d36b49f55e6 refs/tags/0.57
+- ^b92196912d363683f24e71b0b2351324d50f5375
+- 84cc0252d7bf1cc8514ef347e150e9c8b930f0bd refs/tags/0.6
+- 824b3e16d5f3962f7bdba0ff3159363afad3cc68 refs/tags/0.7
+- 7e8e057cd10ca3d436f786003c0c34e5074074dd refs/tags/0.8
+- 64f0d162b040d66fd21c4ec8c7b5e9792866febc refs/tags/0.9
+- fd39d03a69d171cc72f5720b240f081e7e8105d9 refs/tags/debian/0.50
+- ^323e2f7a120823806156c6afe9d4158904802b0e
+- 021d62fcd86ea788f521c80eec8b7aab99854254 refs/tags/debian/0.51
+- ^f0eadf7076dc44bfd439e6199ad46eaeacfe19ec
+- f7406cbf0487c61e438540becff4ea5f3ef459ad refs/tags/debian/0.52
+- ^ab65e3880c57b508b5f4e1ab46872dd797f5c1dd
+- 17c4afb64c498237f3c2d45a34ff241d451c03af refs/tags/debian/0.53
+- ^2ac31faaefa940248c1d2818671bc7476661fabc
+--- 0 ----
+diff -Nrc moreutils/.git/refs/heads/master mooreutils/.git/refs/heads/master
+*** moreutils/.git/refs/heads/master	2015-12-24 17:25:17.717555130 +0400
+--- mooreutils/.git/refs/heads/master	1970-01-01 03:00:00.000000000 +0300
+***************
+*** 1 ****
+- b92196912d363683f24e71b0b2351324d50f5375
+--- 0 ----
+diff -Nrc moreutils/.git/refs/remotes/origin/HEAD mooreutils/.git/refs/remotes/origin/HEAD
+*** moreutils/.git/refs/remotes/origin/HEAD	2015-12-24 17:25:17.717555130 +0400
+--- mooreutils/.git/refs/remotes/origin/HEAD	1970-01-01 03:00:00.000000000 +0300
+***************
+*** 1 ****
+- ref: refs/remotes/origin/master
+--- 0 ----
+diff -Nrc moreutils/.gitattributes mooreutils/.gitattributes
+*** moreutils/.gitattributes	2015-12-24 17:25:17.721555130 +0400
+--- mooreutils/.gitattributes	1970-01-01 03:00:00.000000000 +0300
+***************
+*** 1 ****
+- debian/changelog merge=dpkg-mergechangelogs
+--- 0 ----
