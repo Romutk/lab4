@@ -80,3 +80,13 @@ sudo apt-get install build-essential dh-make autoconf automake libtool autotools
 
 export DEBEMAIL=newangel88@mail.ru
 
+Проверяем все ли норм для сборки
+roma@roma-virtual-machine:~/lab3/AvalonTRPO/util-linux$ dpkg-depcheck -d ./configure
+
+Правим файлы 
+roma@roma-virtual-machine:~/lab3/AvalonTRPO/util-linux$nano debian/changelog
+roma@roma-virtual-machine:~/lab3/AvalonTRPO/util-linux$nano debian/control
+roma@roma-virtual-machine:~/lab3/AvalonTRPO/util-linux$nano debian/rules
+
+
+
