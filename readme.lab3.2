@@ -28,3 +28,35 @@ git clone git://git.kernel.org/pub/scm/utils/util-linux/util-linux.git
 Склонировал репозиторий
 Помня грабли из предыдущей лабы проверим зависимотси пакета
 sudo apt-get build-dep util-linux
+
+
+Первая проблемка
+roma@roma-virtual-machine:~/lab3/AvalonTRPO/util-linux$ ./autogen.sh
+
+You must have autopoint installed to generate the util-linux build system.
+The autopoint command is part of the GNU gettext package.
+
+
+You must have autoconf installed to generate the util-linux build system.
+
+
+You must have autoheader installed to generate the util-linux build system.
+The autoheader command is part of the GNU autoconf package.
+
+
+You must have libtool-2 installed to generate the util-linux build system.
+
+
+You must have automake installed to generate the util-linux build system.
+
+./autogen.sh: 82: ./autogen.sh: libtoolize: not found
+You must have libtool version >= 2.x.x, but you have none.
+
+
+
+Похоже нужно поставить  libtool version >= 2.x.x ,  autopoint,autoconf, autoheader, automake
+
+
+
+roma@roma-virtual-machine:~/lab3/AvalonTRPO/util-linux$ sudo apt-get install libtool autopoint autoconf automake
+
