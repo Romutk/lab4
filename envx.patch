@@ -1,6 +1,6 @@
 diff -Nrc util-linux/misc-utils/envx.c util-linux-envx/misc-utils/envx.c
 *** util-linux/misc-utils/envx.c	1970-01-01 03:00:00.000000000 +0300
---- util-linux-envx/misc-utils/envx.c	2016-01-12 17:00:52.264637150 +0400
+--- util-linux/misc-utils/envx.c	2016-01-12 17:49:09.188665443 +0400
 ***************
 *** 0 ****
 --- 1,27 ----
