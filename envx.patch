@@ -1,0 +1,33 @@
+diff -Nrc util-linux/misc-utils/envx.c util-linux-envx/misc-utils/envx.c
+*** util-linux/misc-utils/envx.c	1970-01-01 03:00:00.000000000 +0300
+--- util-linux-envx/misc-utils/envx.c	2016-01-12 17:00:52.264637150 +0400
+***************
+*** 0 ****
+--- 1,27 ----
++ #include <stdio.h>
++ # include <stdlib.h>
++ # include <string.h>
++ int main(int argc, char const *argv[])
++ {
++ 
++ 	char str[80];
++ 	char* pid = argv[1];
++ 
++ 	if( argc<2 ) return 1;
++ 
++ 	strcpy(str, "/proc/");
++ 	strcat(str, pid);
++ 	strcat(str, "/environ");
++ 
++ 	char ch;
++ 	FILE *fp;
++ 	fp = fopen(str,"r");
++ 	printf("Text from file:%s\n", str);
++ 
++ 	while( ( ch = fgetc(fp) ) != EOF )
++ 	printf("%c",ch);
++ 
++ 	fclose(fp);
++ 	printf("\n");
++ 	return 0;
++ }
