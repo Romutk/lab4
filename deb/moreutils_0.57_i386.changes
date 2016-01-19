@@ -1,0 +1,32 @@
+Format: 1.8
+Date: Mon, 19 Jun 2016 18:29:06 -0400
+Source: moreutils
+Binary: moreutils
+Architecture: source i386
+Version: 0.57
+Distribution: unstable
+Urgency: medium
+Maintainer: Nicolas Schier <nicolas@hjem.rpa.no>
+Changed-By: Roman Utkin <romutk@outlook.com>
+Description: 
+ moreutils  - additional Unix utilities
+Changes: 
+ moreutils (0.57) unstable; urgency=medium
+ .
+   * Avoid using non-portable error() in ifdata, a portability reversion
+     introduced in 0.56.
+Checksums-Sha1: 
+ e7bcbd4836d3c3be01b4c74a2d3bf841ff5a943f 895 moreutils_0.57.dsc
+ 1b53b6669a414f50ea2ec708f4e9d72ad703c784 46749 moreutils_0.57.orig.tar.gz
+ bd5283943f79fca2dbcdd0927eea51d6a49c245f 705 moreutils_0.57.diff.gz
+ a1ef5f1a8fae89bd098efefdf4cd72917395ee2d 65682 moreutils_0.57_i386.deb
+Checksums-Sha256: 
+ 155ad296c87a10299eef7ff6b7c41b0f5f25e8368d9797d45b29e4591f1795a1 895 moreutils_0.57.dsc
+ 3a7d54b0634e5eda8c3c43490d47cea189156700892dea6d876867cef9bc0d1d 46749 moreutils_0.57.orig.tar.gz
+ 5d514ed51acdee1c2626ab6c24dd613e72c593f388201952fbc51ab77caa0b29 705 moreutils_0.57.diff.gz
+ 128034652ec099574a1c9ca379dbe252707a8d895fbecbd15f27cacc3b1860e3 65682 moreutils_0.57_i386.deb
+Files: 
+ 07eb130d56829ceb11cffbe8f89fb9d7 895 utils optional moreutils_0.57.dsc
+ 2fd82a15dea059506a6f43ce717dbfad 46749 utils optional moreutils_0.57.orig.tar.gz
+ 8e9629345d6eeac8485341a3db188dfd 705 utils optional moreutils_0.57.diff.gz
+ eb43054ce32f9068b8bc9f13bb4f1ef1 65682 utils optional moreutils_0.57_i386.deb
